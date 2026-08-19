@@ -16,6 +16,7 @@ import FinalCTA from "@/components/FinalCTA";
 import StickyMobileCTA from "@/components/StickyMobileCTA";
 import Footer from "@/components/Footer";
 import SocialProof from "@/components/SocialProof";
+import WhatsAppSupport from "@/components/WhatsAppSupport";
 
 export default function Home() {
   return (
@@ -40,6 +41,7 @@ export default function Home() {
       </main>
       <Footer />
       <StickyMobileCTA />
+      <WhatsAppSupport />
     </>
   );
 }
