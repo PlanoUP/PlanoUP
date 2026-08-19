@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #080a0b;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #d2f51e;
+  color: #080a0b;
+}
+
+.container-px {
+  @apply px-5 sm:px-8 lg:px-12;
+}
+
+.section-py {
+  @apply py-16 sm:py-20 lg:py-28;
+}
+
+.eyebrow {
+  @apply inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-6 py-4 text-sm font-bold uppercase tracking-wide text-background transition-colors duration-150 hover:bg-accent-hover active:scale-[0.99];
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface px-6 py-4 text-sm font-semibold uppercase tracking-wide text-white transition-colors duration-150 hover:border-accent/40 hover:bg-surface-light;
+}
+
+.card-surface {
+  @apply rounded-xl border border-border bg-surface;
+}
+
+.bg-technical-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
