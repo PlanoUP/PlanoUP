@@ -15,7 +15,7 @@ export const equipments: Equipment[] = [
     slug: "tanque",
     name: "Tanque Industrial",
     description: "Tanque de armazenamento com corrimão de segurança, bocais de inspeção e bacia de contenção.",
-    image: "/images/tanque.png",
+    image: "/images/tanque-industrial.jpg",
     deliverables: ["Projeto .SKP editável", "Imagem geral em alta resolução", "Vistas técnicas"],
   },
   {
@@ -24,7 +24,7 @@ export const equipments: Equipment[] = [
     slug: "flotador",
     name: "Flotador",
     description: "Vista interna com mecanismo de raspagem/agitação apoiado em estrutura radial e plataforma central.",
-    image: "/images/flotador.png",
+    image: "/images/flotador.jpg",
     deliverables: ["Projeto .SKP editável", "Imagem geral em alta resolução", "Vistas técnicas"],
   },
   {
@@ -33,7 +33,7 @@ export const equipments: Equipment[] = [
     slug: "motor-compressor",
     name: "Motor Compressor",
     description: "Skid completo com motor, acoplamento, compressor e estrutura de acesso.",
-    image: "/images/motor-compressor.png",
+    image: "/images/motor-compressor.jpg",
     deliverables: ["Projeto .SKP editável", "Imagem geral em alta resolução", "Vistas técnicas"],
   },
   {
@@ -42,7 +42,7 @@ export const equipments: Equipment[] = [
     slug: "air-cooler",
     name: "Permutador / Air Cooler",
     description: "Trocador de calor a ar com módulo de ventiladores e feixe tubular.",
-    image: "/images/air-cooler.png",
+    image: "/images/permutador-calor.jpg",
     deliverables: ["Projeto .SKP editável", "Imagem geral em alta resolução", "Vistas técnicas"],
   },
   {
@@ -51,7 +51,7 @@ export const equipments: Equipment[] = [
     slug: "forno",
     name: "Forno Industrial",
     description: "Estrutura vertical de processo com chaminé, duto de alimentação e plataforma de acesso superior.",
-    image: "/images/forno.png",
+    image: "/images/forno-industrial.jpg",
     deliverables: ["Projeto .SKP editável", "Imagem geral em alta resolução", "Vistas técnicas"],
   },
   {
@@ -60,7 +60,7 @@ export const equipments: Equipment[] = [
     slug: "vaso-peneira",
     name: "Vaso / Peneira Molecular",
     description: "Sistema em torres duplas para operação contínua de adsorção e regeneração, com plataforma e escadas de acesso.",
-    image: "/images/vaso-peneira.png",
+    image: "/images/vaso-de-pressao.jpg",
     deliverables: ["Projeto .SKP editável", "Imagem geral em alta resolução", "Vistas técnicas"],
   },
 ];
