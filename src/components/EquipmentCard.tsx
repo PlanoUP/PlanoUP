@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import type { Equipment } from "@/data/equipments";
-import EquipmentArt from "./EquipmentArt";
+import EquipmentImage from "./EquipmentImage";
 
 export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
   return (
@@ -12,8 +12,13 @@ export default function EquipmentCard({ equipment }: { equipment: Equipment }) {
         <span className="absolute right-4 top-4 z-10 rounded-full border border-accent/40 bg-background/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-accent">
           Editável
         </span>
-        <div className="h-full w-full p-6 transition-transform duration-300 group-hover:scale-[1.03]">
-          <EquipmentArt slug={equipment.slug} />
+        <div className="relative h-full w-full p-6 transition-transform duration-300 group-hover:scale-[1.03]">
+          <EquipmentImage
+            src={equipment.image}
+            slug={equipment.slug}
+            alt={equipment.name}
+            imageClassName="object-contain p-2"
+          />
         </div>
       </div>
 

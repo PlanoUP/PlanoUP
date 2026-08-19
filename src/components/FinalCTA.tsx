@@ -3,7 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import { product, formatPrice } from "@/config/product";
 import { goToCheckout } from "@/lib/checkout";
-import EquipmentArt from "./EquipmentArt";
+import EquipmentImage from "./EquipmentImage";
 import { equipments } from "@/data/equipments";
 
 export default function FinalCTA() {
@@ -13,8 +13,13 @@ export default function FinalCTA() {
       <div className="container-px relative mx-auto max-w-content text-center">
         <div className="mx-auto mb-10 grid max-w-3xl grid-cols-3 gap-2 opacity-70 sm:grid-cols-6 sm:gap-3">
           {equipments.map((eq) => (
-            <div key={eq.id} className="card-surface aspect-square p-2.5">
-              <EquipmentArt slug={eq.slug} />
+            <div key={eq.id} className="card-surface relative aspect-square p-2.5">
+              <EquipmentImage
+                src={eq.image}
+                slug={eq.slug}
+                alt={eq.name}
+                imageClassName="object-contain p-1.5"
+              />
             </div>
           ))}
         </div>

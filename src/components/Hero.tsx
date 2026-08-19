@@ -3,7 +3,7 @@
 import { ArrowDown, CheckCircle2 } from "lucide-react";
 import { product, formatPrice } from "@/config/product";
 import { goToCheckout } from "@/lib/checkout";
-import EquipmentArt from "./EquipmentArt";
+import EquipmentImage from "./EquipmentImage";
 import { equipments } from "@/data/equipments";
 
 const stats = [
@@ -89,7 +89,12 @@ export default function Hero() {
                 <span className="absolute left-3 top-3 z-10 font-mono text-[11px] font-bold text-accent">
                   {eq.number}
                 </span>
-                <EquipmentArt slug={eq.slug} />
+                <EquipmentImage
+                  src={eq.image}
+                  slug={eq.slug}
+                  alt={eq.name}
+                  imageClassName="object-contain p-3"
+                />
               </div>
             ))}
           </div>
