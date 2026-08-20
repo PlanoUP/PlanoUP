@@ -2,7 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import { product, formatPrice } from "@/config/product";
-import { goToCheckout } from "@/lib/checkout";
+import CheckoutLink from "./CheckoutLink";
 import EquipmentImage from "./EquipmentImage";
 import { equipments } from "@/data/equipments";
 
@@ -41,13 +41,13 @@ export default function FinalCTA() {
           <span className="font-bold text-accent">{formatPrice(product.price)}</span>
         </div>
 
-        <button
-          onClick={() => goToCheckout("final-cta")}
+        <CheckoutLink
+          origin="final-cta"
           className="btn-primary mx-auto mt-10 w-full text-base sm:w-auto sm:px-14 sm:py-5 sm:text-lg"
         >
           Quero acessar agora
           <ArrowRight className="h-5 w-5" />
-        </button>
+        </CheckoutLink>
       </div>
     </section>
   );

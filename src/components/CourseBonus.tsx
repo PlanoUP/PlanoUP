@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, FileText } from "lucide-react";
-import { goToCheckout } from "@/lib/checkout";
+import CheckoutLink from "./CheckoutLink";
 
 const lessons = [
   { n: "01", title: "Preparação", desc: "Preparando o SketchUp para modelagem industrial" },
@@ -81,13 +81,13 @@ export default function CourseBonus() {
               ))}
             </div>
 
-            <button
-              onClick={() => goToCheckout("course-bonus")}
+            <CheckoutLink
+              origin="course-bonus"
               className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-md bg-background px-6 py-4 text-sm font-bold uppercase tracking-wide text-accent transition-colors hover:bg-[#0c0f10] sm:w-auto sm:px-10"
             >
               Quero acessar a biblioteca
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </CheckoutLink>
           </div>
         </div>
       </div>

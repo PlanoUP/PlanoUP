@@ -2,7 +2,7 @@
 
 import { ArrowDown, CheckCircle2 } from "lucide-react";
 import { product, formatPrice } from "@/config/product";
-import { goToCheckout } from "@/lib/checkout";
+import CheckoutLink from "./CheckoutLink";
 import EquipmentImage from "./EquipmentImage";
 import { equipments } from "@/data/equipments";
 
@@ -55,12 +55,12 @@ export default function Hero() {
                 {formatPrice(product.price)}
               </div>
             </div>
-            <button
-              onClick={() => goToCheckout("hero")}
+            <CheckoutLink
+              origin="hero"
               className="btn-primary h-[56px] w-full text-base sm:w-auto sm:px-10"
             >
               Quero acessar a biblioteca
-            </button>
+            </CheckoutLink>
           </div>
 
           <p className="mt-3 text-xs text-text-secondary">

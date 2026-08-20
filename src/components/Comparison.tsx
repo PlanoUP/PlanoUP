@@ -1,7 +1,7 @@
 "use client";
 
 import { X, Check, ArrowRight } from "lucide-react";
-import { goToCheckout } from "@/lib/checkout";
+import CheckoutLink from "./CheckoutLink";
 
 const before = ["Tela vazia", "Pesquisa por referências", "Modelagem inicial", "Horas de preparação"];
 const after = ["Abra a biblioteca", "Escolha o modelo", "Edite", "Adapte", "Continue o projeto"];
@@ -41,13 +41,10 @@ export default function Comparison() {
         </div>
 
         <div className="mt-10 text-center">
-          <button
-            onClick={() => goToCheckout("comparison")}
-            className="btn-primary mx-auto w-full sm:w-auto"
-          >
+          <CheckoutLink origin="comparison" className="btn-primary mx-auto w-full sm:w-auto">
             Quero acessar a biblioteca
             <ArrowRight className="h-4 w-4" />
-          </button>
+          </CheckoutLink>
         </div>
       </div>
     </section>

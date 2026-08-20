@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { product, formatPrice } from "@/config/product";
-import { goToCheckout } from "@/lib/checkout";
+import CheckoutLink from "./CheckoutLink";
 
 export default function StickyMobileCTA() {
   const [visible, setVisible] = useState(false);
@@ -25,12 +25,12 @@ export default function StickyMobileCTA() {
         <span className="font-mono text-base font-extrabold text-accent">
           {formatPrice(product.price)}
         </span>
-        <button
-          onClick={() => goToCheckout("sticky-mobile")}
+        <CheckoutLink
+          origin="sticky-mobile"
           className="flex h-[52px] flex-1 items-center justify-center rounded-md bg-accent px-4 text-sm font-bold uppercase tracking-wide text-background active:scale-[0.99]"
         >
           Acessar biblioteca
-        </button>
+        </CheckoutLink>
       </div>
     </div>
   );

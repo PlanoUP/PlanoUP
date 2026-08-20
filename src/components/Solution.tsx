@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, ArrowDown } from "lucide-react";
-import { goToCheckout } from "@/lib/checkout";
+import CheckoutLink from "./CheckoutLink";
 
 const before = ["Ideia", "Referência", "Modelagem", "Detalhamento", "Ajustes", "Apresentação"];
 const after = ["Escolha", "Edite", "Adapte", "Apresente"];
@@ -62,13 +62,10 @@ export default function Solution() {
             MENOS TEMPO COMEÇANDO.
             <br className="sm:hidden" /> <span className="text-accent">MAIS TEMPO DESENVOLVENDO.</span>
           </p>
-          <button
-            onClick={() => goToCheckout("solution")}
-            className="btn-primary mx-auto mt-8 w-full sm:w-auto"
-          >
+          <CheckoutLink origin="solution" className="btn-primary mx-auto mt-8 w-full sm:w-auto">
             Quero acessar a biblioteca
             <ArrowRight className="h-4 w-4" />
-          </button>
+          </CheckoutLink>
         </div>
       </div>
     </section>

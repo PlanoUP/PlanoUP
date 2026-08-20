@@ -2,7 +2,7 @@
 
 import { Check, ArrowRight, Zap, CreditCard } from "lucide-react";
 import { product, formatPrice } from "@/config/product";
-import { goToCheckout } from "@/lib/checkout";
+import CheckoutLink from "./CheckoutLink";
 
 const included = [
   "6 projetos industriais",
@@ -48,13 +48,10 @@ export default function Offer() {
               </span>
             </div>
 
-            <button
-              onClick={() => goToCheckout("offer")}
-              className="btn-primary mt-8 w-full text-base"
-            >
+            <CheckoutLink origin="offer" className="btn-primary mt-8 w-full text-base">
               Quero acessar a biblioteca
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </CheckoutLink>
 
             <p className="mt-4 text-center text-xs text-text-secondary">
               Pagamento processado com segurança.
