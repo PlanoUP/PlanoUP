@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { site } from "@/config/site";
+import MetaPixel from "@/components/MetaPixel";
 import "@/styles/globals.css";
 
 const inter = Inter({
@@ -36,7 +37,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${jbmono.variable}`}>
-      <body className="bg-background font-sans antialiased">{children}</body>
+      <body className="bg-background font-sans antialiased">
+        <MetaPixel />
+        {children}
+      </body>
     </html>
   );
 }

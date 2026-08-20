@@ -1,10 +1,10 @@
 /**
- * Estrutura de analytics preparada para receber IDs reais.
- * Nenhum ID é inventado — preencha as variáveis de ambiente
- * correspondentes antes de ativar cada integração.
+ * Estrutura de analytics. O Meta Pixel da PlanoUP já está configurado;
+ * NEXT_PUBLIC_META_PIXEL_ID permite sobrepor por ambiente (ex: staging)
+ * sem tocar no código. O GA segue vazio até um ID real ser fornecido.
  */
 export const analytics = {
-  metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "",
+  metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID || "1387214533512450",
   googleAnalyticsId: process.env.NEXT_PUBLIC_GA_ID ?? "",
 };
 
