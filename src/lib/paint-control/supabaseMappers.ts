@@ -2,6 +2,8 @@ import type {
   Activity,
   ActivityHistoryEntry,
   ActivityStatus,
+  CostCategory,
+  CostItem,
   ExecutionStepKey,
   Priority,
   Responsible,
@@ -292,5 +294,65 @@ export function revitalizationItemToRow(
     work_order: input.workOrder,
     note: input.note,
     reference: input.reference,
+  };
+}
+
+// ---------------------------------------------------------------------
+// Custos — budget register (previsto x realizado), not a schedule.
+// ---------------------------------------------------------------------
+export interface CostRow {
+  id: string;
+  category: CostCategory;
+  name: string;
+  regime: string;
+  quantity: number;
+  hourly_rate: number | null;
+  hours_per_day: number | null;
+  days_per_year: number | null;
+  planned_monthly_cost: number;
+  planned_annual_cost: number;
+  actual_monthly_cost: number | null;
+  actual_annual_cost: number | null;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function rowToCostItem(row: CostRow): CostItem {
+  return {
+    id: row.id,
+    category: row.category,
+    name: row.name,
+    regime: row.regime,
+    quantity: row.quantity,
+    hourlyRate: row.hourly_rate,
+    hoursPerDay: row.hours_per_day,
+    daysPerYear: row.days_per_year,
+    plannedMonthlyCost: row.planned_monthly_cost,
+    plannedAnnualCost: row.planned_annual_cost,
+    actualMonthlyCost: row.actual_monthly_cost,
+    actualAnnualCost: row.actual_annual_cost,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function costItemToRow(
+  input: Omit<CostItem, "id" | "createdAt" | "updatedAt">
+): Omit<CostRow, "id" | "created_at" | "updated_at"> {
+  return {
+    category: input.category,
+    name: input.name,
+    regime: input.regime,
+    quantity: input.quantity,
+    hourly_rate: input.hourlyRate,
+    hours_per_day: input.hoursPerDay,
+    days_per_year: input.daysPerYear,
+    planned_monthly_cost: input.plannedMonthlyCost,
+    planned_annual_cost: input.plannedAnnualCost,
+    actual_monthly_cost: input.actualMonthlyCost,
+    actual_annual_cost: input.actualAnnualCost,
+    notes: input.notes,
   };
 }

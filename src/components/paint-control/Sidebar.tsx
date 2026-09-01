@@ -14,6 +14,7 @@ import {
   Settings,
   PaintBucket,
   Warehouse,
+  Wallet,
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
 // separate section for site-facility revitalização, per the product ask.
 const SEPARATE_NAV_ITEMS = [
   { href: "/paint-control-ati/revitalizacao", label: "Revitalização", icon: Warehouse },
+  { href: "/paint-control-ati/custos", label: "Custos", icon: Wallet },
 ];
 
 const SETTINGS_NAV_ITEM = {

@@ -170,9 +170,43 @@ create policy "revitalization_activities_anon_all" on revitalization_activities
   for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------
+-- cost_items
+--
+-- Budget register, not a schedule: workforce (efetivo) and equipment
+-- lines behind the painting contract, tracking "previsto" (planned) vs
+-- "realizado" (actual) cost so they can be compared month to month.
+-- ---------------------------------------------------------------------
+create table if not exists cost_items (
+  id uuid primary key default gen_random_uuid(),
+
+  category text not null check (category in ('Mão de Obra', 'Equipamento')),
+  name text not null default '',
+  regime text not null default '',
+  quantity numeric not null default 0,
+
+  hourly_rate numeric,
+  hours_per_day numeric,
+  days_per_year numeric,
+
+  planned_monthly_cost numeric not null default 0,
+  planned_annual_cost numeric not null default 0,
+  actual_monthly_cost numeric,
+  actual_annual_cost numeric,
+
+  notes text not null default '',
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table cost_items enable row level security;
+create policy "cost_items_anon_all" on cost_items for all using (true) with check (true);
+
+-- ---------------------------------------------------------------------
 -- Realtime: broadcast row changes to every connected browser
 -- ---------------------------------------------------------------------
 alter publication supabase_realtime add table activities;
 alter publication supabase_realtime add table responsibles;
 alter publication supabase_realtime add table activity_history;
 alter publication supabase_realtime add table revitalization_activities;
+alter publication supabase_realtime add table cost_items;

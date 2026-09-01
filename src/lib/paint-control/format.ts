@@ -22,3 +22,8 @@ export function formatArea(value: number | null | undefined): string {
   if (value === null || value === undefined) return "—";
   return `${value.toLocaleString("pt-BR")} m²`;
 }
+
+export function formatCurrency(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}

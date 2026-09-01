@@ -3,16 +3,18 @@
 -- Run this AFTER schema.sql, once, in the Supabase SQL Editor. It populates
 -- the 31 ATI units, one responsible (Eugênio Vale), the 12 activities from
 -- the Cronograma Plurianual - Plano de Manutenção - Pintura (2027-2029),
--- and the 13 items from the Cronograma Plurianual - Revitalização - Pintura
+-- the 13 items from the Cronograma Plurianual - Revitalização - Pintura
 -- (2027-2029), which live in their own table (revitalization_activities)
--- since they track site areas, not registered ATI units.
+-- since they track site areas, not registered ATI units, and the 21 budget
+-- lines (10 workforce roles + 11 equipment items) in cost_items — a budget
+-- register, not tied to units/responsibles.
 --
 -- Safe to re-run: it clears these tables first (activity_history →
--- activities → revitalization_activities → responsibles → units,
--- respecting foreign keys) before re-inserting, so running it twice does
--- not create duplicates.
+-- activities → revitalization_activities → responsibles → units →
+-- cost_items, respecting foreign keys) before re-inserting, so running it
+-- twice does not create duplicates.
 
-truncate table activity_history, activities, revitalization_activities, responsibles, units cascade;
+truncate table activity_history, activities, revitalization_activities, responsibles, units, cost_items cascade;
 
 -- ---------------------------------------------------------------------
 -- units (31 rows, fixed UUIDs — some TAGs repeat on purpose, see §7)
@@ -104,3 +106,33 @@ insert into revitalization_activities (
   ('b0a2b3c4-4d5e-4f0a-8b8b-d3e4f5a6b7cb', 'Caldeiraria', 'Revitalização de Pintura — Caldeiraria', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2027-12-31', '2027-12-01', null, '2027-12-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
   ('c1b3c4d5-5e6f-4f1b-9c9c-e4f5a6b7c8dc', 'Praça Maquete', 'Revitalização de Pintura — Praça Maquete', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2027-12-31', '2027-12-01', null, '2027-12-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
   ('d2c4d5e6-6f70-4f2c-adad-f5a6b7c8d9ed', 'Gaveteiro', 'Revitalização de Pintura — Gaveteiro', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-01-31', '2027-12-01', null, '2028-01-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', '');
+
+-- ---------------------------------------------------------------------
+-- cost_items — Efetivo Total / Custo Total / Equipamentos / Custo
+-- "realizado" columns start null; the team fills them in as actuals come in.
+-- ---------------------------------------------------------------------
+insert into cost_items (
+  id, category, name, regime, quantity, hourly_rate, hours_per_day, days_per_year,
+  planned_monthly_cost, planned_annual_cost, actual_monthly_cost, actual_annual_cost, notes
+) values
+  ('299c534e-196b-483d-8f89-787bab212688', 'Mão de Obra', 'Encarregado', 'Mensalista', 2, 95.1, 9, 262, 18687.15, 224245.80, null, null, ''),
+  ('bfd26436-c3ec-431a-b3e3-390334730060', 'Mão de Obra', 'Pintor', 'Mensalista', 18, 62.93, 9, 262, 12365.75, 148388.94, null, null, ''),
+  ('779a02e6-fb08-48b1-92f9-4fe6ef1d022e', 'Mão de Obra', 'Montador de andaimes', 'Mensalista', 12, 62.8, 9, 262, 12340.20, 148082.40, null, null, ''),
+  ('ddc84298-1802-4f81-b900-f15c8ded96ca', 'Mão de Obra', 'Auxiliar de andaimes', 'Mensalista', 6, 47.57, 9, 262, 9347.50, 112170.06, null, null, ''),
+  ('cb2016de-00f8-448f-91b3-baa89dab0af8', 'Mão de Obra', 'Caldeireiro', 'Mensalista', 4, 69.13, 9, 262, 13584.05, 163008.54, null, null, ''),
+  ('4d722a52-4e9f-420e-91b4-fc5d3d25ca72', 'Mão de Obra', 'Auxiliar de caldeiraria', 'Mensalista', 4, 47.52, 9, 262, 9337.68, 112052.16, null, null, ''),
+  ('b62a9375-fbf3-4387-8192-c47a383bc8ac', 'Mão de Obra', 'Pedreiro', 'Mensalista', 2, 52.91, 9, 262, 10396.82, 124761.78, null, null, ''),
+  ('4117bc67-b8cf-4e55-ac4c-88014beb7cdb', 'Mão de Obra', 'Auxiliar de pedreiro', 'Mensalista', 4, 47.4, 9, 262, 9314.10, 111769.20, null, null, ''),
+  ('58d8319f-888e-459f-82e4-5f603623b96a', 'Mão de Obra', 'Soldador', 'Mensalista', 2, 69.31, 9, 262, 13619.42, 163432.98, null, null, ''),
+  ('0a0323d1-06d2-4fa8-8f45-e64a5b52583b', 'Mão de Obra', 'Isolador', 'Mensalista', 2, 77.89, 9, 262, 15305.39, 183664.62, null, null, ''),
+  ('1f6664c9-658b-42e5-a373-2515828b7d5a', 'Equipamento', 'Gerador', 'Locação', 2, null, null, null, 7700.00, 92400.00, null, null, ''),
+  ('5a95b619-47c3-4280-b353-67ecd167b0c1', 'Equipamento', 'Bitoneira', 'Objeto Contratado', 3, null, null, null, 0, 0, null, null, ''),
+  ('9b705633-7408-47d5-87f0-5e27b36b71f5', 'Equipamento', 'Conjunto de oxicorte', 'Objeto Contratado', 4, null, null, null, 0, 0, null, null, ''),
+  ('85027030-181f-4872-98e2-57c92b261dd2', 'Equipamento', 'Máquina de solda', 'Objeto Contratado', 2, null, null, null, 0, 0, null, null, ''),
+  ('eb7db3f9-8d79-42bc-95c7-1d5287e63a04', 'Equipamento', 'PTA', 'Locação', 1, null, null, null, 43000.00, 516000.00, null, null, ''),
+  ('32ede91b-d45e-4716-9fdf-b6f67abe310a', 'Equipamento', 'Caminhão Munck', 'Locação', 1, null, null, null, 50000.00, 600000.00, null, null, ''),
+  ('db52a63a-5a79-4899-88cd-4a6561b78af3', 'Equipamento', 'Andaimes', 'Efetivo Brava', 8000, null, null, null, 0, 0, null, null, ''),
+  ('14d58555-8b7a-4cf2-afe1-5572024a617a', 'Equipamento', 'Abraçadeiras', 'Efetivo Brava', 5400, null, null, null, 0, 0, null, null, ''),
+  ('cbc8fc48-c65f-4be9-b59d-6ece569821e9', 'Equipamento', 'Barracas', 'Efetivo Brava', 2, null, null, null, 0, 0, null, null, ''),
+  ('1687afae-21c3-4e37-aea2-3af0ab79d651', 'Equipamento', 'Container', 'Efetivo Brava', 1, null, null, null, 0, 0, null, null, ''),
+  ('45f5219b-edbd-4f26-af22-563c8f4ec1f7', 'Equipamento', 'Compressor', 'Efetivo Brava', 1, null, null, null, 0, 0, null, null, '');

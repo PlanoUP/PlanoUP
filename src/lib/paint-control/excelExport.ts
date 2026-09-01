@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
-import type { Activity, Responsible, RevitalizationItem, Unit } from "@/types/paint-control";
+import type { Activity, CostItem, Responsible, RevitalizationItem, Unit } from "@/types/paint-control";
 import { PRIORITY_LABELS } from "@/lib/paint-control/constants";
+import { formatCurrency } from "@/lib/paint-control/format";
 
 const COMBINING_DIACRITICS = new RegExp("[\\u0300-\\u036f]", "g");
 
@@ -191,6 +192,35 @@ export async function exportRevitalizationToExcel(
   await buildAndDownloadReport(
     "REVITALIZAÇÃO DE PINTURA — ATI GUAMARÉ",
     `Área: ${item.area}    |    Emitido em: ${emittedAt}`,
+    rows,
+    filename
+  );
+}
+
+export async function exportCostItemToExcel(item: CostItem): Promise<void> {
+  const emittedAt = new Date().toLocaleDateString("pt-BR");
+
+  const rows: [string, string][] = [
+    ["Categoria", item.category],
+    ["Item / Cargo", item.name || "—"],
+    ["Regime", item.regime || "—"],
+    ["Quantidade", item.quantity.toLocaleString("pt-BR")],
+    ["Valor / Hora (equipe)", item.hourlyRate !== null ? formatCurrency(item.hourlyRate) : "—"],
+    ["Horas / Dia", item.hoursPerDay !== null ? String(item.hoursPerDay) : "—"],
+    ["Dias / Ano", item.daysPerYear !== null ? String(item.daysPerYear) : "—"],
+    ["Custo Mensal Previsto", formatCurrency(item.plannedMonthlyCost)],
+    ["Custo Anual Previsto", formatCurrency(item.plannedAnnualCost)],
+    ["Custo Mensal Realizado", formatCurrency(item.actualMonthlyCost)],
+    ["Custo Anual Realizado", formatCurrency(item.actualAnnualCost)],
+    ["Observações", item.notes || "—"],
+  ];
+
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  const filename = `CUSTO_${sanitizeForFilename(item.name || "ITEM")}_${dateStamp}.xlsx`;
+
+  await buildAndDownloadReport(
+    "CUSTOS — PREVISTO X REALIZADO — ATI GUAMARÉ",
+    `Item: ${item.name}    |    Emitido em: ${emittedAt}`,
     rows,
     filename
   );

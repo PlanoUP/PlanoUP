@@ -5,6 +5,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type {
   Activity,
   ActivityHistoryEntry,
+  CostItem,
   Responsible,
   RevitalizationItem,
   Unit,
@@ -13,19 +14,23 @@ import { SEED_UNITS } from "@/data/paint-control/units";
 import { SEED_ACTIVITIES } from "@/data/paint-control/activities";
 import { SEED_RESPONSIBLES } from "@/data/paint-control/responsibles";
 import { SEED_REVITALIZATION_ITEMS } from "@/data/paint-control/revitalization";
+import { SEED_COST_ITEMS } from "@/data/paint-control/costs";
 import { PRIORITY_LABELS } from "@/lib/paint-control/constants";
 import { isSupabaseConfigured, supabase } from "@/lib/paint-control/supabaseClient";
 import {
   activityToRow,
+  costItemToRow,
   responsibleToRow,
   revitalizationItemToRow,
   rowToActivity,
+  rowToCostItem,
   rowToHistoryEntry,
   rowToResponsible,
   rowToRevitalizationItem,
   rowToUnit,
   type ActivityHistoryRow,
   type ActivityRow,
+  type CostRow,
   type ResponsibleRow,
   type RevitalizationRow,
   type UnitRow,
@@ -48,6 +53,7 @@ export type NewActivityInput = Omit<
 > & { completedSteps?: Activity["completedSteps"] };
 
 export type NewRevitalizationInput = Omit<RevitalizationItem, "id" | "createdAt" | "updatedAt">;
+export type NewCostItemInput = Omit<CostItem, "id" | "createdAt" | "updatedAt">;
 
 interface PaintControlState {
   units: Unit[];
@@ -55,6 +61,7 @@ interface PaintControlState {
   responsibles: Responsible[];
   history: ActivityHistoryEntry[];
   revitalizationItems: RevitalizationItem[];
+  costItems: CostItem[];
   hasHydrated: boolean;
   /** True once the Supabase realtime channels are live (multi-user sync active). */
   isLive: boolean;
@@ -70,6 +77,10 @@ interface PaintControlState {
   addRevitalizationItem: (input: NewRevitalizationInput) => RevitalizationItem;
   updateRevitalizationItem: (id: string, patch: Partial<RevitalizationItem>) => void;
   deleteRevitalizationItem: (id: string) => void;
+
+  addCostItem: (input: NewCostItemInput) => CostItem;
+  updateCostItem: (id: string, patch: Partial<CostItem>) => void;
+  deleteCostItem: (id: string) => void;
 
   logHistory: (entry: Omit<ActivityHistoryEntry, "id" | "createdAt">) => void;
   resetToSeedData: () => void;
@@ -178,6 +189,7 @@ function createLocalStore() {
         responsibles: SEED_RESPONSIBLES,
         history: [],
         revitalizationItems: SEED_REVITALIZATION_ITEMS,
+        costItems: SEED_COST_ITEMS,
         hasHydrated: false,
         isLive: false,
 
@@ -267,6 +279,31 @@ function createLocalStore() {
           }));
         },
 
+        addCostItem: (input) => {
+          const item: CostItem = {
+            ...input,
+            id: newId(),
+            createdAt: nowIso(),
+            updatedAt: nowIso(),
+          };
+          set((state) => ({ costItems: [item, ...state.costItems] }));
+          return item;
+        },
+
+        updateCostItem: (id, patch) => {
+          set((state) => ({
+            costItems: state.costItems.map((c) =>
+              c.id === id ? { ...c, ...patch, updatedAt: nowIso() } : c
+            ),
+          }));
+        },
+
+        deleteCostItem: (id) => {
+          set((state) => ({
+            costItems: state.costItems.filter((c) => c.id !== id),
+          }));
+        },
+
         logHistory: (entry) => {
           set((state) => ({ history: pushHistory(state.history, entry) }));
         },
@@ -278,6 +315,7 @@ function createLocalStore() {
             responsibles: SEED_RESPONSIBLES,
             history: [],
             revitalizationItems: SEED_REVITALIZATION_ITEMS,
+            costItems: SEED_COST_ITEMS,
           });
         },
 
@@ -292,6 +330,7 @@ function createLocalStore() {
           responsibles: state.responsibles,
           history: state.history,
           revitalizationItems: state.revitalizationItems,
+          costItems: state.costItems,
         }),
         onRehydrateStorage: () => (state) => {
           state?.setHasHydrated(true);
@@ -315,6 +354,7 @@ function createSupabaseStore() {
     responsibles: [],
     history: [],
     revitalizationItems: [],
+    costItems: [],
     hasHydrated: false,
     isLive: false,
 
@@ -475,6 +515,46 @@ function createSupabaseStore() {
         .then(({ error }) => error && console.error("Falha ao excluir item de revitalização", error));
     },
 
+    addCostItem: (input) => {
+      const item: CostItem = {
+        ...input,
+        id: newId(),
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      set((state) => ({ costItems: [item, ...state.costItems] }));
+      db.from("cost_items")
+        .insert({ id: item.id, ...costItemToRow(item) })
+        .then(({ error }) => error && console.error("Falha ao criar item de custo", error));
+      return item;
+    },
+
+    updateCostItem: (id, patch) => {
+      const state = get();
+      const current = state.costItems.find((c) => c.id === id);
+      if (!current) return;
+      set((s) => ({
+        costItems: s.costItems.map((c) =>
+          c.id === id ? { ...c, ...patch, updatedAt: nowIso() } : c
+        ),
+      }));
+      const updated = { ...current, ...patch };
+      db.from("cost_items")
+        .update({ ...costItemToRow(updated), updated_at: nowIso() })
+        .eq("id", id)
+        .then(({ error }) => error && console.error("Falha ao atualizar item de custo", error));
+    },
+
+    deleteCostItem: (id) => {
+      set((state) => ({
+        costItems: state.costItems.filter((c) => c.id !== id),
+      }));
+      db.from("cost_items")
+        .delete()
+        .eq("id", id)
+        .then(({ error }) => error && console.error("Falha ao excluir item de custo", error));
+    },
+
     logHistory: (entry) => {
       set((state) => ({ history: pushHistory(state.history, entry) }));
     },
@@ -489,19 +569,22 @@ function createSupabaseStore() {
   }));
 
   async function loadAll() {
-    const [unitsRes, responsiblesRes, activitiesRes, historyRes, revitalizationRes] = await Promise.all([
-      db.from("units").select("*").order("tag"),
-      db.from("responsibles").select("*").order("name"),
-      db.from("activities").select("*").order("created_at", { ascending: false }),
-      db.from("activity_history").select("*").order("created_at", { ascending: false }),
-      db.from("revitalization_activities").select("*").order("created_at", { ascending: false }),
-    ]);
+    const [unitsRes, responsiblesRes, activitiesRes, historyRes, revitalizationRes, costItemsRes] =
+      await Promise.all([
+        db.from("units").select("*").order("tag"),
+        db.from("responsibles").select("*").order("name"),
+        db.from("activities").select("*").order("created_at", { ascending: false }),
+        db.from("activity_history").select("*").order("created_at", { ascending: false }),
+        db.from("revitalization_activities").select("*").order("created_at", { ascending: false }),
+        db.from("cost_items").select("*").order("created_at", { ascending: false }),
+      ]);
 
     if (unitsRes.error) console.error("Falha ao carregar unidades", unitsRes.error);
     if (responsiblesRes.error) console.error("Falha ao carregar responsáveis", responsiblesRes.error);
     if (activitiesRes.error) console.error("Falha ao carregar serviços", activitiesRes.error);
     if (historyRes.error) console.error("Falha ao carregar histórico", historyRes.error);
     if (revitalizationRes.error) console.error("Falha ao carregar revitalização", revitalizationRes.error);
+    if (costItemsRes.error) console.error("Falha ao carregar custos", costItemsRes.error);
 
     useStore.setState({
       units: ((unitsRes.data ?? []) as UnitRow[]).map(rowToUnit),
@@ -511,6 +594,7 @@ function createSupabaseStore() {
       revitalizationItems: ((revitalizationRes.data ?? []) as RevitalizationRow[]).map(
         rowToRevitalizationItem
       ),
+      costItems: ((costItemsRes.data ?? []) as CostRow[]).map(rowToCostItem),
       hasHydrated: true,
     });
   }
@@ -575,6 +659,20 @@ function createSupabaseStore() {
           useStore.setState((s) => ({
             revitalizationItems: upsertById(s.revitalizationItems, item),
           }));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "cost_items" },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldId = (payload.old as { id?: string }).id;
+            if (!oldId) return;
+            useStore.setState((s) => ({ costItems: s.costItems.filter((c) => c.id !== oldId) }));
+            return;
+          }
+          const item = rowToCostItem(payload.new as CostRow);
+          useStore.setState((s) => ({ costItems: upsertById(s.costItems, item) }));
         }
       )
       .subscribe((status) => {

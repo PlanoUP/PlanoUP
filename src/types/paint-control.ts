@@ -207,6 +207,44 @@ export interface RevitalizationItem {
   updatedAt: string;
 }
 
+/**
+ * Custos is a budget register, not a schedule: it tracks the workforce and
+ * equipment lines behind the painting contract (efetivo + equipamentos) so
+ * "previsto" (planned/budgeted) can be compared against "realizado" (what's
+ * actually being spent) month to month. No priority/status workflow here —
+ * that's what Atividades/Revitalização are for.
+ */
+export type CostCategory = "Mão de Obra" | "Equipamento";
+
+export const COST_CATEGORIES: CostCategory[] = ["Mão de Obra", "Equipamento"];
+
+export interface CostItem {
+  id: string;
+
+  category: CostCategory;
+  name: string; // role (Pintor, Soldador...) or equipment (Gerador, PTA...)
+  regime: string; // free text: "Mensalista", "Locação", "Objeto Contratado", "Efetivo Brava"...
+  quantity: number; // headcount or equipment units
+
+  // Supporting figures used to derive the planned cost (labor mainly).
+  // Left null when the item has a direct monthly/annual cost instead
+  // (most equipment rows).
+  hourlyRate: number | null; // valor/h — already aggregated for the whole crew of that role
+  hoursPerDay: number | null;
+  daysPerYear: number | null;
+
+  plannedMonthlyCost: number; // previsto
+  plannedAnnualCost: number; // previsto
+
+  actualMonthlyCost: number | null; // realizado — filled in as actuals come in
+  actualAnnualCost: number | null; // realizado
+
+  notes: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type UserRole = "ADMIN" | "GESTOR" | "EXECUTOR" | "VISUALIZACAO";
 
 export interface AppUser {
