@@ -1,10 +1,16 @@
 -- PAINT CONTROL ATI — Supabase schema
 --
--- Run this once in the Supabase SQL Editor (Project → SQL Editor → New query)
--- for a brand-new project. It creates the four tables the app needs, enables
--- Realtime so every connected browser sees changes as they happen, and seeds
--- the 31 ATI units + demo responsibles/activities so the app looks the same
--- as the localStorage demo on first load.
+-- Run this in the Supabase SQL Editor (Project → SQL Editor → New query).
+-- It creates every table the app needs (units, responsibles, activities,
+-- activity_history, revitalization_activities, cost_items) and enables
+-- Realtime so every connected browser sees changes as they happen. Run
+-- seed.sql afterwards to populate the data.
+--
+-- Safe to re-run: every statement is idempotent (tables use
+-- IF NOT EXISTS, policies are dropped and recreated, and the Realtime
+-- publication is only extended for tables not already in it) — running
+-- this again after adding new tables (like the Revitalização/Custos ones)
+-- only adds what's missing, it never errors on what's already there.
 --
 -- RLS policies below are intentionally open (anon can read/write) because
 -- the app has no authentication yet (see §25 of the product spec — ADMIN /
@@ -23,6 +29,7 @@ create table if not exists units (
 );
 
 alter table units enable row level security;
+drop policy if exists "units_anon_all" on units;
 create policy "units_anon_all" on units for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------
@@ -39,6 +46,7 @@ create table if not exists responsibles (
 );
 
 alter table responsibles enable row level security;
+drop policy if exists "responsibles_anon_all" on responsibles;
 create policy "responsibles_anon_all" on responsibles for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------
@@ -93,6 +101,7 @@ create index if not exists activities_unit_id_idx on activities(unit_id);
 create index if not exists activities_responsible_id_idx on activities(responsible_id);
 
 alter table activities enable row level security;
+drop policy if exists "activities_anon_all" on activities;
 create policy "activities_anon_all" on activities for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------
@@ -110,6 +119,7 @@ create table if not exists activity_history (
 create index if not exists activity_history_activity_id_idx on activity_history(activity_id);
 
 alter table activity_history enable row level security;
+drop policy if exists "activity_history_anon_all" on activity_history;
 create policy "activity_history_anon_all" on activity_history for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------
@@ -166,6 +176,7 @@ create index if not exists revitalization_activities_responsible_id_idx
   on revitalization_activities(responsible_id);
 
 alter table revitalization_activities enable row level security;
+drop policy if exists "revitalization_activities_anon_all" on revitalization_activities;
 create policy "revitalization_activities_anon_all" on revitalization_activities
   for all using (true) with check (true);
 
@@ -200,13 +211,28 @@ create table if not exists cost_items (
 );
 
 alter table cost_items enable row level security;
+drop policy if exists "cost_items_anon_all" on cost_items;
 create policy "cost_items_anon_all" on cost_items for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------
 -- Realtime: broadcast row changes to every connected browser
+--
+-- Wrapped in a guard because "alter publication ... add table" has no
+-- IF NOT EXISTS form in Postgres — without the guard, re-running this
+-- script errors on the second run with "relation is already member of
+-- publication".
 -- ---------------------------------------------------------------------
-alter publication supabase_realtime add table activities;
-alter publication supabase_realtime add table responsibles;
-alter publication supabase_realtime add table activity_history;
-alter publication supabase_realtime add table revitalization_activities;
-alter publication supabase_realtime add table cost_items;
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['activities', 'responsibles', 'activity_history', 'revitalization_activities', 'cost_items']
+  loop
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t
+    ) then
+      execute format('alter publication supabase_realtime add table %I', t);
+    end if;
+  end loop;
+end $$;
