@@ -113,8 +113,66 @@ alter table activity_history enable row level security;
 create policy "activity_history_anon_all" on activity_history for all using (true) with check (true);
 
 -- ---------------------------------------------------------------------
+-- revitalization_activities
+--
+-- Kept as a control deliberately separate from `activities`: it tracks
+-- site facilities/areas (pátio de sucata, subestação, galpões, etc.) that
+-- don't correspond to any of the 31 registered ATI process units, so it
+-- uses a free-text `area` instead of a unit_id FK. Everything else mirrors
+-- the planning/control fields on `activities` for consistency.
+-- ---------------------------------------------------------------------
+create table if not exists revitalization_activities (
+  id uuid primary key default gen_random_uuid(),
+
+  area text not null default '',
+  title text not null default '',
+  description text not null default '',
+
+  priority text not null check (priority in ('P1', 'P2', 'P3', 'P4')),
+  responsible_id uuid references responsibles(id) on delete set null,
+  estimated_area_m2 numeric,
+  request_date date,
+  needed_date date,
+  programmed_date date,
+  actual_start_date date,
+  expected_end_date date,
+  actual_end_date date,
+
+  surface_type text not null default '',
+  surface_preparation text not null default '',
+  paint_system text not null default '',
+  primer text not null default '',
+  intermediate_coat text not null default '',
+  finish_coat text not null default '',
+  coats_count int,
+  technical_notes text not null default '',
+
+  status text not null default 'Backlog' check (status in (
+    'Backlog', 'Aguardando Programação', 'Programado', 'Aguardando Liberação',
+    'Liberado', 'Em Execução', 'Paralisado', 'Em Inspeção', 'Concluído', 'Cancelado'
+  )),
+  progress int not null default 0 check (progress between 0 and 100),
+  impediment text not null default '',
+  general_notes text not null default '',
+  work_order text not null default '',
+  note text not null default '',
+  reference text not null default '',
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists revitalization_activities_responsible_id_idx
+  on revitalization_activities(responsible_id);
+
+alter table revitalization_activities enable row level security;
+create policy "revitalization_activities_anon_all" on revitalization_activities
+  for all using (true) with check (true);
+
+-- ---------------------------------------------------------------------
 -- Realtime: broadcast row changes to every connected browser
 -- ---------------------------------------------------------------------
 alter publication supabase_realtime add table activities;
 alter publication supabase_realtime add table responsibles;
 alter publication supabase_realtime add table activity_history;
+alter publication supabase_realtime add table revitalization_activities;

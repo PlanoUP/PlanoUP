@@ -1,14 +1,18 @@
 -- PAINT CONTROL ATI — seed data
 --
 -- Run this AFTER schema.sql, once, in the Supabase SQL Editor. It populates
--- the 31 ATI units, one responsible (Eugênio Vale), and the 12 activities
--- from the Cronograma Plurianual - Plano de Manutenção - Pintura (2027-2029).
+-- the 31 ATI units, one responsible (Eugênio Vale), the 12 activities from
+-- the Cronograma Plurianual - Plano de Manutenção - Pintura (2027-2029),
+-- and the 13 items from the Cronograma Plurianual - Revitalização - Pintura
+-- (2027-2029), which live in their own table (revitalization_activities)
+-- since they track site areas, not registered ATI units.
 --
--- Safe to re-run: it clears these four tables first (activity_history →
--- activities → responsibles → units, respecting foreign keys) before
--- re-inserting, so running it twice does not create duplicates.
+-- Safe to re-run: it clears these tables first (activity_history →
+-- activities → revitalization_activities → responsibles → units,
+-- respecting foreign keys) before re-inserting, so running it twice does
+-- not create duplicates.
 
-truncate table activity_history, activities, responsibles, units cascade;
+truncate table activity_history, activities, revitalization_activities, responsibles, units cascade;
 
 -- ---------------------------------------------------------------------
 -- units (31 rows, fixed UUIDs — some TAGs repeat on purpose, see §7)
@@ -74,3 +78,29 @@ insert into activities (
   ('68cc54fe-7d6d-4e66-9f79-b6854d8fb91e', 'aaa89aa3-6e3d-440a-be84-551642f21fcc', '', 'ECUB VI', 'Plano de Manutenção de Pintura — ECUB VI', 'Atividade extraída do Cronograma Plurianual de Manutenção - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2029-07-31', '2029-04-01', null, '2029-06-30', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Manutenção - Pintura.', '', '', '', array[]::text[]),
   ('888a62a8-705f-407d-84f1-351cac78916e', 'dcb0ef3a-0d76-49f6-8e8b-611005ffbef5', '', 'UTG I II E III', 'Plano de Manutenção de Pintura — UTG I II E III', 'Atividade extraída do Cronograma Plurianual de Manutenção - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2029-09-30', '2029-06-01', null, '2029-08-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Manutenção - Pintura.', '', '', '', array[]::text[]),
   ('833b0968-715a-49af-a637-61d992d3d424', '6c59d08d-9fb3-4336-bd5d-0a0069bb4225', '', 'UTE TER FLARE E UEP', 'Plano de Manutenção de Pintura — UTE TER FLARE E UEP', 'Atividade extraída do Cronograma Plurianual de Manutenção - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2029-11-30', '2029-08-01', null, '2029-10-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Manutenção - Pintura.', '', '', '', array[]::text[]);
+
+-- ---------------------------------------------------------------------
+-- revitalization_activities — Cronograma Plurianual - Revitalização - Pintura (2027-2029)
+-- Control kept separate from `activities`: tracks site areas/facilities,
+-- not registered ATI units.
+-- ---------------------------------------------------------------------
+insert into revitalization_activities (
+  id, area, title, description, priority, responsible_id,
+  estimated_area_m2, request_date, needed_date, programmed_date, actual_start_date,
+  expected_end_date, actual_end_date, surface_type, surface_preparation, paint_system,
+  primer, intermediate_coat, finish_coat, coats_count, technical_notes, status, progress,
+  impediment, general_notes, work_order, note, reference
+) values
+  ('1f0a2b3c-4d5e-4f60-8172-93a4b5c6d7e1', 'Pátio de Sucata', 'Revitalização de Pintura — Pátio de Sucata', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2027-12-31', '2027-10-01', null, '2027-11-30', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('2f1a3b4c-5d6e-4f71-9283-a4b5c6d7e8f2', 'Biodiesel I', 'Revitalização de Pintura — Biodiesel I', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-05-31', '2027-09-01', null, '2028-04-30', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('3f2a4b5c-6d7e-4f82-a394-b5c6d7e8f9a3', 'Porto', 'Revitalização de Pintura — Porto', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2027-10-31', '2027-09-01', null, '2027-10-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('4f3a5b6c-7d8e-4f93-b4a5-c6d7e8f9a0b4', 'Subestação', 'Revitalização de Pintura — Subestação', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-10-31', '2027-10-01', null, '2028-09-30', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('5f4a6b7c-8d9e-4fa4-c5b6-d7e8f9a0b1c5', 'ECUB I A IV', 'Revitalização de Pintura — ECUB I A IV', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-09-30', '2028-09-01', null, '2028-09-30', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('6f5a7b8c-9d0e-4fb5-d6c7-e8f9a0b1c2d6', 'Galpão H', 'Revitalização de Pintura — Galpão H', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-11-30', '2028-09-01', null, '2028-10-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('7f6a8b9c-0d1e-4fc6-e7d8-f9a0b1c2d3e7', 'Bicicletário', 'Revitalização de Pintura — Bicicletário', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P4', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, null, null, null, null, null, '', '', '', '', '', '', null, '', 'Backlog', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura. Sem datas definidas no cronograma.', '', '', ''),
+  ('8f7a9b0c-1d2e-4fd7-f8e9-a0b1c2d3e4f8', 'Área do Hidrojato', 'Revitalização de Pintura — Área do Hidrojato', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-11-30', '2028-05-01', null, '2028-10-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('9f8a0b1c-2d3e-4fe8-a9fa-b1c2d3e4f5a9', 'Mesanino', 'Revitalização de Pintura — Mesanino', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-08-31', '2028-05-01', null, '2028-07-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('af9a1b2c-3d4e-4ff9-baba-c2d3e4f5a6ba', 'UTA', 'Revitalização de Pintura — UTA', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2027-11-30', '2027-09-01', null, '2027-10-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('b0a2b3c4-4d5e-4f0a-8b8b-d3e4f5a6b7cb', 'Caldeiraria', 'Revitalização de Pintura — Caldeiraria', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2027-12-31', '2027-12-01', null, '2027-12-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('c1b3c4d5-5e6f-4f1b-9c9c-e4f5a6b7c8dc', 'Praça Maquete', 'Revitalização de Pintura — Praça Maquete', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2027-12-31', '2027-12-01', null, '2027-12-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', ''),
+  ('d2c4d5e6-6f70-4f2c-adad-f5a6b7c8d9ed', 'Gaveteiro', 'Revitalização de Pintura — Gaveteiro', 'Atividade extraída do Cronograma Plurianual de Revitalização - Pintura.', 'P3', '75a4b678-2367-4019-a3e6-83c11c9d3f01', null, null, '2028-01-31', '2027-12-01', null, '2028-01-31', null, '', '', '', '', '', '', null, '', 'Programado', 0, '', 'Origem: Cronograma Plurianual de Revitalização - Pintura.', '', '', '');

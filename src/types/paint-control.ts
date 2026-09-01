@@ -157,6 +157,56 @@ export interface ActivityPhoto {
   createdAt: string;
 }
 
+/**
+ * Revitalização is a control kept deliberately separate from the unit-based
+ * painting activities above: it tracks site facilities/areas (pátio de
+ * sucata, subestação, galpões, etc.) that don't correspond to any of the
+ * 31 registered ATI process units, so it uses a free-text `area` instead
+ * of a Unit FK. Everything else mirrors Activity's planning/control fields
+ * for consistency.
+ */
+export interface RevitalizationItem {
+  id: string;
+
+  // Identificação
+  area: string; // free-text site area/facility, e.g. "Pátio de Sucata"
+  title: string;
+  description: string;
+
+  // Planejamento
+  priority: Priority;
+  responsibleId: string | null;
+  estimatedAreaM2: number | null;
+  requestDate: string | null;
+  neededDate: string | null;
+  programmedDate: string | null;
+  actualStartDate: string | null;
+  expectedEndDate: string | null;
+  actualEndDate: string | null;
+
+  // Pintura
+  surfaceType: string;
+  surfacePreparation: string;
+  paintSystem: string;
+  primer: string;
+  intermediateCoat: string;
+  finishCoat: string;
+  coatsCount: number | null;
+  technicalNotes: string;
+
+  // Controle
+  status: ActivityStatus;
+  progress: number;
+  impediment: string;
+  generalNotes: string;
+  workOrder: string;
+  note: string;
+  reference: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type UserRole = "ADMIN" | "GESTOR" | "EXECUTOR" | "VISUALIZACAO";
 
 export interface AppUser {

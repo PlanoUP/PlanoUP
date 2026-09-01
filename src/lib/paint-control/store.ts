@@ -6,23 +6,28 @@ import type {
   Activity,
   ActivityHistoryEntry,
   Responsible,
+  RevitalizationItem,
   Unit,
 } from "@/types/paint-control";
 import { SEED_UNITS } from "@/data/paint-control/units";
 import { SEED_ACTIVITIES } from "@/data/paint-control/activities";
 import { SEED_RESPONSIBLES } from "@/data/paint-control/responsibles";
+import { SEED_REVITALIZATION_ITEMS } from "@/data/paint-control/revitalization";
 import { PRIORITY_LABELS } from "@/lib/paint-control/constants";
 import { isSupabaseConfigured, supabase } from "@/lib/paint-control/supabaseClient";
 import {
   activityToRow,
   responsibleToRow,
+  revitalizationItemToRow,
   rowToActivity,
   rowToHistoryEntry,
   rowToResponsible,
+  rowToRevitalizationItem,
   rowToUnit,
   type ActivityHistoryRow,
   type ActivityRow,
   type ResponsibleRow,
+  type RevitalizationRow,
   type UnitRow,
 } from "@/lib/paint-control/supabaseMappers";
 
@@ -42,11 +47,14 @@ export type NewActivityInput = Omit<
   "id" | "createdAt" | "updatedAt" | "completedSteps"
 > & { completedSteps?: Activity["completedSteps"] };
 
+export type NewRevitalizationInput = Omit<RevitalizationItem, "id" | "createdAt" | "updatedAt">;
+
 interface PaintControlState {
   units: Unit[];
   activities: Activity[];
   responsibles: Responsible[];
   history: ActivityHistoryEntry[];
+  revitalizationItems: RevitalizationItem[];
   hasHydrated: boolean;
   /** True once the Supabase realtime channels are live (multi-user sync active). */
   isLive: boolean;
@@ -58,6 +66,10 @@ interface PaintControlState {
   addResponsible: (input: Omit<Responsible, "id">) => Responsible;
   updateResponsible: (id: string, patch: Partial<Responsible>) => void;
   deleteResponsible: (id: string) => void;
+
+  addRevitalizationItem: (input: NewRevitalizationInput) => RevitalizationItem;
+  updateRevitalizationItem: (id: string, patch: Partial<RevitalizationItem>) => void;
+  deleteRevitalizationItem: (id: string) => void;
 
   logHistory: (entry: Omit<ActivityHistoryEntry, "id" | "createdAt">) => void;
   resetToSeedData: () => void;
@@ -165,6 +177,7 @@ function createLocalStore() {
         activities: SEED_ACTIVITIES,
         responsibles: SEED_RESPONSIBLES,
         history: [],
+        revitalizationItems: SEED_REVITALIZATION_ITEMS,
         hasHydrated: false,
         isLive: false,
 
@@ -229,6 +242,31 @@ function createLocalStore() {
           }));
         },
 
+        addRevitalizationItem: (input) => {
+          const item: RevitalizationItem = {
+            ...input,
+            id: newId(),
+            createdAt: nowIso(),
+            updatedAt: nowIso(),
+          };
+          set((state) => ({ revitalizationItems: [item, ...state.revitalizationItems] }));
+          return item;
+        },
+
+        updateRevitalizationItem: (id, patch) => {
+          set((state) => ({
+            revitalizationItems: state.revitalizationItems.map((r) =>
+              r.id === id ? { ...r, ...patch, updatedAt: nowIso() } : r
+            ),
+          }));
+        },
+
+        deleteRevitalizationItem: (id) => {
+          set((state) => ({
+            revitalizationItems: state.revitalizationItems.filter((r) => r.id !== id),
+          }));
+        },
+
         logHistory: (entry) => {
           set((state) => ({ history: pushHistory(state.history, entry) }));
         },
@@ -239,6 +277,7 @@ function createLocalStore() {
             activities: SEED_ACTIVITIES,
             responsibles: SEED_RESPONSIBLES,
             history: [],
+            revitalizationItems: SEED_REVITALIZATION_ITEMS,
           });
         },
 
@@ -252,6 +291,7 @@ function createLocalStore() {
           activities: state.activities,
           responsibles: state.responsibles,
           history: state.history,
+          revitalizationItems: state.revitalizationItems,
         }),
         onRehydrateStorage: () => (state) => {
           state?.setHasHydrated(true);
@@ -274,6 +314,7 @@ function createSupabaseStore() {
     activities: [],
     responsibles: [],
     history: [],
+    revitalizationItems: [],
     hasHydrated: false,
     isLive: false,
 
@@ -394,6 +435,46 @@ function createSupabaseStore() {
         .then(({ error }) => error && console.error("Falha ao excluir responsável", error));
     },
 
+    addRevitalizationItem: (input) => {
+      const item: RevitalizationItem = {
+        ...input,
+        id: newId(),
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      set((state) => ({ revitalizationItems: [item, ...state.revitalizationItems] }));
+      db.from("revitalization_activities")
+        .insert({ id: item.id, ...revitalizationItemToRow(item) })
+        .then(({ error }) => error && console.error("Falha ao criar item de revitalização", error));
+      return item;
+    },
+
+    updateRevitalizationItem: (id, patch) => {
+      const state = get();
+      const current = state.revitalizationItems.find((r) => r.id === id);
+      if (!current) return;
+      set((s) => ({
+        revitalizationItems: s.revitalizationItems.map((r) =>
+          r.id === id ? { ...r, ...patch, updatedAt: nowIso() } : r
+        ),
+      }));
+      const updated = { ...current, ...patch };
+      db.from("revitalization_activities")
+        .update({ ...revitalizationItemToRow(updated), updated_at: nowIso() })
+        .eq("id", id)
+        .then(({ error }) => error && console.error("Falha ao atualizar item de revitalização", error));
+    },
+
+    deleteRevitalizationItem: (id) => {
+      set((state) => ({
+        revitalizationItems: state.revitalizationItems.filter((r) => r.id !== id),
+      }));
+      db.from("revitalization_activities")
+        .delete()
+        .eq("id", id)
+        .then(({ error }) => error && console.error("Falha ao excluir item de revitalização", error));
+    },
+
     logHistory: (entry) => {
       set((state) => ({ history: pushHistory(state.history, entry) }));
     },
@@ -408,23 +489,28 @@ function createSupabaseStore() {
   }));
 
   async function loadAll() {
-    const [unitsRes, responsiblesRes, activitiesRes, historyRes] = await Promise.all([
+    const [unitsRes, responsiblesRes, activitiesRes, historyRes, revitalizationRes] = await Promise.all([
       db.from("units").select("*").order("tag"),
       db.from("responsibles").select("*").order("name"),
       db.from("activities").select("*").order("created_at", { ascending: false }),
       db.from("activity_history").select("*").order("created_at", { ascending: false }),
+      db.from("revitalization_activities").select("*").order("created_at", { ascending: false }),
     ]);
 
     if (unitsRes.error) console.error("Falha ao carregar unidades", unitsRes.error);
     if (responsiblesRes.error) console.error("Falha ao carregar responsáveis", responsiblesRes.error);
     if (activitiesRes.error) console.error("Falha ao carregar serviços", activitiesRes.error);
     if (historyRes.error) console.error("Falha ao carregar histórico", historyRes.error);
+    if (revitalizationRes.error) console.error("Falha ao carregar revitalização", revitalizationRes.error);
 
     useStore.setState({
       units: ((unitsRes.data ?? []) as UnitRow[]).map(rowToUnit),
       responsibles: ((responsiblesRes.data ?? []) as ResponsibleRow[]).map(rowToResponsible),
       activities: ((activitiesRes.data ?? []) as ActivityRow[]).map(rowToActivity),
       history: ((historyRes.data ?? []) as ActivityHistoryRow[]).map(rowToHistoryEntry),
+      revitalizationItems: ((revitalizationRes.data ?? []) as RevitalizationRow[]).map(
+        rowToRevitalizationItem
+      ),
       hasHydrated: true,
     });
   }
@@ -471,6 +557,24 @@ function createSupabaseStore() {
           }
           const entry = rowToHistoryEntry(payload.new as ActivityHistoryRow);
           useStore.setState((s) => ({ history: upsertById(s.history, entry) }));
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "revitalization_activities" },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldId = (payload.old as { id?: string }).id;
+            if (!oldId) return;
+            useStore.setState((s) => ({
+              revitalizationItems: s.revitalizationItems.filter((r) => r.id !== oldId),
+            }));
+            return;
+          }
+          const item = rowToRevitalizationItem(payload.new as RevitalizationRow);
+          useStore.setState((s) => ({
+            revitalizationItems: upsertById(s.revitalizationItems, item),
+          }));
         }
       )
       .subscribe((status) => {

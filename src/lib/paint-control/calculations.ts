@@ -1,4 +1,4 @@
-import type { Activity, Priority } from "@/types/paint-control";
+import type { Activity, ActivityStatus, Priority } from "@/types/paint-control";
 import { PRIORITY_WEIGHT } from "@/lib/paint-control/constants";
 
 /** Today's date as YYYY-MM-DD, safe to compare against ISO date-only strings. */
@@ -6,14 +6,22 @@ export function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** The subset of Activity/RevitalizationItem fields isOverdue actually needs. */
+interface SchedulableItem {
+  status: ActivityStatus;
+  expectedEndDate: string | null;
+  neededDate: string | null;
+}
+
 /**
  * A service is overdue when "today" is past its expected end date (or, if
  * that isn't set yet, its required date) and it hasn't been closed out.
  * Per spec §18: data atual > data prevista/necessária AND status != Concluído.
+ * Works for both painting Activities and Revitalização items.
  */
-export function isOverdue(activity: Activity, today: string = todayIso()): boolean {
-  if (activity.status === "Concluído" || activity.status === "Cancelado") return false;
-  const referenceDate = activity.expectedEndDate || activity.neededDate;
+export function isOverdue(item: SchedulableItem, today: string = todayIso()): boolean {
+  if (item.status === "Concluído" || item.status === "Cancelado") return false;
+  const referenceDate = item.expectedEndDate || item.neededDate;
   if (!referenceDate) return false;
   return today > referenceDate;
 }
@@ -23,17 +31,23 @@ export function isCritical(activity: Activity): boolean {
   return activity.priority === "P1";
 }
 
+interface ProgressableItem {
+  status: ActivityStatus;
+  progress: number;
+}
+
 /**
  * Average progress of an activity set. Cancelled services are excluded —
  * they never contribute to a unit's or the ATI's physical progress.
  *
  * `weightFn` is a seam for the future area-weighted rule (§21): pass e.g.
  * `(a) => a.estimatedAreaM2 ?? 0` to switch from a simple average to an
- * area-weighted one without touching any call site.
+ * area-weighted one without touching any call site. Works for both
+ * painting Activities and Revitalização items.
  */
-export function averageProgress(
-  activities: Activity[],
-  weightFn?: (activity: Activity) => number
+export function averageProgress<T extends ProgressableItem>(
+  activities: T[],
+  weightFn?: (activity: T) => number
 ): number {
   const active = activities.filter((a) => a.status !== "Cancelado");
   if (active.length === 0) return 0;
@@ -49,15 +63,23 @@ export function averageProgress(
   return Math.round(weighted / totalWeight);
 }
 
-function compareByNeededDate(a: Activity, b: Activity): number {
+interface PrioritizableItem {
+  priority: Priority;
+  neededDate: string | null;
+}
+
+function compareByNeededDate(a: PrioritizableItem, b: PrioritizableItem): number {
   if (a.neededDate && b.neededDate) return a.neededDate.localeCompare(b.neededDate);
   if (a.neededDate) return -1;
   if (b.neededDate) return 1;
   return 0;
 }
 
-/** Priority tier first, then nearest required date. Used on the Visão Geral priorities table. */
-export function priorityComparator(a: Activity, b: Activity): number {
+/**
+ * Priority tier first, then nearest required date. Used on the Visão Geral
+ * priorities table. Works for both painting Activities and Revitalização items.
+ */
+export function priorityComparator<T extends PrioritizableItem>(a: T, b: T): number {
   const weightDiff = PRIORITY_WEIGHT[a.priority] - PRIORITY_WEIGHT[b.priority];
   if (weightDiff !== 0) return weightDiff;
   return compareByNeededDate(a, b);

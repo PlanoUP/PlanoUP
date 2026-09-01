@@ -13,6 +13,7 @@ import {
   BarChart3,
   Settings,
   PaintBucket,
+  Warehouse,
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
@@ -25,10 +26,55 @@ const NAV_ITEMS = [
   { href: "/paint-control-ati/programacao", label: "Programação", icon: CalendarDays },
   { href: "/paint-control-ati/responsaveis", label: "Responsáveis", icon: Users },
   { href: "/paint-control-ati/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/paint-control-ati/configuracoes", label: "Configurações", icon: Settings },
 ];
 
+// Kept visually apart from the unit-based painting control above — a
+// separate section for site-facility revitalização, per the product ask.
+const SEPARATE_NAV_ITEMS = [
+  { href: "/paint-control-ati/revitalizacao", label: "Revitalização", icon: Warehouse },
+];
+
+const SETTINGS_NAV_ITEM = {
+  href: "/paint-control-ati/configuracoes",
+  label: "Configurações",
+  icon: Settings,
+};
+
 const STORAGE_KEY = "pcati-sidebar-collapsed";
+
+interface NavItemData {
+  href: string;
+  label: string;
+  icon: typeof LayoutGrid;
+}
+
+function NavItem({
+  item,
+  collapsed,
+  active,
+}: {
+  item: NavItemData;
+  collapsed: boolean;
+  active: boolean;
+}) {
+  const Icon = item.icon;
+  return (
+    <li>
+      <Link
+        href={item.href}
+        title={collapsed ? item.label : undefined}
+        className={`flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
+          active
+            ? "bg-slate-900 text-accent"
+            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+        }`}
+      >
+        <Icon className="h-[18px] w-[18px] shrink-0" />
+        {!collapsed && <span className="truncate">{item.label}</span>}
+      </Link>
+    </li>
+  );
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -76,26 +122,26 @@ export default function Sidebar() {
 
       <nav className="flex-1 overflow-y-auto px-2.5 py-3">
         <ul className="flex flex-col gap-0.5">
-          {NAV_ITEMS.map((item) => {
-            const active = mounted && isActive(item.href, item.exact);
-            const Icon = item.icon;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  title={collapsed ? item.label : undefined}
-                  className={`flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-slate-900 text-accent"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
-                >
-                  <Icon className="h-[18px] w-[18px] shrink-0" />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </Link>
-              </li>
-            );
-          })}
+          {NAV_ITEMS.map((item) => (
+            <NavItem key={item.href} item={item} collapsed={collapsed} active={mounted && isActive(item.href, item.exact)} />
+          ))}
+        </ul>
+
+        <div className="my-3 border-t border-slate-100" />
+        {!collapsed && (
+          <p className="px-2.5 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            Controle separado
+          </p>
+        )}
+        <ul className="flex flex-col gap-0.5">
+          {SEPARATE_NAV_ITEMS.map((item) => (
+            <NavItem key={item.href} item={item} collapsed={collapsed} active={mounted && isActive(item.href)} />
+          ))}
+        </ul>
+
+        <div className="my-3 border-t border-slate-100" />
+        <ul className="flex flex-col gap-0.5">
+          <NavItem item={SETTINGS_NAV_ITEM} collapsed={collapsed} active={mounted && isActive(SETTINGS_NAV_ITEM.href)} />
         </ul>
       </nav>
 
