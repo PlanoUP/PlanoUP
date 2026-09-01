@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Mail, Phone } from "lucide-react";
 import { usePaintControlStore } from "@/lib/paint-control/store";
+import { useAuthStore } from "@/lib/paint-control/authStore";
 import { isOverdue } from "@/lib/paint-control/calculations";
 import type { Responsible } from "@/types/paint-control";
 import PageHeader from "@/components/paint-control/PageHeader";
@@ -18,6 +19,7 @@ export default function ResponsaveisPage() {
   const addResponsible = usePaintControlStore((s) => s.addResponsible);
   const updateResponsible = usePaintControlStore((s) => s.updateResponsible);
   const deleteResponsible = usePaintControlStore((s) => s.deleteResponsible);
+  const requireEditor = useAuthStore((s) => s.requireEditor);
 
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
@@ -58,6 +60,7 @@ export default function ResponsaveisPage() {
         actions={
           <button
             onClick={() => {
+              if (!requireEditor()) return;
               setEditing(null);
               setFormOpen(true);
             }}
@@ -133,6 +136,7 @@ export default function ResponsaveisPage() {
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => {
+                          if (!requireEditor()) return;
                           setEditing(responsible);
                           setFormOpen(true);
                         }}
@@ -142,7 +146,10 @@ export default function ResponsaveisPage() {
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => setDeleting(responsible)}
+                        onClick={() => {
+                          if (!requireEditor()) return;
+                          setDeleting(responsible);
+                        }}
                         title="Excluir"
                         className="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
                       >

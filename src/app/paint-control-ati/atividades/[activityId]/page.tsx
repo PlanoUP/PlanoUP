@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Pencil, FileDown, Trash2, Check, History as HistoryIcon } from "lucide-react";
 import { usePaintControlStore } from "@/lib/paint-control/store";
+import { useAuthStore } from "@/lib/paint-control/authStore";
 import { EXECUTION_STEPS } from "@/types/paint-control";
 import type { ActivityStatus } from "@/types/paint-control";
 import { isOverdue } from "@/lib/paint-control/calculations";
@@ -51,6 +52,7 @@ export default function ActivityDetailPage({ params }: { params: { activityId: s
   const history = usePaintControlStore((s) => s.history);
   const updateActivity = usePaintControlStore((s) => s.updateActivity);
   const deleteActivity = usePaintControlStore((s) => s.deleteActivity);
+  const requireEditor = useAuthStore((s) => s.requireEditor);
 
   const [formOpen, setFormOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -137,7 +139,10 @@ export default function ActivityDetailPage({ params }: { params: { activityId: s
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
-            onClick={() => setFormOpen(true)}
+            onClick={() => {
+              if (!requireEditor()) return;
+              setFormOpen(true);
+            }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
           >
             <Pencil className="h-4 w-4" />
@@ -151,7 +156,10 @@ export default function ActivityDetailPage({ params }: { params: { activityId: s
             Exportar Excel
           </button>
           <button
-            onClick={() => setConfirmDelete(true)}
+            onClick={() => {
+              if (!requireEditor()) return;
+              setConfirmDelete(true);
+            }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50"
           >
             <Trash2 className="h-4 w-4" />

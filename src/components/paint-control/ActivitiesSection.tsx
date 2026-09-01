@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import type { Activity, Priority, ActivityStatus } from "@/types/paint-control";
 import { ACTIVITY_STATUSES, PRIORITIES } from "@/types/paint-control";
 import { usePaintControlStore } from "@/lib/paint-control/store";
+import { useAuthStore } from "@/lib/paint-control/authStore";
 import { isCritical, isOverdue, priorityComparator } from "@/lib/paint-control/calculations";
 import { PRIORITY_LABELS } from "@/lib/paint-control/constants";
 import { exportActivityToExcel } from "@/lib/paint-control/excelExport";
@@ -32,6 +33,7 @@ export default function ActivitiesSection({
   const addActivity = usePaintControlStore((s) => s.addActivity);
   const updateActivity = usePaintControlStore((s) => s.updateActivity);
   const deleteActivity = usePaintControlStore((s) => s.deleteActivity);
+  const requireEditor = useAuthStore((s) => s.requireEditor);
 
   const [search, setSearch] = useState("");
   const [unitFilter, setUnitFilter] = useState("");
@@ -74,13 +76,20 @@ export default function ActivitiesSection({
   ]);
 
   function openCreate() {
+    if (!requireEditor()) return;
     setEditingActivity(null);
     setFormOpen(true);
   }
 
   function openEdit(activity: Activity) {
+    if (!requireEditor()) return;
     setEditingActivity(activity);
     setFormOpen(true);
+  }
+
+  function requestDelete(activity: Activity) {
+    if (!requireEditor()) return;
+    setDeletingActivity(activity);
   }
 
   function handleSubmit(payload: NewActivityInput) {
@@ -213,7 +222,7 @@ export default function ActivitiesSection({
           responsibles={responsibles}
           showUnitColumn={showUnitColumn}
           onEdit={openEdit}
-          onRequestDelete={setDeletingActivity}
+          onRequestDelete={requestDelete}
           onExport={handleExport}
         />
       </div>

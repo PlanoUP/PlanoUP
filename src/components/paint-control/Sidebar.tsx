@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import EditModeButton from "@/components/paint-control/EditModeButton";
 import {
   LayoutGrid,
   Factory,
@@ -147,7 +148,8 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      <div className="border-t border-slate-100 p-2.5">
+      <div className="flex flex-col gap-0.5 border-t border-slate-100 p-2.5">
+        <EditModeButton collapsed={collapsed} />
         <button
           onClick={toggle}
           className="flex w-full items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-700"

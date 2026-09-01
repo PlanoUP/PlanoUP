@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/paint-control/Sidebar";
+import EditAuthModal from "@/components/paint-control/EditAuthModal";
 import { usePaintControlStore } from "@/lib/paint-control/store";
 
 export default function PaintControlShell({ children }: { children: React.ReactNode }) {
@@ -23,6 +24,7 @@ export default function PaintControlShell({ children }: { children: React.ReactN
           )}
         </div>
       </main>
+      <EditAuthModal />
     </div>
   );
 }

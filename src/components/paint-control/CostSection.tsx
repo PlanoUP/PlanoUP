@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import type { CostCategory, CostItem } from "@/types/paint-control";
 import { COST_CATEGORIES } from "@/types/paint-control";
 import { usePaintControlStore } from "@/lib/paint-control/store";
+import { useAuthStore } from "@/lib/paint-control/authStore";
 import { exportCostItemToExcel } from "@/lib/paint-control/excelExport";
 import SearchInput from "@/components/paint-control/SearchInput";
 import CostTable from "@/components/paint-control/CostTable";
@@ -17,6 +18,7 @@ export default function CostSection() {
   const addCostItem = usePaintControlStore((s) => s.addCostItem);
   const updateCostItem = usePaintControlStore((s) => s.updateCostItem);
   const deleteCostItem = usePaintControlStore((s) => s.deleteCostItem);
+  const requireEditor = useAuthStore((s) => s.requireEditor);
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CostCategory | "">("");
@@ -37,13 +39,20 @@ export default function CostSection() {
   }, [items, search, categoryFilter]);
 
   function openCreate() {
+    if (!requireEditor()) return;
     setEditingItem(null);
     setFormOpen(true);
   }
 
   function openEdit(item: CostItem) {
+    if (!requireEditor()) return;
     setEditingItem(item);
     setFormOpen(true);
+  }
+
+  function requestDelete(item: CostItem) {
+    if (!requireEditor()) return;
+    setDeletingItem(item);
   }
 
   function handleSubmit(payload: NewCostItemInput) {
@@ -104,7 +113,7 @@ export default function CostSection() {
         <CostTable
           items={filtered}
           onEdit={openEdit}
-          onRequestDelete={setDeletingItem}
+          onRequestDelete={requestDelete}
           onExport={handleExport}
         />
       </div>

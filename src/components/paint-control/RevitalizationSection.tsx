@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import type { Priority, ActivityStatus, RevitalizationItem } from "@/types/paint-control";
 import { ACTIVITY_STATUSES, PRIORITIES } from "@/types/paint-control";
 import { usePaintControlStore } from "@/lib/paint-control/store";
+import { useAuthStore } from "@/lib/paint-control/authStore";
 import { isOverdue, priorityComparator } from "@/lib/paint-control/calculations";
 import { PRIORITY_LABELS } from "@/lib/paint-control/constants";
 import { exportRevitalizationToExcel } from "@/lib/paint-control/excelExport";
@@ -20,6 +21,7 @@ export default function RevitalizationSection() {
   const addRevitalizationItem = usePaintControlStore((s) => s.addRevitalizationItem);
   const updateRevitalizationItem = usePaintControlStore((s) => s.updateRevitalizationItem);
   const deleteRevitalizationItem = usePaintControlStore((s) => s.deleteRevitalizationItem);
+  const requireEditor = useAuthStore((s) => s.requireEditor);
 
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<Priority | "">("");
@@ -46,13 +48,20 @@ export default function RevitalizationSection() {
   }, [items, search, priorityFilter, statusFilter, responsibleFilter, onlyOverdue]);
 
   function openCreate() {
+    if (!requireEditor()) return;
     setEditingItem(null);
     setFormOpen(true);
   }
 
   function openEdit(item: RevitalizationItem) {
+    if (!requireEditor()) return;
     setEditingItem(item);
     setFormOpen(true);
+  }
+
+  function requestDelete(item: RevitalizationItem) {
+    if (!requireEditor()) return;
+    setDeletingItem(item);
   }
 
   function handleSubmit(payload: NewRevitalizationInput) {
@@ -152,7 +161,7 @@ export default function RevitalizationSection() {
           items={filtered}
           responsibles={responsibles}
           onEdit={openEdit}
-          onRequestDelete={setDeletingItem}
+          onRequestDelete={requestDelete}
           onExport={handleExport}
         />
       </div>

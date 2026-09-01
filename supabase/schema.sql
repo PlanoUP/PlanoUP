@@ -12,10 +12,14 @@
 -- this again after adding new tables (like the Revitalização/Custos ones)
 -- only adds what's missing, it never errors on what's already there.
 --
--- RLS policies below are intentionally open (anon can read/write) because
--- the app has no authentication yet (see §25 of the product spec — ADMIN /
--- GESTOR / EXECUTOR / VISUALIZACAO roles are prepared but not enforced).
--- Once login ships, replace the "anon_all" policies with role-aware ones.
+-- RLS policies below split read from write: anyone can SELECT (no login
+-- needed to view the dashboard), but INSERT/UPDATE/DELETE require being
+-- signed in via Supabase Auth (a single shared "editor" account — see
+-- src/lib/paint-control/authStore.ts). This is the real enforcement layer:
+-- the app's UI hides edit controls from logged-out visitors, but even a
+-- direct API call without a valid session is rejected here. Full
+-- per-user roles (ADMIN / GESTOR / EXECUTOR / VISUALIZACAO from §25 of the
+-- product spec) are a future step; today it's a single binary gate.
 
 create extension if not exists "pgcrypto";
 
@@ -30,7 +34,11 @@ create table if not exists units (
 
 alter table units enable row level security;
 drop policy if exists "units_anon_all" on units;
-create policy "units_anon_all" on units for all using (true) with check (true);
+drop policy if exists "units_select_all" on units;
+drop policy if exists "units_write_authenticated" on units;
+create policy "units_select_all" on units for select using (true);
+create policy "units_write_authenticated" on units for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- ---------------------------------------------------------------------
 -- responsibles
@@ -47,7 +55,11 @@ create table if not exists responsibles (
 
 alter table responsibles enable row level security;
 drop policy if exists "responsibles_anon_all" on responsibles;
-create policy "responsibles_anon_all" on responsibles for all using (true) with check (true);
+drop policy if exists "responsibles_select_all" on responsibles;
+drop policy if exists "responsibles_write_authenticated" on responsibles;
+create policy "responsibles_select_all" on responsibles for select using (true);
+create policy "responsibles_write_authenticated" on responsibles for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- ---------------------------------------------------------------------
 -- activities
@@ -102,7 +114,11 @@ create index if not exists activities_responsible_id_idx on activities(responsib
 
 alter table activities enable row level security;
 drop policy if exists "activities_anon_all" on activities;
-create policy "activities_anon_all" on activities for all using (true) with check (true);
+drop policy if exists "activities_select_all" on activities;
+drop policy if exists "activities_write_authenticated" on activities;
+create policy "activities_select_all" on activities for select using (true);
+create policy "activities_write_authenticated" on activities for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- ---------------------------------------------------------------------
 -- activity_history
@@ -120,7 +136,11 @@ create index if not exists activity_history_activity_id_idx on activity_history(
 
 alter table activity_history enable row level security;
 drop policy if exists "activity_history_anon_all" on activity_history;
-create policy "activity_history_anon_all" on activity_history for all using (true) with check (true);
+drop policy if exists "activity_history_select_all" on activity_history;
+drop policy if exists "activity_history_write_authenticated" on activity_history;
+create policy "activity_history_select_all" on activity_history for select using (true);
+create policy "activity_history_write_authenticated" on activity_history for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- ---------------------------------------------------------------------
 -- revitalization_activities
@@ -177,8 +197,12 @@ create index if not exists revitalization_activities_responsible_id_idx
 
 alter table revitalization_activities enable row level security;
 drop policy if exists "revitalization_activities_anon_all" on revitalization_activities;
-create policy "revitalization_activities_anon_all" on revitalization_activities
-  for all using (true) with check (true);
+drop policy if exists "revitalization_activities_select_all" on revitalization_activities;
+drop policy if exists "revitalization_activities_write_authenticated" on revitalization_activities;
+create policy "revitalization_activities_select_all" on revitalization_activities
+  for select using (true);
+create policy "revitalization_activities_write_authenticated" on revitalization_activities
+  for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- ---------------------------------------------------------------------
 -- cost_items
@@ -212,7 +236,11 @@ create table if not exists cost_items (
 
 alter table cost_items enable row level security;
 drop policy if exists "cost_items_anon_all" on cost_items;
-create policy "cost_items_anon_all" on cost_items for all using (true) with check (true);
+drop policy if exists "cost_items_select_all" on cost_items;
+drop policy if exists "cost_items_write_authenticated" on cost_items;
+create policy "cost_items_select_all" on cost_items for select using (true);
+create policy "cost_items_write_authenticated" on cost_items for all
+  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 -- ---------------------------------------------------------------------
 -- Realtime: broadcast row changes to every connected browser
