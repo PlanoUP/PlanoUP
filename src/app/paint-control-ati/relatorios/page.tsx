@@ -19,8 +19,9 @@ import { PRIORITY_STYLES } from "@/lib/paint-control/constants";
 import PageHeader from "@/components/paint-control/PageHeader";
 import ProgressBar from "@/components/paint-control/ProgressBar";
 import EmptyState from "@/components/paint-control/EmptyState";
+import ExecutiveReport from "@/components/paint-control/ExecutiveReport";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, FileDown } from "lucide-react";
 
 const CHART_INK = "#1F2429";
 
@@ -102,9 +103,21 @@ export default function RelatoriosPage() {
         eyebrow="ATI Guamaré"
         title="Relatórios"
         description="Indicadores consolidados dos serviços de pintura do ATI."
+        actions={
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-slate-900 hover:bg-accent-hover print:hidden"
+          >
+            <FileDown className="h-4 w-4" />
+            Gerar Relatório PDF
+          </button>
+        }
       />
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <ExecutiveReport />
+
+      <div className="flex flex-col gap-6 print:hidden">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <ChartCard title="Serviços por Status">
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={byStatus} layout="vertical" margin={{ left: 8, right: 16 }}>
@@ -214,6 +227,7 @@ export default function RelatoriosPage() {
           </div>
         )}
       </ChartCard>
+      </div>
     </div>
   );
 }

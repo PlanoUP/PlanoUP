@@ -47,3 +47,13 @@ body {
     linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 44px 44px;
 }
+
+/* The root landing page sets a dark body background/text color; without this
+   override, printing any light-themed page (like the Paint Control reports)
+   would render white text on white paper. */
+@media print {
+  body {
+    background: #ffffff;
+    color: #0b0b0b;
+  }
+}
