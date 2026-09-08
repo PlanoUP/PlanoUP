@@ -1,4 +1,5 @@
 import PageHeader from "@/components/brava/PageHeader";
+import UpcomingInspectionsTimeline from "@/components/brava/UpcomingInspectionsTimeline";
 import ConsolidatedGantt from "@/components/brava/ConsolidatedGantt";
 
 export default function ConsolidatedPage() {
@@ -9,7 +10,8 @@ export default function ConsolidatedPage() {
         title="Visão Consolidada"
         subtitle="Comparação dos cronogramas de todos os tanques — identifique sobreposições e períodos críticos"
       />
-      <div className="space-y-6 px-5 py-6 sm:px-8 sm:py-8">
+      <div className="space-y-8 px-5 py-6 sm:px-8 sm:py-8">
+        <UpcomingInspectionsTimeline />
         <ConsolidatedGantt />
       </div>
     </>

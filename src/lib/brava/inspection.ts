@@ -102,31 +102,118 @@ export function formatDaysToInspection(days: number | null): string {
   return `Vencido há ${Math.abs(days)}d`;
 }
 
+interface InspectionPriorityLike {
+  tag: string;
+  daysToInternalInspection: number | null;
+}
+
 /**
  * Ordering rule for the whole panel: overdue first (oldest overdue first),
- * then soonest-upcoming to furthest-out, then undated tanks last. Ties break
- * on TAG so the order is stable and deterministic.
+ * then soonest-upcoming to furthest-out, then undated last. Ties break on
+ * TAG so the order is stable and deterministic. Shared by the tracked-fleet
+ * sorter below and by sortAssetsByInspectionPriority (macro due-date view).
  */
+function compareInspectionPriority(a: InspectionPriorityLike, b: InspectionPriorityLike): number {
+  const da = a.daysToInternalInspection;
+  const db = b.daysToInternalInspection;
+
+  if (da === null && db === null) return a.tag.localeCompare(b.tag);
+  if (da === null) return 1;
+  if (db === null) return -1;
+
+  const overdueA = da < 0;
+  const overdueB = db < 0;
+  if (overdueA && overdueB) {
+    if (da !== db) return da - db; // most negative (oldest overdue) first
+  } else if (overdueA !== overdueB) {
+    return overdueA ? -1 : 1; // any overdue tank outranks any upcoming one
+  } else if (da !== db) {
+    return da - db; // soonest upcoming first
+  }
+  return a.tag.localeCompare(b.tag);
+}
+
 export function sortByInspectionPriority<T extends TankWithDerived>(tanks: T[]): T[] {
-  return [...tanks].sort((a, b) => {
-    const da = a.derived.daysToInternalInspection;
-    const db = b.derived.daysToInternalInspection;
+  return [...tanks].sort((a, b) =>
+    compareInspectionPriority(
+      { tag: a.tag, daysToInternalInspection: a.derived.daysToInternalInspection },
+      { tag: b.tag, daysToInternalInspection: b.derived.daysToInternalInspection }
+    )
+  );
+}
 
-    if (da === null && db === null) return a.tag.localeCompare(b.tag);
-    if (da === null) return 1;
-    if (db === null) return -1;
+/** Same ordering rule, generalized for the macro due-date fleet (tracked + untracked assets). */
+export function sortAssetsByInspectionPriority<T extends InspectionPriorityLike>(assets: T[]): T[] {
+  return [...assets].sort(compareInspectionPriority);
+}
 
-    const overdueA = da < 0;
-    const overdueB = db < 0;
-    if (overdueA && overdueB) {
-      if (da !== db) return da - db; // most negative (oldest overdue) first
-    } else if (overdueA !== overdueB) {
-      return overdueA ? -1 : 1; // any overdue tank outranks any upcoming one
-    } else if (da !== db) {
-      return da - db; // soonest upcoming first
+export interface InspectionFleetAsset {
+  tag: string;
+  family: TankFamily | null;
+  nextInternalInspection?: string;
+  daysToInternalInspection: number | null;
+  inspectionCriticality: InspectionCriticality;
+  /** True when this TAG also has a real Tank record (maintenance project) — false = inspection-only asset. */
+  tracked: boolean;
+}
+
+/**
+ * Merges the complete real inspection inventory (every tancagem Brava
+ * tracks for regulatory purposes) with the tanks actually under an active
+ * maintenance project. Used ONLY by the macro due-date views (Consolidado +
+ * Cronograma) — Tank Control, the executive summary and the featured-tank
+ * logic keep using the maintenance-tracked fleet only, unchanged.
+ */
+export function buildInspectionFleet(
+  tanks: TankWithDerived[],
+  inventory: { tag: string; nextInternalInspection: string }[],
+  todayISO: string
+): InspectionFleetAsset[] {
+  const byTag = new Map(tanks.map((t) => [t.tag.toUpperCase(), t]));
+  const seen = new Set<string>();
+  const result: InspectionFleetAsset[] = [];
+
+  for (const item of inventory) {
+    const key = item.tag.toUpperCase();
+    seen.add(key);
+    const tracked = byTag.get(key);
+    if (tracked) {
+      result.push({
+        tag: tracked.tag,
+        family: tracked.derived.family,
+        nextInternalInspection: tracked.nextInternalInspection,
+        daysToInternalInspection: tracked.derived.daysToInternalInspection,
+        inspectionCriticality: tracked.derived.inspectionCriticality,
+        tracked: true,
+      });
+    } else {
+      const days = getDaysToInspection(item.nextInternalInspection, todayISO);
+      result.push({
+        tag: item.tag,
+        family: getTankFamily(item.tag),
+        nextInternalInspection: item.nextInternalInspection,
+        daysToInternalInspection: days,
+        inspectionCriticality: getInspectionCriticality(days),
+        tracked: false,
+      });
     }
-    return a.tag.localeCompare(b.tag);
-  });
+  }
+
+  // Defensive: a maintenance-tracked tank absent from the inventory (e.g. one
+  // genuinely undated, like TQ-1222-62) still needs to appear somewhere.
+  for (const t of tanks) {
+    if (seen.has(t.tag.toUpperCase())) continue;
+    result.push({
+      tag: t.tag,
+      family: t.derived.family,
+      nextInternalInspection: t.nextInternalInspection,
+      daysToInternalInspection: t.derived.daysToInternalInspection,
+      inspectionCriticality: t.derived.inspectionCriticality,
+      tracked: true,
+    });
+  }
+
+  return result;
 }
 
 export interface InspectionSummaryCounts {
