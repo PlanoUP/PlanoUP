@@ -13,6 +13,7 @@ const STATUS_HEADLINE: Record<string, string> = {
   CONCLUIDO: "Manutenção Concluída",
   ATRASADO: "Manutenção Atrasada",
   CRITICO: "Intervenção Crítica",
+  SEM_PROJETO: "Sem Projeto de Manutenção",
 };
 
 export default function ExecutiveHeader({ tank }: { tank: TankWithDerived }) {
@@ -62,17 +63,23 @@ export default function ExecutiveHeader({ tank }: { tank: TankWithDerived }) {
         />
         <StatBlock
           label="Etapa Atual"
-          value={tank.status === "CONCLUIDO" ? "Concluído" : derived.currentActivity?.name ?? "Aguardando início"}
+          value={
+            tank.status === "CONCLUIDO"
+              ? "Concluído"
+              : tank.status === "SEM_PROJETO"
+                ? "Sem projeto cadastrado"
+                : derived.currentActivity?.name ?? "Aguardando início"
+          }
           small
         />
         <StatBlock
           label={tank.status === "CONCLUIDO" ? "Duração Total" : "Dias Restantes"}
           value={
-            tank.status === "CONCLUIDO"
+            derived.daysRemaining === null
               ? "—"
-              : derived.daysRemaining !== null && derived.daysRemaining < 0
+              : derived.daysRemaining < 0
                 ? `${Math.abs(derived.daysRemaining)}d`
-                : `${derived.daysRemaining ?? "—"}d`
+                : `${derived.daysRemaining}d`
           }
           tone={derived.daysRemaining !== null && derived.daysRemaining < 0 ? "danger" : "neutral"}
         />

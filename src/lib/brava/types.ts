@@ -7,7 +7,8 @@ export type TankStatus =
   | "EM_EXECUCAO"
   | "CONCLUIDO"
   | "ATRASADO"
-  | "CRITICO";
+  | "CRITICO"
+  | "SEM_PROJETO";
 
 export type ActivityStatus = "CONCLUIDO" | "ATUAL" | "FUTURO" | "ATRASADO";
 

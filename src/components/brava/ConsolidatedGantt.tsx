@@ -15,7 +15,12 @@ const ROW_H = 40;
 
 export default function ConsolidatedGantt() {
   const { tanks, filter, today } = useBravaData();
-  const filtered = filterTanks(tanks, filter).filter((t) => t.status !== "CONCLUIDO");
+  // Excludes tanks with no activities/schedule (e.g. SEM_PROJETO — inspection-
+  // only, no maintenance dates) — this Gantt is strictly the maintenance
+  // schedule, never inspection dates.
+  const filtered = filterTanks(tanks, filter).filter(
+    (t) => t.status !== "CONCLUIDO" && t.derived.plannedStart !== ""
+  );
   const ordered = [...filtered].sort((a, b) => a.derived.plannedStart.localeCompare(b.derived.plannedStart));
 
   if (ordered.length === 0) {

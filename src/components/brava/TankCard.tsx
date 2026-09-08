@@ -48,7 +48,9 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
           <span className="truncate pr-2">
             {tank.status === "CONCLUIDO"
               ? "Manutenção concluída"
-              : derived.currentActivity?.name ?? "Aguardando início"}
+              : tank.status === "SEM_PROJETO"
+                ? "Sem projeto de manutenção"
+                : derived.currentActivity?.name ?? "Aguardando início"}
           </span>
           <span className="font-mono font-bold text-brava-text">{derived.progress}%</span>
         </div>
@@ -61,11 +63,11 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
         <Stat
           label="Dias restantes"
           value={
-            tank.status === "CONCLUIDO"
+            daysRemaining === null
               ? "—"
-              : daysRemaining !== null && daysRemaining < 0
+              : daysRemaining < 0
                 ? `${Math.abs(daysRemaining)}d atraso`
-                : `${daysRemaining ?? "—"}d`
+                : `${daysRemaining}d`
           }
           emphasize={daysRemaining !== null && daysRemaining < 0}
         />

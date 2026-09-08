@@ -6,6 +6,7 @@ import SectionHeading from "./SectionHeading";
 
 export default function ExecutiveTimeline({ activities }: { activities: Activity[] }) {
   const ordered = [...activities].sort((a, b) => a.order - b.order);
+  if (ordered.length === 0) return null;
 
   return (
     <div className="rounded-brava-lg border border-brava-border bg-brava-white p-6 shadow-brava-sm sm:p-7">

@@ -10,7 +10,10 @@ const MAX_ROWS = 6;
 
 export default function ProgramOverviewMini() {
   const { tanks } = useBravaData();
-  const active = tanks.filter((t) => t.status !== "CONCLUIDO");
+  // Excludes tanks with no activities/schedule (e.g. SEM_PROJETO — inspection-
+  // only, no plannedStart/plannedEnd) — this mini-Gantt is strictly about the
+  // maintenance program's own schedule.
+  const active = tanks.filter((t) => t.status !== "CONCLUIDO" && t.derived.plannedStart !== "");
   const ordered = [...active].sort((a, b) => a.derived.plannedStart.localeCompare(b.derived.plannedStart)).slice(0, MAX_ROWS);
 
   if (ordered.length === 0) return null;

@@ -17,7 +17,7 @@ import { todayISO } from "./date-utils";
 // Bump this whenever TANKS_SEED's shape or content changes in a way that
 // must override a browser's previously cached edits — otherwise a stale
 // localStorage snapshot silently shadows every seed-data fix forever.
-const STORAGE_KEY = "brava-tanks-v2";
+const STORAGE_KEY = "brava-tanks-v3";
 
 interface ActivityEdit {
   plannedStart?: string;

@@ -8,7 +8,14 @@ import { formatShort } from "@/lib/brava/date-utils";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { cn } from "@/lib/brava/cn";
 
-const STATUS_OPTIONS: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"];
+const STATUS_OPTIONS: TankStatus[] = [
+  "SEM_PROJETO",
+  "PROGRAMADO",
+  "EM_EXECUCAO",
+  "ATRASADO",
+  "CRITICO",
+  "CONCLUIDO",
+];
 
 export default function PlanningEditor({ tank }: { tank: Tank }) {
   const { updateActivity, updateTankMeta } = useBravaData();

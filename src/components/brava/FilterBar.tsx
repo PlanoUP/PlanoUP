@@ -13,6 +13,7 @@ const FILTER_OPTIONS: { value: "TODOS" | TankStatus; label: string }[] = [
   { value: "ATRASADO", label: "Atrasado" },
   { value: "CRITICO", label: "Crítico" },
   { value: "CONCLUIDO", label: "Concluído" },
+  { value: "SEM_PROJETO", label: "Sem Projeto" },
 ];
 
 export default function FilterBar({ searchPlaceholder }: { searchPlaceholder?: string }) {

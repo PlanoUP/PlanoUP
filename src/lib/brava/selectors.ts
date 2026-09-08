@@ -26,7 +26,7 @@ export function deriveTank(tank: Tank, todayISO: string): TankDerived {
     actualStart: first?.actualStart,
     actualEnd: tank.status === "CONCLUIDO" ? last?.actualEnd : undefined,
     progress,
-    daysRemaining: tank.status === "CONCLUIDO" ? null : diffDays(todayISO, plannedEnd),
+    daysRemaining: tank.status === "CONCLUIDO" || !plannedEnd ? null : diffDays(todayISO, plannedEnd),
     deviationDays: overallDeviationDays(activities),
     currentActivity,
     nextActivity,
@@ -76,10 +76,15 @@ export function computeFleetKpis(tanks: TankWithDerived[], todayISO: string): Fl
   const atividadesCriticas = tanks.filter((t) => t.status === "CRITICO").length;
 
   const active = tanks.filter((t) => t.status !== "CONCLUIDO");
+
+  // Assets with no maintenance project yet (inspection-only) have no physical
+  // progress to speak of — excluded here so they don't drag down the average
+  // for the tanks actually under an active/completed project.
+  const withProject = tanks.filter((t) => t.status !== "SEM_PROJETO");
   const avancoFisicoGeral =
-    tanks.length === 0
+    withProject.length === 0
       ? 0
-      : Math.round(tanks.reduce((sum, t) => sum + t.derived.progress, 0) / tanks.length);
+      : Math.round(withProject.reduce((sum, t) => sum + t.derived.progress, 0) / withProject.length);
 
   let proximoMarco: FleetKpis["proximoMarco"] = null;
   for (const t of active) {

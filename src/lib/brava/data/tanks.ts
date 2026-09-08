@@ -106,6 +106,37 @@ function buildScheduled(p: ScheduledParams): Tank {
   };
 }
 
+interface NoProjectParams {
+  tag: string;
+  area: string;
+  nextInternalInspection: string;
+  notes?: string;
+}
+
+const CADASTRO_PENDENTE_NOTES =
+  "Cadastro inicial a partir do inventário de inspeções — área, produto e tipo de teto ainda não classificados. Sem projeto de manutenção ativo; nenhuma data de cronograma foi definida.";
+
+/**
+ * Registers a real tancagem tracked for regulatory inspection that has no
+ * active maintenance project yet — no baseline, no activities, so no
+ * schedule date is invented. Gives the asset its own dashboard page and a
+ * place in Tank Control, driven entirely by its real nextInternalInspection.
+ */
+function buildNoProject(p: NoProjectParams): Tank {
+  const id = slug(p.tag);
+  return {
+    id,
+    tag: p.tag,
+    area: p.area,
+    product: "A definir",
+    tankType: "A definir",
+    status: "SEM_PROJETO",
+    nextInternalInspection: p.nextInternalInspection,
+    notes: p.notes ?? CADASTRO_PENDENTE_NOTES,
+    activities: [],
+  };
+}
+
 const SERVICOS_TETO_FLUTUANTE =
   "Escopo padrão: instalação de raquetes, abertura de BV, remoção de resíduo e lavagem, montagem de andaime balancim, inspeção, reparos de caldeiraria, pintura e remoção de raquetes.";
 const SERVICOS_TETO_FIXO_FLUTUANTE =
@@ -335,4 +366,36 @@ export const TANKS_SEED: Tank[] = [
     responsible: "Coordenação de Manutenção UTE",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
+
+  // ── Sem projeto de manutenção (apenas inspeção — inventário completo) ────
+  // Área herdada da convenção de TAG já usada pelos tanques acima (1222 →
+  // ETO, 27xxx → UTE); produto e tipo de teto não constam no inventário
+  // recebido, por isso ficam "A definir" em vez de inventados.
+  buildNoProject({ tag: "TQ-1222-22", area: "ETO", nextInternalInspection: "2034-02-06" }),
+  buildNoProject({ tag: "TQ-1222-23", area: "ETO", nextInternalInspection: "2036-01-07" }),
+  buildNoProject({ tag: "TQ-1222-24", area: "ETO", nextInternalInspection: "2028-04-21" }),
+  buildNoProject({ tag: "TQ-1222-25", area: "ETO", nextInternalInspection: "2025-12-22" }),
+  buildNoProject({ tag: "TQ-1222-31", area: "ETO", nextInternalInspection: "2026-08-07" }),
+  buildNoProject({ tag: "TQ-1222-32", area: "ETO", nextInternalInspection: "2035-09-02" }),
+  buildNoProject({ tag: "TQ-1222-33", area: "ETO", nextInternalInspection: "2024-10-25" }),
+  buildNoProject({ tag: "TQ-1222-34", area: "ETO", nextInternalInspection: "2034-08-22" }),
+  buildNoProject({ tag: "TQ-1222-37", area: "ETO", nextInternalInspection: "2034-12-19" }),
+  buildNoProject({ tag: "TQ-1222-41", area: "ETO", nextInternalInspection: "2031-05-29" }),
+  buildNoProject({ tag: "TQ-1222-42", area: "ETO", nextInternalInspection: "2034-06-19" }),
+  buildNoProject({ tag: "TQ-1222-43", area: "ETO", nextInternalInspection: "2027-07-01" }),
+  buildNoProject({ tag: "TQ-27002", area: "UTE", nextInternalInspection: "2027-08-10" }),
+  buildNoProject({ tag: "TQ-27003", area: "UTE", nextInternalInspection: "2027-12-20" }),
+  buildNoProject({ tag: "TQ-27004", area: "UTE", nextInternalInspection: "2033-06-17" }),
+  buildNoProject({ tag: "TQ-27011", area: "UTE", nextInternalInspection: "2028-06-08" }),
+  buildNoProject({ tag: "TQ-27015", area: "UTE", nextInternalInspection: "2030-10-28" }),
+  buildNoProject({ tag: "TQ-27016", area: "UTE", nextInternalInspection: "2036-08-19" }),
+  buildNoProject({ tag: "TQ-6313004", area: "Tancagem 6313", nextInternalInspection: "2026-02-27" }),
+  buildNoProject({ tag: "TQ-28001", area: "A definir", nextInternalInspection: "2027-07-02" }),
+  buildNoProject({ tag: "TQ-28002", area: "A definir", nextInternalInspection: "2027-07-02" }),
+  buildNoProject({ tag: "TQ-28003", area: "A definir", nextInternalInspection: "2027-07-02" }),
+  buildNoProject({ tag: "TQ-28006", area: "A definir", nextInternalInspection: "2031-06-11" }),
+  buildNoProject({ tag: "TQ-40001", area: "A definir", nextInternalInspection: "2027-10-19" }),
+  buildNoProject({ tag: "TQ-26021", area: "A definir", nextInternalInspection: "2030-03-13" }),
+  buildNoProject({ tag: "TQ-26024", area: "A definir", nextInternalInspection: "2030-03-28" }),
+  buildNoProject({ tag: "TQ-26025", area: "A definir", nextInternalInspection: "2035-03-13" }),
 ];

@@ -38,6 +38,12 @@ export const STATUS_META: Record<TankStatus, StatusMeta> = {
     textClass: "text-brava-danger",
     badgeClass: "border-brava-danger-border bg-brava-danger-bg text-brava-danger",
   },
+  SEM_PROJETO: {
+    label: "Sem Projeto",
+    dotClass: "bg-brava-text-secondary",
+    textClass: "text-brava-text-secondary",
+    badgeClass: "border-dashed border-brava-border bg-brava-white text-brava-text-secondary",
+  },
 };
 
 export const STATUS_ORDER: TankStatus[] = [
@@ -46,4 +52,5 @@ export const STATUS_ORDER: TankStatus[] = [
   "EM_EXECUCAO",
   "PROGRAMADO",
   "CONCLUIDO",
+  "SEM_PROJETO",
 ];
