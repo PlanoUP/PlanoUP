@@ -12,6 +12,26 @@ const config: Config = {
         "accent-hover": "#E0FF3F",
         "text-secondary": "#A7ADB0",
         border: "rgba(255,255,255,.08)",
+
+        brava: {
+          white: "var(--brava-white)",
+          blue: "var(--brava-blue)",
+          "blue-dark": "var(--brava-blue-dark)",
+          accent: "var(--brava-accent)",
+          bg: "var(--brava-bg)",
+          border: "var(--brava-border)",
+          "text-secondary": "var(--brava-text-secondary)",
+          text: "var(--brava-text)",
+          warning: "var(--brava-warning)",
+          "warning-bg": "var(--brava-warning-bg)",
+          "warning-border": "var(--brava-warning-border)",
+          danger: "var(--brava-danger)",
+          "danger-bg": "var(--brava-danger-bg)",
+          "danger-border": "var(--brava-danger-border)",
+          success: "var(--brava-success)",
+          "success-bg": "var(--brava-success-bg)",
+          "success-border": "var(--brava-success-border)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
@@ -19,6 +39,16 @@ const config: Config = {
       },
       maxWidth: {
         content: "1280px",
+      },
+      boxShadow: {
+        "brava-sm": "var(--brava-shadow-sm)",
+        "brava-md": "var(--brava-shadow-md)",
+        "brava-lg": "var(--brava-shadow-lg)",
+      },
+      borderRadius: {
+        "brava-sm": "var(--brava-radius-sm)",
+        "brava-md": "var(--brava-radius-md)",
+        "brava-lg": "var(--brava-radius-lg)",
       },
       backgroundImage: {
         "grid-technical":
