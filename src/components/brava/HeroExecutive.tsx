@@ -1,129 +1,163 @@
 "use client";
 
-import { useBravaData } from "@/lib/brava/context";
-import { computeFleetKpis } from "@/lib/brava/selectors";
-import { formatLong } from "@/lib/brava/date-utils";
+import { Users, Clock, ShieldCheck, Leaf, ArrowRight, FileText, Droplets } from "lucide-react";
 import BlueprintGrid from "./BlueprintGrid";
 import TankIllustration from "./TankIllustration";
 
-export default function HeroExecutive() {
-  const { tanks, today } = useBravaData();
-  const kpis = computeFleetKpis(tanks, today);
+const BENEFITS = [
+  { icon: Users, label: "Mais confiabilidade" },
+  { icon: Clock, label: "Mais disponibilidade" },
+  { icon: ShieldCheck, label: "Mais segurança" },
+  { icon: Leaf, label: "Um futuro mais sustentável" },
+];
 
+export default function HeroExecutive() {
   return (
     <section className="relative overflow-hidden border-b border-brava-border bg-brava-white">
-      <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr]">
-        {/* Left — executive summary */}
-        <div className="relative z-10 flex flex-col justify-center px-5 py-10 sm:px-8 sm:py-14 lg:py-16">
-          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-brava-blue/15 bg-brava-blue/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-brava-blue">
-            <span className="h-1.5 w-1.5 rounded-full bg-brava-accent" />
-            Brava Energia · Polo Potiguar
-          </span>
+      <div className="grid grid-cols-1 lg:grid-cols-2">
+        {/* Left — institutional / executive copy */}
+        <div className="relative z-10 flex flex-col justify-center gap-6 px-5 py-10 sm:px-8 sm:py-14 lg:py-16 xl:pl-14">
+          <BravaWordmark />
 
-          <h1 className="mt-5 text-[2.1rem] font-extrabold leading-[1.06] tracking-tight text-brava-blue-dark sm:text-[2.75rem] lg:text-[3.1rem]">
-            Central de Controle
-            <br />
-            de Manutenção de Tanques
-          </h1>
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="h-[2px] w-6 bg-brava-accent" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-brava-text-secondary">
+                Manutenção Industrial
+              </span>
+            </div>
 
-          <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-brava-text-secondary sm:text-base">
-            Acompanhamento executivo do planejamento, execução e avanço físico
-            das manutenções de tanques industriais — do início da drenagem ao
-            comissionamento.
-          </p>
+            <h1 className="mt-3 leading-[0.98] tracking-tight text-brava-blue">
+              <span className="block text-[2.3rem] font-extrabold sm:text-[3rem] lg:text-[3.4rem]">
+                TANK MAINTENANCE
+              </span>
+              <span className="block text-[2.3rem] font-light sm:text-[3rem] lg:text-[3.4rem]">
+                CONTROL CENTER
+              </span>
+            </h1>
 
-          <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-brava-border pt-5 text-[13px]">
-            <SummaryStat value={kpis.total} label="Tanques monitorados" />
-            <Divider />
-            <SummaryStat value={kpis.emManutencao} label="Em manutenção" accent />
-            <Divider />
-            <SummaryStat value={`${kpis.avancoFisicoGeral}%`} label="Avanço geral" />
-            <Divider />
-            <SummaryStat
-              value={kpis.atrasos}
-              label="Atrasos ativos"
-              tone={kpis.atrasos > 0 ? "danger" : undefined}
-            />
+            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-brava-text-secondary sm:text-base">
+              Gestão integrada das manutenções de tanques industriais.
+              <br />
+              Planejamento, execução e resultados em um só lugar.
+            </p>
           </div>
 
-          <p className="mt-6 text-[11.5px] uppercase tracking-wide text-brava-text-secondary">
-            Última atualização · {formatLong(today)}
+          <div className="flex flex-wrap gap-x-7 gap-y-3">
+            {BENEFITS.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-2">
+                <Icon className="h-4 w-4 shrink-0 text-brava-blue" strokeWidth={1.75} />
+                <span className="text-[12.5px] leading-tight text-brava-text-secondary">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="#tank-control"
+              className="inline-flex items-center gap-2 rounded-brava-md bg-brava-accent px-5 py-3 text-[13.5px] font-bold text-brava-blue-dark shadow-brava-sm transition-transform duration-150 hover:brightness-[1.03] active:scale-[0.98]"
+            >
+              Acompanhar tanques
+              <ArrowRight className="h-4 w-4" />
+            </a>
+            <a
+              href="#cronograma"
+              className="inline-flex items-center gap-2 rounded-brava-md border border-brava-border bg-brava-white px-5 py-3 text-[13.5px] font-semibold text-brava-blue transition-colors duration-150 hover:border-brava-blue/30 hover:bg-brava-bg"
+            >
+              <FileText className="h-4 w-4" />
+              Ver cronograma
+            </a>
+          </div>
+
+          <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-brava-text-secondary">
+            Brava Energia &nbsp;|&nbsp; Ativo Industrial de Guamaré &nbsp;|&nbsp; Manutenção é o que nos move
           </p>
         </div>
 
-        {/* Right — technical composition */}
-        <div className="relative hidden min-h-[360px] items-center justify-center overflow-hidden bg-brava-bg lg:flex">
-          <BlueprintGrid className="absolute inset-0 h-full w-full text-brava-blue" />
+        {/* Right — technical / photographic composition */}
+        <div className="relative hidden min-h-[560px] overflow-hidden lg:block">
+          {/* Photo layer — swap in a real photo by adding public/images/brava/hero-tanque.jpg */}
+          <div className="brava-hero-photo absolute inset-0" />
+          <div className="absolute inset-0 bg-gradient-to-t from-brava-blue-dark/35 via-transparent to-brava-blue-dark/10" />
+
+          {/* Technical HUD overlay */}
+          <BlueprintGrid className="absolute inset-0 h-full w-full text-brava-white opacity-40" />
           <TankIllustration
             variant="hero"
-            className="relative z-10 h-[260px] w-[260px] text-brava-blue-dark/70 xl:h-[300px] xl:w-[300px]"
+            className="absolute bottom-10 right-10 h-[220px] w-[220px] text-brava-white/25 xl:h-[260px] xl:w-[260px]"
           />
 
-          <FloatingChip className="left-[12%] top-[18%]" label="Avanço Físico" value={`${kpis.avancoFisicoGeral}%`} />
-          <FloatingChip
-            className="bottom-[16%] right-[10%]"
-            label="Próximo Marco"
-            value={kpis.proximoMarco ? `${kpis.proximoMarco.daysAway}d` : "—"}
-            accent
+          {/* White organic/angular fade into the left panel */}
+          <div
+            className="absolute inset-y-0 left-0 w-[42%]"
+            style={{
+              background: "linear-gradient(to right, var(--brava-white) 35%, transparent 100%)",
+            }}
           />
+          <div
+            className="absolute inset-y-0 left-0 w-[26%] bg-brava-white"
+            style={{ clipPath: "polygon(0 0, 100% 0, 55% 100%, 0% 100%)" }}
+          />
+
+          {/* Location tag */}
+          <div className="absolute right-6 top-6 text-right [text-shadow:0_1px_6px_rgba(23,16,82,0.6)]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brava-white">Guamaré / RN</p>
+            <p className="mt-0.5 max-w-[180px] text-[11px] leading-snug text-brava-white/90">
+              Energia que impulsiona desenvolvimento.
+            </p>
+          </div>
+
+          {/* Featured asset caption */}
+          <div className="absolute bottom-[38%] left-[40%] flex items-center gap-3">
+            <span className="h-10 w-[3px] rounded-full bg-brava-accent" />
+            <div>
+              <p className="font-mono text-lg font-extrabold leading-none text-brava-white">TQ-41009</p>
+              <p className="mt-1 text-[10.5px] font-semibold uppercase tracking-wide text-brava-white/75">
+                Tanque em Manutenção
+              </p>
+            </div>
+          </div>
+
+          {/* Bottom-right institutional card */}
+          <div className="absolute bottom-6 right-6 flex overflow-hidden rounded-brava-md bg-brava-blue-dark shadow-brava-lg">
+            <span className="w-1 shrink-0 bg-brava-accent" />
+            <div className="px-4 py-3 text-right">
+              <p className="text-[11.5px] font-bold uppercase tracking-wide text-brava-white">Planejamento Hoje</p>
+              <p className="text-[11.5px] font-bold uppercase tracking-wide text-brava-accent">Operação Amanhã</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile — compact photo strip (image + asset caption, no HUD clutter) */}
+        <div className="relative flex h-56 overflow-hidden border-t border-brava-border lg:hidden">
+          <div className="brava-hero-photo absolute inset-0" />
+          <div className="absolute inset-0 bg-gradient-to-t from-brava-blue-dark/50 via-transparent to-transparent" />
+          <div className="relative z-10 mt-auto flex items-center gap-3 p-5">
+            <span className="h-8 w-[3px] rounded-full bg-brava-accent" />
+            <div>
+              <p className="font-mono text-base font-extrabold leading-none text-brava-white">TQ-41009</p>
+              <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-brava-white/75">
+                Tanque em Manutenção · Guamaré/RN
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function SummaryStat({
-  value,
-  label,
-  accent,
-  tone,
-}: {
-  value: string | number;
-  label: string;
-  accent?: boolean;
-  tone?: "danger";
-}) {
+function BravaWordmark() {
   return (
-    <div className="flex items-baseline gap-2">
-      <span
-        className={
-          "font-mono text-lg font-bold " +
-          (tone === "danger" ? "text-brava-danger" : accent ? "text-brava-blue" : "text-brava-blue-dark")
-        }
-      >
-        {value}
-      </span>
-      <span className="text-[12px] text-brava-text-secondary">{label}</span>
-    </div>
-  );
-}
-
-function Divider() {
-  return <span className="hidden h-4 w-px bg-brava-border sm:block" />;
-}
-
-function FloatingChip({
-  className,
-  label,
-  value,
-  accent,
-}: {
-  className: string;
-  label: string;
-  value: string;
-  accent?: boolean;
-}) {
-  return (
-    <div
-      className={
-        "absolute z-10 flex items-center gap-2.5 rounded-brava-md border border-brava-border bg-brava-white/95 px-3.5 py-2.5 shadow-brava-lg backdrop-blur " +
-        className
-      }
-    >
-      <span className={`h-2 w-2 rounded-full ${accent ? "bg-brava-accent" : "bg-brava-blue"}`} />
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-brava-sm bg-brava-blue">
+        <Droplets className="h-5 w-5 text-brava-accent" strokeWidth={2} />
+      </div>
       <div className="leading-tight">
-        <p className="text-[9.5px] font-semibold uppercase tracking-wide text-brava-text-secondary">{label}</p>
-        <p className="text-[13px] font-bold text-brava-blue-dark">{value}</p>
+        <p className="text-[19px] font-extrabold tracking-tight text-brava-blue">
+          BRAVA <span className="font-light">ENERGIA</span>
+        </p>
+        <p className="text-[11px] text-brava-text-secondary">Energia para um futuro mais seguro.</p>
       </div>
     </div>
   );
