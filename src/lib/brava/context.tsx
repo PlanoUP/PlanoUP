@@ -14,7 +14,10 @@ import { recalculateSchedule } from "./schedule-engine";
 import { withDerived } from "./selectors";
 import { todayISO } from "./date-utils";
 
-const STORAGE_KEY = "brava-tanks-v1";
+// Bump this whenever TANKS_SEED's shape or content changes in a way that
+// must override a browser's previously cached edits — otherwise a stale
+// localStorage snapshot silently shadows every seed-data fix forever.
+const STORAGE_KEY = "brava-tanks-v2";
 
 interface ActivityEdit {
   plannedStart?: string;
