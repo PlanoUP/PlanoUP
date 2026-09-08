@@ -5,10 +5,12 @@ import { ArrowUpRight } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { computeFeaturedTank } from "@/lib/brava/home-selectors";
 import { formatShort } from "@/lib/brava/date-utils";
+import { formatDaysToInspection } from "@/lib/brava/inspection";
 import StatusBadge from "./StatusBadge";
 import ProgressRing from "./ProgressRing";
 import BlueprintGrid from "./BlueprintGrid";
 import SectionHeading from "./SectionHeading";
+import InspectionCriticalityBadge from "./InspectionCriticalityBadge";
 
 export default function FeaturedTankCard() {
   const { tanks } = useBravaData();
@@ -32,13 +34,14 @@ export default function FeaturedTankCard() {
             <div className="flex items-center gap-2.5">
               <h3 className="font-mono text-2xl font-extrabold tracking-tight text-brava-blue-dark">{tank.tag}</h3>
               <StatusBadge status={tank.status} />
+              <InspectionCriticalityBadge criticality={derived.inspectionCriticality} />
               <ArrowUpRight className="h-4 w-4 text-brava-text-secondary opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
             <p className="mt-1 text-[13px] text-brava-text-secondary">
               {tank.area} · {tank.product}
             </p>
 
-            <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3.5 sm:grid-cols-4">
+            <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3.5 sm:grid-cols-3 lg:grid-cols-5">
               <Field
                 label="Etapa Atual"
                 value={tank.status === "CONCLUIDO" ? "Concluído" : derived.currentActivity?.name ?? "Aguardando início"}
@@ -55,6 +58,15 @@ export default function FeaturedTankCard() {
                       : `${derived.daysRemaining}d`
                 }
                 danger={derived.daysRemaining !== null && derived.daysRemaining < 0}
+              />
+              <Field
+                label="Próxima Interna"
+                value={
+                  tank.nextInternalInspection
+                    ? `${formatShort(tank.nextInternalInspection)} · ${formatDaysToInspection(derived.daysToInternalInspection)}`
+                    : "A definir"
+                }
+                danger={derived.inspectionCriticality === "CRITICO"}
               />
             </div>
           </div>

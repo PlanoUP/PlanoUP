@@ -1,6 +1,8 @@
 import { TankWithDerived } from "@/lib/brava/types";
 import { formatShort } from "@/lib/brava/date-utils";
+import { formatDaysToInspection } from "@/lib/brava/inspection";
 import StatusBadge from "./StatusBadge";
+import InspectionCriticalityBadge from "./InspectionCriticalityBadge";
 import BlueprintGrid from "./BlueprintGrid";
 import TankIllustration from "./TankIllustration";
 import { cn } from "@/lib/brava/cn";
@@ -37,6 +39,12 @@ export default function ExecutiveHeader({ tank }: { tank: TankWithDerived }) {
               {tank.tag}
             </h1>
             <StatusBadge status={tank.status} />
+            <InspectionCriticalityBadge criticality={derived.inspectionCriticality} />
+            {derived.family && (
+              <span className="rounded-full border border-brava-border bg-brava-bg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-brava-text-secondary">
+                Grupo {derived.family}
+              </span>
+            )}
           </div>
           <p className="mt-2 text-[13.5px] text-brava-text-secondary">
             {tank.area} · {tank.product} · {tank.tankType}
@@ -89,6 +97,16 @@ export default function ExecutiveHeader({ tank }: { tank: TankWithDerived }) {
           className="col-span-2"
         />
         <Field label="Responsável" value={tank.responsible ?? "—"} />
+        <Field
+          label="Próxima Inspeção Interna"
+          value={
+            tank.nextInternalInspection
+              ? `${formatShort(tank.nextInternalInspection)} · ${formatDaysToInspection(derived.daysToInternalInspection)}`
+              : "A definir"
+          }
+          wrap
+          className="col-span-2"
+        />
       </div>
     </div>
   );

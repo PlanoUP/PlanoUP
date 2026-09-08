@@ -5,12 +5,34 @@
 import { TankWithDerived } from "./types";
 import { diffDays } from "./date-utils";
 
+/**
+ * Priority order: 1) inspection overdue or maintenance CRITICO, 2) soonest
+ * upcoming inspection (unless it's more than 24 months out), 3) active
+ * maintenance (EM_EXECUCAO/ATRASADO), 4) next milestone fallback. Never
+ * surfaces a NORMAL/no-flag tank while any real overdue asset exists.
+ */
 export function computeFeaturedTank(tanks: TankWithDerived[]): TankWithDerived | null {
   const active = tanks.filter((t) => t.status !== "CONCLUIDO");
   if (active.length === 0) return null;
 
-  const critico = active.find((t) => t.status === "CRITICO");
-  if (critico) return critico;
+  const inspectionOverdue = active.filter((t) => t.derived.inspectionCriticality === "CRITICO");
+  if (inspectionOverdue.length > 0) {
+    return [...inspectionOverdue].sort(
+      (a, b) => (a.derived.daysToInternalInspection ?? 0) - (b.derived.daysToInternalInspection ?? 0)
+    )[0];
+  }
+
+  const maintenanceCritico = active.find((t) => t.status === "CRITICO");
+  if (maintenanceCritico) return maintenanceCritico;
+
+  const withUpcomingInspection = active.filter(
+    (t) => t.derived.daysToInternalInspection !== null && t.derived.inspectionCriticality !== "NORMAL"
+  );
+  if (withUpcomingInspection.length > 0) {
+    return [...withUpcomingInspection].sort(
+      (a, b) => a.derived.daysToInternalInspection! - b.derived.daysToInternalInspection!
+    )[0];
+  }
 
   const emCurso = active.filter((t) => t.status === "EM_EXECUCAO" || t.status === "ATRASADO");
   if (emCurso.length > 0) {

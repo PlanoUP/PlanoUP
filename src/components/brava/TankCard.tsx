@@ -2,9 +2,11 @@ import Link from "next/link";
 import { TankWithDerived } from "@/lib/brava/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { STATUS_META } from "@/lib/brava/status-meta";
+import { formatDaysToInspection } from "@/lib/brava/inspection";
 import StatusBadge from "./StatusBadge";
 import ProgressBar from "./ProgressBar";
 import TankIllustration from "./TankIllustration";
+import InspectionCriticalityBadge, { InspectionTooltip } from "./InspectionCriticalityBadge";
 import { cn } from "@/lib/brava/cn";
 
 export default function TankCard({ tank }: { tank: TankWithDerived }) {
@@ -12,6 +14,8 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
   const isActive = tank.status === "EM_EXECUCAO" || tank.status === "ATRASADO" || tank.status === "CRITICO";
   const daysRemaining = derived.daysRemaining;
   const stripeClass = STATUS_META[tank.status].dotClass;
+  const daysToInspection = derived.daysToInternalInspection;
+  const inspectionOverdue = daysToInspection !== null && daysToInspection < 0;
 
   return (
     <Link
@@ -26,7 +30,14 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
 
       <div className="relative flex items-start justify-between gap-2 pt-1">
         <div className="min-w-0">
-          <p className="font-mono text-[16px] font-extrabold tracking-tight text-brava-blue-dark">{tank.tag}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-mono text-[16px] font-extrabold tracking-tight text-brava-blue-dark">{tank.tag}</p>
+            {derived.family && (
+              <span className="rounded-full border border-brava-border bg-brava-bg px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brava-text-secondary">
+                Grupo {derived.family}
+              </span>
+            )}
+          </div>
           <p className="mt-0.5 truncate text-[12px] text-brava-text-secondary">{tank.area}</p>
         </div>
         <StatusBadge status={tank.status} size="sm" />
@@ -60,6 +71,25 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
         />
         <Stat label="Próximo marco" value={derived.nextMilestone ? derived.nextMilestone.name : "—"} />
       </div>
+
+      <InspectionTooltip
+        nextInternalInspection={tank.nextInternalInspection}
+        daysToInternalInspection={daysToInspection}
+        criticality={derived.inspectionCriticality}
+      >
+        <div className="relative flex w-full items-center justify-between gap-2 border-t border-brava-border pt-3 text-[11px]">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-wide text-brava-text-secondary">Próxima Interna</p>
+            <p className={cn("truncate font-semibold", inspectionOverdue ? "text-brava-danger" : "text-brava-text")}>
+              {tank.nextInternalInspection ? formatShort(tank.nextInternalInspection) : "A definir"}
+              <span className="ml-1.5 font-normal text-brava-text-secondary">
+                · {formatDaysToInspection(daysToInspection)}
+              </span>
+            </p>
+          </div>
+          <InspectionCriticalityBadge criticality={derived.inspectionCriticality} size="sm" className="shrink-0" />
+        </div>
+      </InspectionTooltip>
     </Link>
   );
 }

@@ -2,20 +2,37 @@
 
 import { useBravaData } from "@/lib/brava/context";
 import { filterTanks } from "@/lib/brava/selectors";
+import { sortByInspectionPriority } from "@/lib/brava/inspection";
 import TankCard from "./TankCard";
 import FilterBar from "./FilterBar";
+import FamilyFilterBar from "./FamilyFilterBar";
 import SectionHeading from "./SectionHeading";
 
+const FAMILY_TITLES: Record<string, string> = {
+  CRITICIDADE: "Tank Control — Criticidade das Inspeções",
+  "410": "Tancagem 410",
+  "6313": "Tancagem 6313",
+  "270": "Tancagem 270",
+};
+
 export default function TankControlGrid() {
-  const { tanks, filter } = useBravaData();
-  const filtered = filterTanks(tanks, filter);
+  const { tanks, filter, familyView } = useBravaData();
+  const byStatusAndSearch = filterTanks(tanks, filter);
+  const byFamily =
+    familyView === "CRITICIDADE"
+      ? byStatusAndSearch
+      : byStatusAndSearch.filter((t) => t.derived.family === familyView);
+  const filtered = sortByInspectionPriority(byFamily);
 
   return (
     <section id="tank-control" className="scroll-mt-24">
+      <div className="mb-4">
+        <FamilyFilterBar />
+      </div>
       <SectionHeading
         eyebrow="Operação"
-        title="Tank Control"
-        subtitle={`${filtered.length} de ${tanks.length} tanques`}
+        title={FAMILY_TITLES[familyView]}
+        subtitle={`${filtered.length} de ${tanks.length} tanques · ordenado pela próxima inspeção interna`}
         actions={<FilterBar />}
       />
 

@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Tank, TankStatus, TankWithDerived, TankFilter } from "./types";
+import { Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./types";
 import { TANKS_SEED } from "./data/tanks";
 import { recalculateSchedule } from "./schedule-engine";
 import { withDerived } from "./selectors";
@@ -29,6 +29,8 @@ interface BravaContextValue {
   today: string;
   filter: TankFilter;
   setFilter: (filter: Partial<TankFilter>) => void;
+  familyView: FamilyView;
+  setFamilyView: (view: FamilyView) => void;
   getTank: (tag: string) => TankWithDerived | undefined;
   updateActivity: (tankId: string, activityId: string, edit: ActivityEdit) => void;
   updateTankMeta: (
@@ -44,6 +46,7 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
   const [tanksRaw, setTanksRaw] = useState<Tank[]>(TANKS_SEED);
   const [hydrated, setHydrated] = useState(false);
   const [filter, setFilterState] = useState<TankFilter>({ status: "TODOS", search: "" });
+  const [familyView, setFamilyView] = useState<FamilyView>("CRITICIDADE");
   const today = useMemo(() => todayISO(), []);
 
   useEffect(() => {
@@ -128,6 +131,8 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
     today,
     filter,
     setFilter,
+    familyView,
+    setFamilyView,
     getTank,
     updateActivity,
     updateTankMeta,

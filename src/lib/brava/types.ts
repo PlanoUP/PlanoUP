@@ -11,6 +11,22 @@ export type TankStatus =
 
 export type ActivityStatus = "CONCLUIDO" | "ATUAL" | "FUTURO" | "ATRASADO";
 
+/** Tancagem family, derived from the TAG's numeric prefix — see getTankFamily(). */
+export type TankFamily = "410" | "6313" | "270";
+
+/**
+ * Criticality of the tank's NEXT INTERNAL INSPECTION deadline — a regulatory
+ * concept, independent from the maintenance-project TankStatus above. See
+ * getInspectionCriticality() for the day-range rules.
+ */
+export type InspectionCriticality =
+  | "CRITICO"
+  | "ALTA"
+  | "ATENCAO"
+  | "PLANEJAR"
+  | "NORMAL"
+  | "SEM_DATA";
+
 export interface Activity {
   id: string;
   tankId: string;
@@ -46,7 +62,14 @@ export interface Tank {
   status: TankStatus;
   responsible?: string;
   notes?: string;
-  inspectionDeadline?: string;
+  /**
+   * Real "PRÓXIMA INTERNA" date from the tank inventory spreadsheet — the
+   * next regulatory internal inspection. Feeds ONLY criticality/priority/
+   * alerts (see lib/brava/inspection.ts). Never used by the Gantt, the
+   * execution timeline, or the planning editor — those run off the
+   * activities' own planned/actual dates.
+   */
+  nextInternalInspection?: string;
   activities: Activity[];
 }
 
@@ -62,6 +85,13 @@ export interface TankDerived {
   currentActivity: Activity | null;
   nextActivity: Activity | null;
   nextMilestone: Activity | null;
+
+  /** Tancagem family derived from the TAG, or null when it matches none. */
+  family: TankFamily | null;
+  /** Signed day count to nextInternalInspection (negative = overdue), or null when undated. */
+  daysToInternalInspection: number | null;
+  /** Criticality bucket computed from daysToInternalInspection. */
+  inspectionCriticality: InspectionCriticality;
 }
 
 export type TankWithDerived = Tank & { derived: TankDerived };
@@ -70,3 +100,6 @@ export interface TankFilter {
   status: "TODOS" | TankStatus;
   search: string;
 }
+
+/** Quick top-of-page grouping: CRITICIDADE mixes every family sorted by inspection due date. */
+export type FamilyView = "CRITICIDADE" | TankFamily;

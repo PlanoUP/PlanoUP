@@ -1,6 +1,7 @@
 import { Tank, TankDerived, TankWithDerived, TankFilter } from "./types";
 import { weightedProgress, overallDeviationDays } from "./schedule-engine";
 import { diffDays } from "./date-utils";
+import { getTankFamily, getDaysToInspection, getInspectionCriticality } from "./inspection";
 
 export function deriveTank(tank: Tank, todayISO: string): TankDerived {
   const activities = [...tank.activities].sort((a, b) => a.order - b.order);
@@ -16,6 +17,8 @@ export function deriveTank(tank: Tank, todayISO: string): TankDerived {
   const progress = tank.status === "CONCLUIDO" ? 100 : weightedProgress(activities);
   const plannedEnd = last?.plannedEnd ?? "";
 
+  const daysToInternalInspection = getDaysToInspection(tank.nextInternalInspection, todayISO);
+
   return {
     plannedStart: first?.plannedStart ?? "",
     plannedEnd,
@@ -28,6 +31,9 @@ export function deriveTank(tank: Tank, todayISO: string): TankDerived {
     currentActivity,
     nextActivity,
     nextMilestone,
+    family: getTankFamily(tank.tag),
+    daysToInternalInspection,
+    inspectionCriticality: getInspectionCriticality(daysToInternalInspection),
   };
 }
 

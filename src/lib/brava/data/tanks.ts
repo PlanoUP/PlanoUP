@@ -20,6 +20,7 @@ interface ConcludedParams {
   tankType: string;
   actualStart: string;
   actualEnd: string;
+  nextInternalInspection?: string;
   notes?: string;
 }
 
@@ -34,6 +35,7 @@ function buildConcluded(p: ConcludedParams): Tank {
     product: p.product,
     tankType: p.tankType,
     status: "CONCLUIDO",
+    nextInternalInspection: p.nextInternalInspection,
     notes: p.notes,
     activities,
   };
@@ -49,7 +51,7 @@ interface ActiveParams {
   currentOrder: number;
   currentProgress: number;
   startOffsetDays?: number;
-  inspectionDeadline?: string;
+  nextInternalInspection?: string;
   responsible?: string;
   notes?: string;
 }
@@ -69,7 +71,7 @@ function buildActive(p: ActiveParams): Tank {
     product: p.product,
     tankType: p.tankType,
     status: p.status,
-    inspectionDeadline: p.inspectionDeadline,
+    nextInternalInspection: p.nextInternalInspection,
     responsible: p.responsible,
     notes: p.notes,
     activities,
@@ -82,7 +84,7 @@ interface ScheduledParams {
   product: string;
   tankType: string;
   baselineStart: string;
-  inspectionDeadline?: string;
+  nextInternalInspection?: string;
   responsible?: string;
   notes?: string;
 }
@@ -97,7 +99,7 @@ function buildScheduled(p: ScheduledParams): Tank {
     product: p.product,
     tankType: p.tankType,
     status: "PROGRAMADO",
-    inspectionDeadline: p.inspectionDeadline,
+    nextInternalInspection: p.nextInternalInspection,
     responsible: p.responsible,
     notes: p.notes,
     activities,
@@ -114,12 +116,13 @@ const SERVICOS_LAVAGEM =
 export const TANKS_SEED: Tank[] = [
   // ── Histórico concluído (campanha 2022–2025) ──────────────────────────
   buildConcluded({
-    tag: "TQ-631305",
+    tag: "TQ-6313005",
     area: "Tancagem de S-10",
     product: "Diesel S-10",
     tankType: "Teto Fixo/Flutuante",
     actualStart: "2022-10-01",
     actualEnd: "2023-04-15",
+    nextInternalInspection: "2027-01-03",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
   buildConcluded({
@@ -129,15 +132,17 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Flutuante",
     actualStart: "2022-11-15",
     actualEnd: "2023-03-31",
+    nextInternalInspection: "2033-10-18",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
   buildConcluded({
-    tag: "TQ-631303",
+    tag: "TQ-6313003",
     area: "Tancagem de Nafta",
     product: "Nafta",
     tankType: "Teto Fixo/Flutuante",
     actualStart: "2022-12-01",
     actualEnd: "2023-04-15",
+    nextInternalInspection: "2033-12-13",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
   buildConcluded({
@@ -147,15 +152,17 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Flutuante",
     actualStart: "2022-11-01",
     actualEnd: "2023-07-01",
+    nextInternalInspection: "2034-01-31",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
   buildConcluded({
-    tag: "TQ-631307",
+    tag: "TQ-6313007",
     area: "Diesel para Exportação",
     product: "Diesel",
     tankType: "Teto Flutuante",
     actualStart: "2023-01-01",
     actualEnd: "2023-09-01",
+    nextInternalInspection: "2035-06-18",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
   buildConcluded({
@@ -165,15 +172,17 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Flutuante",
     actualStart: "2023-01-04",
     actualEnd: "2023-09-04",
+    nextInternalInspection: "2028-06-17",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
   buildConcluded({
-    tag: "TQ-631301",
+    tag: "TQ-6313001",
     area: "Tancagem de Nafta",
     product: "Nafta",
     tankType: "Teto Fixo/Flutuante",
     actualStart: "2023-03-01",
     actualEnd: "2023-11-01",
+    nextInternalInspection: "2035-05-07",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
   buildConcluded({
@@ -183,6 +192,7 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Flutuante",
     actualStart: "2023-04-01",
     actualEnd: "2023-11-01",
+    nextInternalInspection: "2025-11-24",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
   buildConcluded({
@@ -192,6 +202,7 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Flutuante",
     actualStart: "2023-02-01",
     actualEnd: "2023-10-01",
+    nextInternalInspection: "2025-12-29",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
   buildConcluded({
@@ -201,24 +212,27 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Flutuante",
     actualStart: "2023-12-01",
     actualEnd: "2024-08-01",
+    nextInternalInspection: "2035-08-13",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
   buildConcluded({
-    tag: "TQ-631302",
+    tag: "TQ-6313002",
     area: "Tancagem de Nafta",
     product: "Nafta",
     tankType: "Teto Fixo/Flutuante",
     actualStart: "2024-05-27",
     actualEnd: "2024-12-27",
+    nextInternalInspection: "2036-03-03",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
   buildConcluded({
-    tag: "TQ-631306",
+    tag: "TQ-6313006",
     area: "Tancagem de S-10",
     product: "Diesel S-10",
     tankType: "Teto Fixo/Flutuante",
     actualStart: "2024-12-01",
     actualEnd: "2025-07-01",
+    nextInternalInspection: "2036-04-27",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
 
@@ -232,7 +246,7 @@ export const TANKS_SEED: Tank[] = [
     baselineStart: "2026-06-10",
     currentOrder: 7,
     currentProgress: 55,
-    inspectionDeadline: "2025-07-12",
+    nextInternalInspection: "2026-01-15",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
@@ -246,7 +260,7 @@ export const TANKS_SEED: Tank[] = [
     currentOrder: 4,
     currentProgress: 30,
     startOffsetDays: 7,
-    inspectionDeadline: "2025-07-22",
+    nextInternalInspection: "2026-01-25",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
@@ -260,7 +274,7 @@ export const TANKS_SEED: Tank[] = [
     currentOrder: 3,
     currentProgress: 40,
     startOffsetDays: 19,
-    inspectionDeadline: "2025-06-25",
+    // Sem registro de "PRÓXIMA INTERNA" na planilha de referência — não inventar data.
     responsible: "Coordenação de Manutenção ETO",
     notes: "Início de execução com 19 dias de atraso em relação ao planejado. " + SERVICOS_LAVAGEM,
   }),
@@ -274,10 +288,10 @@ export const TANKS_SEED: Tank[] = [
     currentOrder: 1,
     currentProgress: 0,
     startOffsetDays: 190,
-    inspectionDeadline: "2025-05-04",
+    nextInternalInspection: "2028-07-20",
     responsible: "Coordenação de Manutenção UTE",
     notes:
-      "Limite regulatório de inspeção interna já ultrapassado. Liberação da unidade pendente — prioridade máxima.",
+      "Início da manutenção com 190 dias de atraso em relação ao planejado. Liberação da unidade pendente — prioridade máxima.",
   }),
 
   // ── Programado ─────────────────────────────────────────────────────────
@@ -287,7 +301,7 @@ export const TANKS_SEED: Tank[] = [
     product: "Petróleo — Lavagem a Quente",
     tankType: "Teto Fixo",
     baselineStart: "2026-10-05",
-    inspectionDeadline: "2025-08-19",
+    nextInternalInspection: "2025-10-21",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
@@ -297,7 +311,7 @@ export const TANKS_SEED: Tank[] = [
     product: "Petróleo — Carga",
     tankType: "Teto Flutuante",
     baselineStart: "2027-01-15",
-    inspectionDeadline: "2024-07-07",
+    nextInternalInspection: "2035-04-14",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
@@ -307,7 +321,7 @@ export const TANKS_SEED: Tank[] = [
     product: "QAV",
     tankType: "Teto Fixo/Flutuante",
     baselineStart: "2027-03-01",
-    inspectionDeadline: "2027-06-01",
+    nextInternalInspection: "2027-06-01",
     responsible: "Coordenação de Manutenção UTE",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
@@ -317,7 +331,7 @@ export const TANKS_SEED: Tank[] = [
     product: "Diesel",
     tankType: "Teto Fixo/Flutuante",
     baselineStart: "2027-06-01",
-    inspectionDeadline: "2027-12-23",
+    nextInternalInspection: "2027-12-25",
     responsible: "Coordenação de Manutenção UTE",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
