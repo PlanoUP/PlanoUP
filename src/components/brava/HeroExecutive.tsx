@@ -1,8 +1,12 @@
 "use client";
 
 import { Users, Clock, ShieldCheck, Leaf, ArrowRight, FileText, Droplets } from "lucide-react";
+import { useBravaData } from "@/lib/brava/context";
+import { STATUS_META } from "@/lib/brava/status-meta";
 import BlueprintGrid from "./BlueprintGrid";
 import TankIllustration from "./TankIllustration";
+
+const HERO_TANK_TAG = "TQ-41008";
 
 const BENEFITS = [
   { icon: Users, label: "Mais confiabilidade" },
@@ -12,6 +16,14 @@ const BENEFITS = [
 ];
 
 export default function HeroExecutive() {
+  const { tanks } = useBravaData();
+  const heroTank = tanks.find((t) => t.tag === HERO_TANK_TAG);
+  const heroStatusLabel = heroTank
+    ? heroTank.status === "CONCLUIDO"
+      ? "Manutenção Concluída"
+      : STATUS_META[heroTank.status].label
+    : "Ativo Industrial";
+
   return (
     <section className="relative overflow-hidden border-b border-brava-border bg-brava-white">
       <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -74,30 +86,30 @@ export default function HeroExecutive() {
           </p>
         </div>
 
-        {/* Right — technical / photographic composition */}
+        {/* Right — technical / photographic composition. Photo is the real
+            TQ-41008 tank (public/images/brava/hero-tq-41008.jpg). The white
+            wedge + soft mask reproduce the reference's angular, non-vertical
+            transition instead of a hard split. */}
         <div className="relative hidden min-h-[560px] overflow-hidden lg:block">
-          {/* Photo layer — swap in a real photo by adding public/images/brava/hero-tanque.jpg */}
-          <div className="brava-hero-photo absolute inset-0" />
+          <div className="brava-hero-photo brava-hero-photo-mask absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-t from-brava-blue-dark/35 via-transparent to-brava-blue-dark/10" />
 
           {/* Technical HUD overlay */}
-          <BlueprintGrid className="absolute inset-0 h-full w-full text-brava-white opacity-40" />
+          <BlueprintGrid className="absolute inset-0 h-full w-full text-brava-white opacity-30" />
           <TankIllustration
             variant="hero"
-            className="absolute bottom-10 right-10 h-[220px] w-[220px] text-brava-white/25 xl:h-[260px] xl:w-[260px]"
+            className="absolute bottom-10 right-10 h-[220px] w-[220px] text-brava-white/20 xl:h-[260px] xl:w-[260px]"
           />
 
-          {/* White organic/angular fade into the left panel */}
-          <div
-            className="absolute inset-y-0 left-0 w-[42%]"
-            style={{
-              background: "linear-gradient(to right, var(--brava-white) 35%, transparent 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-y-0 left-0 w-[26%] bg-brava-white"
-            style={{ clipPath: "polygon(0 0, 100% 0, 55% 100%, 0% 100%)" }}
-          />
+          {/* Organic/angular white wedge cut into the left edge of the photo */}
+          <svg
+            className="pointer-events-none absolute inset-y-0 left-0 h-full w-[30%] text-brava-white"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            <polygon fill="currentColor" points="0,0 62,0 38,22 52,46 30,68 44,100 0,100" />
+          </svg>
+          <span className="absolute inset-y-0 left-[26%] w-px bg-brava-accent/40 xl:left-[24%]" />
 
           {/* Location tag */}
           <div className="absolute right-6 top-6 text-right [text-shadow:0_1px_6px_rgba(23,16,82,0.6)]">
@@ -107,13 +119,15 @@ export default function HeroExecutive() {
             </p>
           </div>
 
-          {/* Featured asset caption */}
-          <div className="absolute bottom-[38%] left-[40%] flex items-center gap-3">
+          {/* Featured asset caption — real TAG + real status, nothing fabricated */}
+          <div className="absolute bottom-[38%] left-[42%] flex items-center gap-3">
             <span className="h-10 w-[3px] rounded-full bg-brava-accent" />
             <div>
-              <p className="font-mono text-lg font-extrabold leading-none text-brava-white">TQ-41009</p>
-              <p className="mt-1 text-[10.5px] font-semibold uppercase tracking-wide text-brava-white/75">
-                Tanque em Manutenção
+              <p className="font-mono text-lg font-extrabold leading-none text-brava-white [text-shadow:0_1px_8px_rgba(23,16,82,0.7)]">
+                {HERO_TANK_TAG}
+              </p>
+              <p className="mt-1 text-[10.5px] font-semibold uppercase tracking-wide text-brava-white/80 [text-shadow:0_1px_6px_rgba(23,16,82,0.7)]">
+                {heroStatusLabel}
               </p>
             </div>
           </div>
@@ -135,9 +149,9 @@ export default function HeroExecutive() {
           <div className="relative z-10 mt-auto flex items-center gap-3 p-5">
             <span className="h-8 w-[3px] rounded-full bg-brava-accent" />
             <div>
-              <p className="font-mono text-base font-extrabold leading-none text-brava-white">TQ-41009</p>
+              <p className="font-mono text-base font-extrabold leading-none text-brava-white">{HERO_TANK_TAG}</p>
               <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-brava-white/75">
-                Tanque em Manutenção · Guamaré/RN
+                {heroStatusLabel} · Guamaré/RN
               </p>
             </div>
           </div>

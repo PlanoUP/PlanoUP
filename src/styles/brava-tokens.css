@@ -62,16 +62,42 @@
 }
 
 /**
- * Hero asset photo. Drop the real photograph at
- * public/images/brava/hero-tanque.jpg and it replaces this placeholder
- * automatically — no code changes needed. Until then, a brand-toned
- * gradient keeps the panel intentional instead of showing a broken image.
+ * Hero asset photo — real photograph of TQ-41008 (Tancagem de RAT,
+ * Guamaré/RN), provided by Brava Energia. Position tuned so the tank's
+ * painted TAG and top railing stay in frame after the cover crop.
  */
 .brava-hero-photo {
   background-color: var(--brava-blue-dark);
   background-image:
-    linear-gradient(160deg, rgba(32, 20, 117, 0.55), rgba(23, 16, 82, 0.85)),
-    url("/images/brava/hero-tanque.jpg");
+    linear-gradient(160deg, rgba(32, 20, 117, 0.32), rgba(23, 16, 82, 0.62)),
+    url("/images/brava/hero-tq-41008.jpg");
   background-size: cover;
-  background-position: center;
+  background-position: 75% 30%;
+  transform: scale(1.35);
+  transform-origin: 85% 30%;
+}
+
+/* Mobile strip has a wider/shorter crop than the desktop panel — reframed
+   so the tank's own painted TAG sits above the caption instead of behind it. */
+@media (max-width: 1023px) {
+  .brava-hero-photo {
+    background-position: 65% 22%;
+    transform: scale(1.35);
+    transform-origin: 65% 0%;
+  }
+}
+
+@media (max-width: 640px) {
+  .brava-hero-photo {
+    background-position: 70% 8%;
+    transform: scale(1.5);
+    transform-origin: 70% 0%;
+  }
+}
+
+/* Organic/angular fade of the photo into white — a soft alpha mask on the
+   photo edge, layered under the angular clip-path wedge in HeroExecutive. */
+.brava-hero-photo-mask {
+  -webkit-mask-image: linear-gradient(100deg, transparent 0%, transparent 14%, #000 46%);
+  mask-image: linear-gradient(100deg, transparent 0%, transparent 14%, #000 46%);
 }
