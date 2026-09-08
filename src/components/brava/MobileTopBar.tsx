@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Droplets } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
 
 const NAV_ITEMS = [
@@ -19,7 +18,7 @@ export default function MobileTopBar() {
     <div className="sticky top-0 z-40 border-b border-brava-border bg-brava-white lg:hidden">
       <div className="flex items-center gap-2.5 px-4 py-2.5">
         <div className="flex h-7 w-7 items-center justify-center rounded-brava-sm bg-brava-blue">
-          <Droplets className="h-3.5 w-3.5 text-brava-accent" strokeWidth={2} />
+          <span className="font-mono text-[13px] font-extrabold leading-none text-brava-accent">B</span>
         </div>
         <p className="text-[12.5px] font-extrabold tracking-tight text-brava-blue-dark">BRAVA ENERGIA</p>
       </div>

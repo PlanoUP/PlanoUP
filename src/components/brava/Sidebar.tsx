@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Boxes, GanttChartSquare, LayoutList, Droplets } from "lucide-react";
+import { LayoutGrid, Boxes, GanttChartSquare, LayoutList } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
@@ -22,7 +22,7 @@ export default function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-brava-border bg-brava-white lg:flex">
       <div className="flex h-[72px] items-center gap-3 border-b border-brava-border px-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-brava-sm bg-brava-blue">
-          <Droplets className="h-4.5 w-4.5 text-brava-accent" strokeWidth={2} />
+          <span className="font-mono text-[17px] font-extrabold leading-none text-brava-accent">B</span>
         </div>
         <div className="leading-tight">
           <p className="text-[13.5px] font-extrabold tracking-tight text-brava-blue-dark">BRAVA ENERGIA</p>

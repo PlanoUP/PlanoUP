@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Clock, ShieldCheck, Leaf, ArrowRight, FileText, Droplets } from "lucide-react";
+import { Users, Clock, ShieldCheck, Leaf, ArrowRight, FileText } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import BlueprintGrid from "./BlueprintGrid";
@@ -165,7 +165,7 @@ function BravaWordmark() {
   return (
     <div className="flex items-center gap-3">
       <div className="flex h-10 w-10 items-center justify-center rounded-brava-sm bg-brava-blue">
-        <Droplets className="h-5 w-5 text-brava-accent" strokeWidth={2} />
+        <span className="font-mono text-xl font-extrabold leading-none text-brava-accent">B</span>
       </div>
       <div className="leading-tight">
         <p className="text-[19px] font-extrabold tracking-tight text-brava-blue">
