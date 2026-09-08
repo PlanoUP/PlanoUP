@@ -6,6 +6,7 @@ import { buildTimeScale, monthTicks } from "@/lib/brava/timescale";
 import { formatShort } from "@/lib/brava/date-utils";
 import { useBravaData } from "@/lib/brava/context";
 import { cn } from "@/lib/brava/cn";
+import SectionHeading from "./SectionHeading";
 
 const LABEL_W = 190;
 const CHART_W = 660;
@@ -29,18 +30,19 @@ export default function GanttChart({ activities }: { activities: Activity[] }) {
   const showToday = todayPx >= 0 && todayPx <= CHART_W;
 
   return (
-    <div className="rounded-brava-lg border border-brava-border bg-brava-white p-6 shadow-brava-sm">
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-[14px] font-semibold tracking-tight text-brava-blue-dark">
-          Macrocronograma
-        </h2>
-        <div className="flex flex-wrap gap-4 text-[11px] text-brava-text-secondary">
-          <Legend swatchClass="border border-dashed border-brava-text-secondary/50" label="Baseline" />
-          <Legend swatchClass="bg-brava-blue" label="Planejado" />
-          <Legend swatchClass="bg-brava-accent" label="Atual" />
-          <Legend swatchClass="bg-brava-blue-dark" label="Realizado" />
-        </div>
-      </div>
+    <div className="rounded-brava-lg border border-brava-border bg-brava-white p-6 shadow-brava-sm sm:p-7">
+      <SectionHeading
+        eyebrow="Planejamento Detalhado"
+        title="Macrocronograma"
+        actions={
+          <div className="flex flex-wrap gap-4 text-[11px] text-brava-text-secondary">
+            <Legend swatchClass="border border-dashed border-brava-text-secondary/50" label="Baseline" />
+            <Legend swatchClass="bg-brava-blue" label="Planejado" />
+            <Legend swatchClass="bg-brava-accent" label="Atual" />
+            <Legend swatchClass="bg-brava-blue-dark" label="Realizado" />
+          </div>
+        }
+      />
 
       <div className="brava-scrollbar overflow-x-auto">
         <div style={{ width: LABEL_W + CHART_W + 8 }}>

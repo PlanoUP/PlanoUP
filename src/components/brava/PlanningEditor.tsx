@@ -23,12 +23,13 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
 
   return (
     <div className="rounded-brava-lg border border-brava-border bg-brava-white shadow-brava-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brava-border px-6 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brava-border px-6 py-5 sm:px-7">
         <div>
-          <h2 className="text-[14px] font-semibold tracking-tight text-brava-blue-dark">
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.14em] text-brava-blue">Edição</p>
+          <h2 className="text-[17px] font-bold tracking-tight text-brava-blue-dark sm:text-[19px]">
             Planejamento das Atividades
           </h2>
-          <p className="text-[12px] text-brava-text-secondary">
+          <p className="mt-1 text-[13px] text-brava-text-secondary">
             {editing
               ? "Altere datas, durações ou avanço — o cronograma é recalculado automaticamente."
               : "Sequência de atividades e dependências do tanque."}

@@ -6,6 +6,7 @@ import ExecutiveHeader from "@/components/brava/ExecutiveHeader";
 import ExecutiveTimeline from "@/components/brava/ExecutiveTimeline";
 import GanttChart from "@/components/brava/GanttChart";
 import PlanningEditor from "@/components/brava/PlanningEditor";
+import TankNotes from "@/components/brava/TankNotes";
 import { useBravaData } from "@/lib/brava/context";
 
 export default function TankDetailPage() {
@@ -31,11 +32,12 @@ export default function TankDetailPage() {
         title={`Dashboard — ${tank.tag}`}
         subtitle={`${tank.area} · ${tank.product}`}
       />
-      <div className="space-y-6 px-5 py-6 sm:px-8 sm:py-8">
+      <div className="space-y-6 px-5 py-8 sm:px-8 sm:py-10 lg:space-y-8">
         <ExecutiveHeader tank={tank} />
         <ExecutiveTimeline activities={tank.activities} />
         <GanttChart activities={tank.activities} />
         <PlanningEditor tank={tank} />
+        <TankNotes tank={tank} />
       </div>
     </>
   );

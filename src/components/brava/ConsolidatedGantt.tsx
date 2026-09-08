@@ -7,6 +7,7 @@ import { buildTimeScale, monthTicks } from "@/lib/brava/timescale";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { formatShort } from "@/lib/brava/date-utils";
 import FilterBar from "./FilterBar";
+import SectionHeading from "./SectionHeading";
 
 const LABEL_W = 150;
 const CHART_W = 720;
@@ -35,18 +36,13 @@ export default function ConsolidatedGantt() {
   const showToday = todayPx >= 0 && todayPx <= CHART_W;
 
   return (
-    <div className="rounded-brava-lg border border-brava-border bg-brava-white p-6 shadow-brava-sm">
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-[14px] font-semibold tracking-tight text-brava-blue-dark">
-            Cronograma Consolidado
-          </h2>
-          <p className="text-[12px] text-brava-text-secondary">
-            Sobreposição e sequência das manutenções ativas e programadas
-          </p>
-        </div>
-        <FilterBar searchPlaceholder="Pesquisar TAG…" />
-      </div>
+    <div className="rounded-brava-lg border border-brava-border bg-brava-white p-6 shadow-brava-sm sm:p-7">
+      <SectionHeading
+        eyebrow="Planejamento Consolidado"
+        title="Cronograma Consolidado"
+        subtitle="Sobreposição e sequência das manutenções ativas e programadas"
+        actions={<FilterBar searchPlaceholder="Pesquisar TAG…" />}
+      />
 
       <div className="brava-scrollbar overflow-x-auto">
         <div style={{ width: LABEL_W + CHART_W + 8 }}>

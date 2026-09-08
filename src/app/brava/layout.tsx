@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
+import { Manrope } from "next/font/google";
 import "@/styles/brava-tokens.css";
 import { BravaDataProvider } from "@/lib/brava/context";
 import Sidebar from "@/components/brava/Sidebar";
 import MobileTopBar from "@/components/brava/MobileTopBar";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-brava",
+  display: "swap",
+  weight: ["500", "600", "700", "800"],
+});
 
 export const metadata: Metadata = {
   title: "Tank Control | Brava Energia",
@@ -12,11 +20,11 @@ export const metadata: Metadata = {
 
 export default function BravaLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="brava-app min-h-screen font-sans text-brava-text">
+    <div className={`${manrope.variable} brava-app min-h-screen font-brava text-brava-text`}>
       <BravaDataProvider>
         <Sidebar />
         <MobileTopBar />
-        <div className="lg:pl-60">{children}</div>
+        <div className="lg:pl-64">{children}</div>
       </BravaDataProvider>
     </div>
   );

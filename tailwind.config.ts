@@ -36,6 +36,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["var(--font-jbmono)", "ui-monospace", "monospace"],
+        brava: ["var(--font-brava)", "var(--font-inter)", "system-ui", "sans-serif"],
       },
       maxWidth: {
         content: "1280px",

@@ -2,15 +2,14 @@ import { Check, Flag } from "lucide-react";
 import { Activity } from "@/lib/brava/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
+import SectionHeading from "./SectionHeading";
 
 export default function ExecutiveTimeline({ activities }: { activities: Activity[] }) {
   const ordered = [...activities].sort((a, b) => a.order - b.order);
 
   return (
-    <div className="rounded-brava-lg border border-brava-border bg-brava-white p-6 shadow-brava-sm">
-      <h2 className="mb-5 text-[14px] font-semibold tracking-tight text-brava-blue-dark">
-        Timeline Executiva
-      </h2>
+    <div className="rounded-brava-lg border border-brava-border bg-brava-white p-6 shadow-brava-sm sm:p-7">
+      <SectionHeading eyebrow="Sequência de Etapas" title="Timeline Executiva" />
       <div className="brava-scrollbar overflow-x-auto pb-2">
         <div className="flex min-w-[900px] items-start">
           {ordered.map((activity, index) => {

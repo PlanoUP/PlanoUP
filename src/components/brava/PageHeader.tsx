@@ -18,7 +18,7 @@ export default function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="sticky top-12 z-20 border-b border-brava-border bg-brava-white/95 backdrop-blur lg:top-0">
+    <div className="sticky top-[86px] z-20 border-b border-brava-border bg-brava-white/95 backdrop-blur lg:top-0">
       <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div>
           {crumbs && crumbs.length > 0 && (
@@ -37,10 +37,10 @@ export default function PageHeader({
               ))}
             </div>
           )}
-          <h1 className="text-lg font-semibold tracking-tight text-brava-blue-dark sm:text-xl">
+          <h1 className="text-xl font-extrabold tracking-tight text-brava-blue-dark sm:text-2xl">
             {title}
           </h1>
-          {subtitle && <p className="mt-0.5 text-[13px] text-brava-text-secondary">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-[13.5px] text-brava-text-secondary">{subtitle}</p>}
         </div>
         {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
       </div>
