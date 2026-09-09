@@ -1,6 +1,9 @@
+import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { formatDaysToInspection } from "@/lib/brava/inspection";
+import { getMapByTank } from "@/lib/brava/maps/selectors";
 import StatusBadge from "./StatusBadge";
 import InspectionCriticalityBadge from "./InspectionCriticalityBadge";
 import BlueprintGrid from "./BlueprintGrid";
@@ -20,6 +23,7 @@ export default function ExecutiveHeader({ tank }: { tank: TankWithDerived }) {
   const { derived } = tank;
   const isActive = ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status);
   const deviation = derived.deviationDays;
+  const onMap = getMapByTank(tank.tag) !== null;
 
   return (
     <div className="overflow-hidden rounded-brava-lg border border-brava-border bg-brava-white shadow-brava-sm">
@@ -32,9 +36,20 @@ export default function ExecutiveHeader({ tank }: { tank: TankWithDerived }) {
         />
 
         <div className="relative z-10">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brava-blue">
-            {STATUS_HEADLINE[tank.status]}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brava-blue">
+              {STATUS_HEADLINE[tank.status]}
+            </p>
+            {onMap && (
+              <Link
+                href={`/brava/mapa?tank=${tank.tag}`}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brava-border bg-brava-white px-2.5 py-1 text-[11px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-blue"
+              >
+                <MapPin className="h-3 w-3" />
+                Localizar no Mapa
+              </Link>
+            )}
+          </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-3">
             <h1 className="font-mono text-[2.5rem] font-extrabold leading-none tracking-tight text-brava-blue-dark sm:text-[3.2rem]">
               {tank.tag}

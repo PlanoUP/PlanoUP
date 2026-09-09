@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Boxes, GanttChartSquare, LayoutList, Package } from "lucide-react";
+import { LayoutGrid, Boxes, GanttChartSquare, LayoutList, Package, Map } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
@@ -11,8 +11,9 @@ const NAV_ITEMS = [
   { href: "/brava", label: "Visão Geral", icon: LayoutGrid, matchExact: true },
   { href: "/brava#tank-control", label: "Tank Control", icon: Boxes, matchExact: false },
   { href: "/brava#cronograma", label: "Cronograma", icon: LayoutList, matchExact: false },
-  { href: "/brava/consolidado", label: "Consolidado", icon: GanttChartSquare, matchExact: true },
+  { href: "/brava/mapa", label: "Mapa", icon: Map, matchExact: true },
   { href: "/brava/materiais", label: "Materiais", icon: Package, matchExact: true },
+  { href: "/brava/consolidado", label: "Consolidado", icon: GanttChartSquare, matchExact: true },
 ];
 
 export default function Sidebar() {

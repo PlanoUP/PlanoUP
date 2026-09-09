@@ -1,6 +1,7 @@
 "use client";
 
-import { Users, Clock, ShieldCheck, Leaf, ArrowRight, FileText } from "lucide-react";
+import Link from "next/link";
+import { Users, Clock, ShieldCheck, Leaf, ArrowRight, FileText, Map } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import BlueprintGrid from "./BlueprintGrid";
@@ -79,6 +80,13 @@ export default function HeroExecutive() {
               <FileText className="h-4 w-4" />
               Ver cronograma
             </a>
+            <Link
+              href="/brava/mapa"
+              className="inline-flex items-center gap-1.5 px-1 text-[13px] font-semibold text-brava-blue-dark/70 underline-offset-4 transition-colors hover:text-brava-blue hover:underline"
+            >
+              <Map className="h-3.5 w-3.5" />
+              Explorar Mapa de Ativos
+            </Link>
           </div>
 
           <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-brava-text-secondary">

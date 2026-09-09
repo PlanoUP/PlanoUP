@@ -110,6 +110,8 @@ interface NoProjectParams {
   tag: string;
   area: string;
   nextInternalInspection: string;
+  /** Only set when confirmed by a real source (e.g. the asset map reference) — otherwise stays "A definir". */
+  product?: string;
   notes?: string;
 }
 
@@ -128,7 +130,7 @@ function buildNoProject(p: NoProjectParams): Tank {
     id,
     tag: p.tag,
     area: p.area,
-    product: "A definir",
+    product: p.product ?? "A definir",
     tankType: "A definir",
     status: "SEM_PROJETO",
     nextInternalInspection: p.nextInternalInspection,
@@ -371,24 +373,28 @@ export const TANKS_SEED: Tank[] = [
   // Área herdada da convenção de TAG já usada pelos tanques acima (1222 →
   // ETO, 27xxx → UTE); produto e tipo de teto não constam no inventário
   // recebido, por isso ficam "A definir" em vez de inventados.
-  buildNoProject({ tag: "TQ-1222-22", area: "ETO", nextInternalInspection: "2034-02-06" }),
+  // Produto confirmado pelo mapa interativo de ativos (referência oficial da
+  // Brava) para os tanques da Área 1222 — TQ-1222-23 não está identificado no
+  // mapa, então permanece "A definir" (não inventar).
+  buildNoProject({ tag: "TQ-1222-22", area: "ETO", product: "Petróleo — Lavagem a Quente", nextInternalInspection: "2034-02-06" }),
   buildNoProject({ tag: "TQ-1222-23", area: "ETO", nextInternalInspection: "2036-01-07" }),
-  buildNoProject({ tag: "TQ-1222-24", area: "ETO", nextInternalInspection: "2028-04-21" }),
-  buildNoProject({ tag: "TQ-1222-25", area: "ETO", nextInternalInspection: "2025-12-22" }),
-  buildNoProject({ tag: "TQ-1222-31", area: "ETO", nextInternalInspection: "2026-08-07" }),
-  buildNoProject({ tag: "TQ-1222-32", area: "ETO", nextInternalInspection: "2035-09-02" }),
-  buildNoProject({ tag: "TQ-1222-33", area: "ETO", nextInternalInspection: "2024-10-25" }),
-  buildNoProject({ tag: "TQ-1222-34", area: "ETO", nextInternalInspection: "2034-08-22" }),
-  buildNoProject({ tag: "TQ-1222-37", area: "ETO", nextInternalInspection: "2034-12-19" }),
-  buildNoProject({ tag: "TQ-1222-41", area: "ETO", nextInternalInspection: "2031-05-29" }),
-  buildNoProject({ tag: "TQ-1222-42", area: "ETO", nextInternalInspection: "2034-06-19" }),
-  buildNoProject({ tag: "TQ-1222-43", area: "ETO", nextInternalInspection: "2027-07-01" }),
-  buildNoProject({ tag: "TQ-27002", area: "UTE", nextInternalInspection: "2027-08-10" }),
-  buildNoProject({ tag: "TQ-27003", area: "UTE", nextInternalInspection: "2027-12-20" }),
-  buildNoProject({ tag: "TQ-27004", area: "UTE", nextInternalInspection: "2033-06-17" }),
-  buildNoProject({ tag: "TQ-27011", area: "UTE", nextInternalInspection: "2028-06-08" }),
-  buildNoProject({ tag: "TQ-27015", area: "UTE", nextInternalInspection: "2030-10-28" }),
-  buildNoProject({ tag: "TQ-27016", area: "UTE", nextInternalInspection: "2036-08-19" }),
+  buildNoProject({ tag: "TQ-1222-24", area: "ETO", product: "Petróleo — Lavagem a Quente", nextInternalInspection: "2028-04-21" }),
+  buildNoProject({ tag: "TQ-1222-25", area: "ETO", product: "Petróleo — Lavagem a Quente", nextInternalInspection: "2025-12-22" }),
+  buildNoProject({ tag: "TQ-1222-31", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2026-08-07" }),
+  buildNoProject({ tag: "TQ-1222-32", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2035-09-02" }),
+  buildNoProject({ tag: "TQ-1222-33", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2024-10-25" }),
+  buildNoProject({ tag: "TQ-1222-34", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2034-08-22" }),
+  buildNoProject({ tag: "TQ-1222-37", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2034-12-19" }),
+  buildNoProject({ tag: "TQ-1222-41", area: "ETO", product: "Petróleo — Carga", nextInternalInspection: "2031-05-29" }),
+  buildNoProject({ tag: "TQ-1222-42", area: "ETO", product: "Petróleo — Carga", nextInternalInspection: "2034-06-19" }),
+  buildNoProject({ tag: "TQ-1222-43", area: "ETO", product: "Petróleo — Carga", nextInternalInspection: "2027-07-01" }),
+  // Idem para a Área 270 — produto confirmado pelo mapa interativo.
+  buildNoProject({ tag: "TQ-27002", area: "UTE", product: "QAV", nextInternalInspection: "2027-08-10" }),
+  buildNoProject({ tag: "TQ-27003", area: "UTE", product: "QAV", nextInternalInspection: "2027-12-20" }),
+  buildNoProject({ tag: "TQ-27004", area: "UTE", product: "QAV", nextInternalInspection: "2033-06-17" }),
+  buildNoProject({ tag: "TQ-27011", area: "UTE", product: "Diesel", nextInternalInspection: "2028-06-08" }),
+  buildNoProject({ tag: "TQ-27015", area: "UTE", product: "Gasolina", nextInternalInspection: "2030-10-28" }),
+  buildNoProject({ tag: "TQ-27016", area: "UTE", product: "Gasolina", nextInternalInspection: "2036-08-19" }),
   buildNoProject({ tag: "TQ-6313004", area: "Tancagem 6313", nextInternalInspection: "2026-02-27" }),
   buildNoProject({ tag: "TQ-28001", area: "A definir", nextInternalInspection: "2027-07-02" }),
   buildNoProject({ tag: "TQ-28002", area: "A definir", nextInternalInspection: "2027-07-02" }),

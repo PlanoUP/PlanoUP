@@ -8,8 +8,9 @@ const NAV_ITEMS = [
   { href: "/brava", label: "Visão Geral", matchExact: true },
   { href: "/brava#tank-control", label: "Tank Control", matchExact: false },
   { href: "/brava#cronograma", label: "Cronograma", matchExact: false },
-  { href: "/brava/consolidado", label: "Consolidado", matchExact: true },
+  { href: "/brava/mapa", label: "Mapa", matchExact: true },
   { href: "/brava/materiais", label: "Materiais", matchExact: true },
+  { href: "/brava/consolidado", label: "Consolidado", matchExact: true },
 ];
 
 export default function MobileTopBar() {
