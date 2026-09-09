@@ -1,28 +1,17 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { Material, MaterialInput, MaterialHistoryEntry } from "./types";
-import { MATERIAL_STATUS_META } from "./meta";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { Material, MaterialInput } from "./types";
 
-// Bump whenever the Material shape changes in a way that must override a
-// browser's previously cached data — same rationale as brava-tanks-vN in
-// lib/brava/context.tsx.
-const STORAGE_KEY = "brava-materials-v1";
+const POLL_INTERVAL_MS = 8000;
 
-function genId(): string {
-  return `mat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
+type LoadStatus = "loading" | "ready" | "error";
 
 interface MaterialsContextValue {
   materials: Material[];
-  addMaterial: (input: MaterialInput) => Material;
+  status: LoadStatus;
+  errorMessage: string | null;
+  addMaterial: (input: MaterialInput) => void;
   updateMaterial: (id: string, patch: Partial<MaterialInput>) => void;
   deleteMaterial: (id: string) => void;
   duplicateMaterial: (id: string) => void;
@@ -31,95 +20,135 @@ interface MaterialsContextValue {
 
 const MaterialsContext = createContext<MaterialsContextValue | null>(null);
 
+async function parseErrorMessage(res: Response): Promise<string> {
+  try {
+    const body = await res.json();
+    return body.message || "Falha ao comunicar com o servidor.";
+  } catch {
+    return "Falha ao comunicar com o servidor.";
+  }
+}
+
 export function MaterialsDataProvider({ children }: { children: React.ReactNode }) {
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  const [status, setStatus] = useState<LoadStatus>("loading");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const hasLoadedOnce = useRef(false);
 
-  useEffect(() => {
+  const fetchMaterials = useCallback(async () => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setMaterials(JSON.parse(raw));
-    } catch {
-      // ignore malformed/blocked storage — fall back to the empty seed
+      const res = await fetch("/api/materials", { cache: "no-store" });
+      if (!res.ok) {
+        const message = await parseErrorMessage(res);
+        if (!hasLoadedOnce.current) {
+          setStatus("error");
+          setErrorMessage(message);
+        } else {
+          console.error("Falha ao atualizar materiais:", message);
+        }
+        return;
+      }
+      const body = await res.json();
+      setMaterials(body.materials);
+      hasLoadedOnce.current = true;
+      setStatus("ready");
+      setErrorMessage(null);
+    } catch (err) {
+      if (!hasLoadedOnce.current) {
+        setStatus("error");
+        setErrorMessage("Não foi possível conectar ao servidor.");
+      } else {
+        console.error("Falha ao atualizar materiais:", err);
+      }
     }
-    setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(materials));
-    } catch {
-      // storage unavailable — edits stay in-memory for this session only
-    }
-  }, [materials, hydrated]);
+    fetchMaterials();
+    const interval = setInterval(fetchMaterials, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [fetchMaterials]);
 
-  const addMaterial = useCallback((input: MaterialInput): Material => {
-    const now = new Date().toISOString();
-    const material: Material = {
-      ...input,
-      id: genId(),
-      tankFamily: input.tankFamily ?? null,
-      attachments: [],
-      history: [
-        { id: genId(), timestamp: now, field: "status", fromValue: null, toValue: input.status },
-      ],
-      createdAt: now,
-      updatedAt: now,
-    };
-    setMaterials((prev) => [...prev, material]);
-    return material;
-  }, []);
-
-  const updateMaterial = useCallback((id: string, patch: Partial<MaterialInput>) => {
-    setMaterials((prev) =>
-      prev.map((m) => {
-        if (m.id !== id) return m;
-        const now = new Date().toISOString();
-        const history: MaterialHistoryEntry[] = m.history;
-        const nextHistory =
-          patch.status && patch.status !== m.status
-            ? [
-                ...history,
-                { id: genId(), timestamp: now, field: "status", fromValue: MATERIAL_STATUS_META[m.status].label, toValue: MATERIAL_STATUS_META[patch.status].label },
-              ]
-            : history;
-        return { ...m, ...patch, history: nextHistory, updatedAt: now };
+  const addMaterial = useCallback(
+    (input: MaterialInput) => {
+      fetch("/api/materials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
       })
-    );
-  }, []);
+        .then(async (res) => {
+          if (!res.ok) throw new Error(await parseErrorMessage(res));
+          const body = await res.json();
+          setMaterials((prev) => [...prev, body.material]);
+        })
+        .catch((err) => {
+          console.error("Falha ao cadastrar material:", err);
+          fetchMaterials();
+        });
+    },
+    [fetchMaterials]
+  );
 
-  const deleteMaterial = useCallback((id: string) => {
-    setMaterials((prev) => prev.filter((m) => m.id !== id));
-  }, []);
+  const updateMaterial = useCallback(
+    (id: string, patch: Partial<MaterialInput>) => {
+      setMaterials((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+      fetch(`/api/materials/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(await parseErrorMessage(res));
+          const body = await res.json();
+          setMaterials((prev) => prev.map((m) => (m.id === id ? body.material : m)));
+        })
+        .catch((err) => {
+          console.error("Falha ao atualizar material:", err);
+          fetchMaterials();
+        });
+    },
+    [fetchMaterials]
+  );
 
-  const duplicateMaterial = useCallback((id: string) => {
-    setMaterials((prev) => {
-      const source = prev.find((m) => m.id === id);
-      if (!source) return prev;
-      const now = new Date().toISOString();
-      const copy: Material = {
-        ...source,
-        id: genId(),
-        description: `${source.description} (cópia)`,
-        code: source.code ? `${source.code}-COPIA` : source.code,
-        attachments: [],
-        history: [
-          { id: genId(), timestamp: now, field: "status", fromValue: null, toValue: MATERIAL_STATUS_META[source.status].label },
-        ],
-        createdAt: now,
-        updatedAt: now,
-      };
-      return [...prev, copy];
-    });
-  }, []);
+  const deleteMaterial = useCallback(
+    (id: string) => {
+      setMaterials((prev) => prev.filter((m) => m.id !== id));
+      fetch(`/api/materials/${id}`, { method: "DELETE" }).catch((err) => {
+        console.error("Falha ao excluir material:", err);
+        fetchMaterials();
+      });
+    },
+    [fetchMaterials]
+  );
+
+  const duplicateMaterial = useCallback(
+    (id: string) => {
+      fetch(`/api/materials/${id}/duplicate`, { method: "POST" })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(await parseErrorMessage(res));
+          const body = await res.json();
+          setMaterials((prev) => [...prev, body.material]);
+        })
+        .catch((err) => {
+          console.error("Falha ao duplicar material:", err);
+          fetchMaterials();
+        });
+    },
+    [fetchMaterials]
+  );
 
   const getMaterial = useCallback((id: string) => materials.find((m) => m.id === id), [materials]);
 
-  const value = useMemo<MaterialsContextValue>(
-    () => ({ materials, addMaterial, updateMaterial, deleteMaterial, duplicateMaterial, getMaterial }),
-    [materials, addMaterial, updateMaterial, deleteMaterial, duplicateMaterial, getMaterial]
-  );
+  const value: MaterialsContextValue = {
+    materials,
+    status,
+    errorMessage,
+    addMaterial,
+    updateMaterial,
+    deleteMaterial,
+    duplicateMaterial,
+    getMaterial,
+  };
 
   return <MaterialsContext.Provider value={value}>{children}</MaterialsContext.Provider>;
 }

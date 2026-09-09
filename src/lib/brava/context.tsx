@@ -6,18 +6,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./types";
-import { TANKS_SEED } from "./data/tanks";
-import { recalculateSchedule } from "./schedule-engine";
 import { withDerived } from "./selectors";
 import { todayISO } from "./date-utils";
 
-// Bump this whenever TANKS_SEED's shape or content changes in a way that
-// must override a browser's previously cached edits — otherwise a stale
-// localStorage snapshot silently shadows every seed-data fix forever.
-const STORAGE_KEY = "brava-tanks-v3";
+const POLL_INTERVAL_MS = 8000;
 
 interface ActivityEdit {
   plannedStart?: string;
@@ -27,9 +23,13 @@ interface ActivityEdit {
   actualEnd?: string;
 }
 
+type LoadStatus = "loading" | "ready" | "error";
+
 interface BravaContextValue {
   tanks: TankWithDerived[];
   today: string;
+  status: LoadStatus;
+  errorMessage: string | null;
   filter: TankFilter;
   setFilter: (filter: Partial<TankFilter>) => void;
   familyView: FamilyView;
@@ -40,36 +40,61 @@ interface BravaContextValue {
     tankId: string,
     patch: Partial<Pick<Tank, "status" | "notes" | "responsible">>
   ) => void;
-  resetToSeed: () => void;
 }
 
 const BravaContext = createContext<BravaContextValue | null>(null);
 
+async function parseErrorMessage(res: Response): Promise<string> {
+  try {
+    const body = await res.json();
+    return body.message || "Falha ao comunicar com o servidor.";
+  } catch {
+    return "Falha ao comunicar com o servidor.";
+  }
+}
+
 export function BravaDataProvider({ children }: { children: React.ReactNode }) {
-  const [tanksRaw, setTanksRaw] = useState<Tank[]>(TANKS_SEED);
-  const [hydrated, setHydrated] = useState(false);
+  const [tanksRaw, setTanksRaw] = useState<Tank[]>([]);
+  const [status, setStatus] = useState<LoadStatus>("loading");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filter, setFilterState] = useState<TankFilter>({ status: "TODOS", search: "" });
   const [familyView, setFamilyView] = useState<FamilyView>("CRITICIDADE");
   const today = useMemo(() => todayISO(), []);
+  const hasLoadedOnce = useRef(false);
 
-  useEffect(() => {
+  const fetchTanks = useCallback(async () => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) setTanksRaw(JSON.parse(raw));
-    } catch {
-      // ignore malformed/blocked storage — fall back to seed data
+      const res = await fetch("/api/tanks", { cache: "no-store" });
+      if (!res.ok) {
+        const message = await parseErrorMessage(res);
+        if (!hasLoadedOnce.current) {
+          setStatus("error");
+          setErrorMessage(message);
+        } else {
+          console.error("Falha ao atualizar tanques:", message);
+        }
+        return;
+      }
+      const body = await res.json();
+      setTanksRaw(body.tanks);
+      hasLoadedOnce.current = true;
+      setStatus("ready");
+      setErrorMessage(null);
+    } catch (err) {
+      if (!hasLoadedOnce.current) {
+        setStatus("error");
+        setErrorMessage("Não foi possível conectar ao servidor.");
+      } else {
+        console.error("Falha ao atualizar tanques:", err);
+      }
     }
-    setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tanksRaw));
-    } catch {
-      // storage unavailable — edits stay in-memory for this session only
-    }
-  }, [tanksRaw, hydrated]);
+    fetchTanks();
+    const interval = setInterval(fetchTanks, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [fetchTanks]);
 
   const setFilter = useCallback((patch: Partial<TankFilter>) => {
     setFilterState((prev) => ({ ...prev, ...patch }));
@@ -77,50 +102,48 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
 
   const updateActivity = useCallback(
     (tankId: string, activityId: string, edit: ActivityEdit) => {
-      setTanksRaw((prev) =>
-        prev.map((tank) => {
-          if (tank.id !== tankId) return tank;
-
-          let activities = tank.activities;
-          if (edit.plannedStart !== undefined || edit.durationDays !== undefined) {
-            activities = recalculateSchedule(activities, activityId, {
-              plannedStart: edit.plannedStart,
-              durationDays: edit.durationDays,
-            });
-          }
-          if (edit.progress !== undefined || edit.actualStart !== undefined || edit.actualEnd !== undefined) {
-            activities = activities.map((a) =>
-              a.id === activityId
-                ? {
-                    ...a,
-                    progress: edit.progress ?? a.progress,
-                    actualStart: edit.actualStart ?? a.actualStart,
-                    actualEnd: edit.actualEnd ?? a.actualEnd,
-                    status: (edit.progress ?? a.progress) >= 100 ? "CONCLUIDO" : a.status === "FUTURO" ? "ATUAL" : a.status,
-                  }
-                : a
-            );
-          }
-
-          return { ...tank, activities };
+      // The dependency-chain recalculation (recalculateSchedule) only runs
+      // server-side, so there's no safe client-side optimistic update here
+      // without duplicating that logic — the grid updates once the response
+      // (or the next poll, on failure) comes back.
+      fetch(`/api/tanks/${tankId}/activity`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activityId, edit }),
+      })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(await parseErrorMessage(res));
+          const body = await res.json();
+          setTanksRaw((prev) => prev.map((t) => (t.id === tankId ? body.tank : t)));
         })
-      );
+        .catch((err) => {
+          console.error("Falha ao salvar atividade:", err);
+          fetchTanks();
+        });
     },
-    []
+    [fetchTanks]
   );
 
   const updateTankMeta = useCallback(
     (tankId: string, patch: Partial<Pick<Tank, "status" | "notes" | "responsible">>) => {
-      setTanksRaw((prev) =>
-        prev.map((tank) => (tank.id === tankId ? { ...tank, ...patch } : tank))
-      );
+      setTanksRaw((prev) => prev.map((tank) => (tank.id === tankId ? { ...tank, ...patch } : tank)));
+      fetch(`/api/tanks/${tankId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(await parseErrorMessage(res));
+          const body = await res.json();
+          setTanksRaw((prev) => prev.map((t) => (t.id === tankId ? body.tank : t)));
+        })
+        .catch((err) => {
+          console.error("Falha ao salvar tanque:", err);
+          fetchTanks();
+        });
     },
-    []
+    [fetchTanks]
   );
-
-  const resetToSeed = useCallback(() => {
-    setTanksRaw(TANKS_SEED);
-  }, []);
 
   const tanks = useMemo(() => withDerived(tanksRaw, today), [tanksRaw, today]);
 
@@ -132,6 +155,8 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
   const value: BravaContextValue = {
     tanks,
     today,
+    status,
+    errorMessage,
     filter,
     setFilter,
     familyView,
@@ -139,7 +164,6 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
     getTank,
     updateActivity,
     updateTankMeta,
-    resetToSeed,
   };
 
   return <BravaContext.Provider value={value}>{children}</BravaContext.Provider>;
