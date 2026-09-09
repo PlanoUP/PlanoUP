@@ -5,6 +5,7 @@ import { Check, AlertTriangle, Plus, Boxes, PackageCheck, Truck, ShieldAlert } f
 import { TankWithDerived } from "@/lib/brava/types";
 import { useBravaData } from "@/lib/brava/context";
 import { useMaterialsData } from "@/lib/brava/materials/context";
+import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { Material } from "@/lib/brava/materials/types";
 import {
   calculateMaterialReadiness,
@@ -22,6 +23,7 @@ import { cn } from "@/lib/brava/cn";
 export default function TankMaterialsSection({ tank }: { tank: TankWithDerived }) {
   const { today } = useBravaData();
   const { materials } = useMaterialsData();
+  const { requireEditor } = useEditAuth();
   const tankMaterials = getMaterialsByTank(materials, tank.id);
 
   const [formOpen, setFormOpen] = useState(false);
@@ -43,12 +45,14 @@ export default function TankMaterialsSection({ tank }: { tank: TankWithDerived }
   const generalMaterials = tankMaterials.filter((m) => !m.activityId);
 
   function openCreate(activityId?: string) {
+    if (!requireEditor()) return;
     setEditingMaterial(undefined);
     setPrefillActivityId(activityId);
     setFormOpen(true);
   }
 
   function openEdit(m: Material) {
+    if (!requireEditor()) return;
     setEditingMaterial(m);
     setPrefillActivityId(undefined);
     setFormOpen(true);

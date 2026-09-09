@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isDatabaseConfigured } from "@/lib/db/client";
 import { createMaterial, listMaterials } from "@/lib/db/materialsRepo";
+import { isRequestEditor } from "@/lib/auth/editAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!(await isRequestEditor())) {
+    return NextResponse.json(
+      { error: "UNAUTHORIZED", message: "Desbloqueie o modo de edição para cadastrar um material." },
+      { status: 401 }
+    );
+  }
   try {
     const input = await request.json();
     const material = await createMaterial(input);

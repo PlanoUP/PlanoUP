@@ -3,6 +3,7 @@
 import { Pencil, Copy, Trash2, Eye } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { useMaterialsData } from "@/lib/brava/materials/context";
+import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { Material, MaterialsSortKey } from "@/lib/brava/materials/types";
 import { calculateMaterialRisk } from "@/lib/brava/materials/calculations";
 import { formatShort } from "@/lib/brava/date-utils";
@@ -35,11 +36,18 @@ export default function MaterialsTable({
 }) {
   const { tanks, today } = useBravaData();
   const { deleteMaterial, duplicateMaterial } = useMaterialsData();
+  const { requireEditor } = useEditAuth();
 
   function handleDelete(m: Material) {
+    if (!requireEditor()) return;
     if (window.confirm(`Excluir "${m.description}"? Essa ação não pode ser desfeita.`)) {
       deleteMaterial(m.id);
     }
+  }
+
+  function handleDuplicate(m: Material) {
+    if (!requireEditor()) return;
+    duplicateMaterial(m.id);
   }
 
   return (
@@ -133,7 +141,7 @@ export default function MaterialsTable({
                       <div className="flex items-center justify-end gap-1">
                         <RowAction icon={Eye} label="Visualizar" onClick={() => onView(m)} />
                         <RowAction icon={Pencil} label="Editar" onClick={() => onEdit(m)} />
-                        <RowAction icon={Copy} label="Duplicar" onClick={() => duplicateMaterial(m.id)} />
+                        <RowAction icon={Copy} label="Duplicar" onClick={() => handleDuplicate(m)} />
                         <RowAction icon={Trash2} label="Excluir" onClick={() => handleDelete(m)} danger />
                       </div>
                     </td>

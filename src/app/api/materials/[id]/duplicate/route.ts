@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { duplicateMaterial } from "@/lib/db/materialsRepo";
+import { isRequestEditor } from "@/lib/auth/editAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(_request: Request, { params }: { params: { id: string } }) {
+  if (!(await isRequestEditor())) {
+    return NextResponse.json(
+      { error: "UNAUTHORIZED", message: "Desbloqueie o modo de edição para duplicar o material." },
+      { status: 401 }
+    );
+  }
   try {
     const material = await duplicateMaterial(params.id);
     if (!material) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });

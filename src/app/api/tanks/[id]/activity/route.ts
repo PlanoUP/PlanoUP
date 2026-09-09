@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { updateTankActivity } from "@/lib/db/tanksRepo";
+import { isRequestEditor } from "@/lib/auth/editAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  if (!(await isRequestEditor())) {
+    return NextResponse.json(
+      { error: "UNAUTHORIZED", message: "Desbloqueie o modo de edição para alterar a atividade." },
+      { status: 401 }
+    );
+  }
   try {
     const { activityId, edit } = await request.json();
     const tank = await updateTankActivity(params.id, activityId, edit);

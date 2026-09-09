@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { deleteMaterial, updateMaterial } from "@/lib/db/materialsRepo";
+import { isRequestEditor } from "@/lib/auth/editAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  if (!(await isRequestEditor())) {
+    return NextResponse.json(
+      { error: "UNAUTHORIZED", message: "Desbloqueie o modo de edição para alterar o material." },
+      { status: 401 }
+    );
+  }
   try {
     const patch = await request.json();
     const material = await updateMaterial(params.id, patch);
@@ -16,6 +23,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+  if (!(await isRequestEditor())) {
+    return NextResponse.json(
+      { error: "UNAUTHORIZED", message: "Desbloqueie o modo de edição para excluir o material." },
+      { status: 401 }
+    );
+  }
   try {
     await deleteMaterial(params.id);
     return NextResponse.json({ ok: true });

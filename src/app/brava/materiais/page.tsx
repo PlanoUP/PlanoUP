@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import PageHeader from "@/components/brava/PageHeader";
 import { useBravaData } from "@/lib/brava/context";
 import { useMaterialsData } from "@/lib/brava/materials/context";
+import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { Material, MaterialsQuickFilter, MaterialsSortKey } from "@/lib/brava/materials/types";
 import { filterMaterials, sortMaterialsByColumn } from "@/lib/brava/materials/calculations";
 import MaterialsKpiRow from "@/components/brava/materials/MaterialsKpiRow";
@@ -18,6 +19,7 @@ import MaterialDetailDrawer from "@/components/brava/materials/MaterialDetailDra
 export default function MaterialsPage() {
   const { tanks, today } = useBravaData();
   const { materials } = useMaterialsData();
+  const { requireEditor } = useEditAuth();
 
   const [quickFilter, setQuickFilter] = useState<MaterialsQuickFilter>("TODOS");
   const [search, setSearch] = useState("");
@@ -39,11 +41,13 @@ export default function MaterialsPage() {
   );
 
   function openCreate() {
+    if (!requireEditor()) return;
     setEditingMaterial(undefined);
     setFormOpen(true);
   }
 
   function openEdit(m: Material) {
+    if (!requireEditor()) return;
     setEditingMaterial(m);
     setFormOpen(true);
   }

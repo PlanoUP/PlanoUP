@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil, Check, RotateCcw } from "lucide-react";
 import { Tank, TankStatus } from "@/lib/brava/types";
 import { useBravaData } from "@/lib/brava/context";
+import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { formatShort } from "@/lib/brava/date-utils";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { cn } from "@/lib/brava/cn";
@@ -19,6 +20,7 @@ const STATUS_OPTIONS: TankStatus[] = [
 
 export default function PlanningEditor({ tank }: { tank: Tank }) {
   const { updateActivity, updateTankMeta } = useBravaData();
+  const { requireEditor } = useEditAuth();
   const [editing, setEditing] = useState(false);
   const [savedPulse, setSavedPulse] = useState(false);
   const ordered = [...tank.activities].sort((a, b) => a.order - b.order);
@@ -65,7 +67,10 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
             </select>
           )}
           <button
-            onClick={() => setEditing((v) => !v)}
+            onClick={() => {
+              if (!editing && !requireEditor()) return;
+              setEditing((v) => !v);
+            }}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-brava-sm border px-3 py-1.5 text-[12px] font-semibold transition-colors",
               editing
