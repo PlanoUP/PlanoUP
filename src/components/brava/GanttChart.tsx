@@ -1,10 +1,15 @@
 "use client";
 
-import { Diamond } from "lucide-react";
+import { useState } from "react";
+import { Diamond, TriangleAlert } from "lucide-react";
 import { Activity } from "@/lib/brava/types";
 import { buildTimeScale, monthTicks } from "@/lib/brava/timescale";
 import { formatShort } from "@/lib/brava/date-utils";
 import { useBravaData } from "@/lib/brava/context";
+import { useMaterialsData } from "@/lib/brava/materials/context";
+import { getMaterialsByActivity } from "@/lib/brava/materials/calculations";
+import { READY_STATUSES } from "@/lib/brava/materials/meta";
+import MaterialCriticalityBadge from "./materials/MaterialCriticalityBadge";
 import { cn } from "@/lib/brava/cn";
 import SectionHeading from "./SectionHeading";
 
@@ -14,6 +19,8 @@ const ROW_H = 38;
 
 export default function GanttChart({ activities }: { activities: Activity[] }) {
   const { today } = useBravaData();
+  const { materials } = useMaterialsData();
+  const [openActivityId, setOpenActivityId] = useState<string | null>(null);
   const ordered = [...activities].sort((a, b) => a.order - b.order);
   if (ordered.length === 0) return null;
 
@@ -96,8 +103,13 @@ export default function GanttChart({ activities }: { activities: Activity[] }) {
                     ? "bg-brava-blue"
                     : "bg-brava-border";
 
+              const pendingMaterials = getMaterialsByActivity(materials, activity.id).filter(
+                (m) => !READY_STATUSES.includes(m.status) && m.status !== "CANCELADO"
+              );
+              const isOpen = openActivityId === activity.id;
+
               return (
-                <div key={activity.id} className="flex items-center" style={{ height: ROW_H }}>
+                <div key={activity.id} className="relative flex items-center" style={{ height: ROW_H }}>
                   <div style={{ width: LABEL_W }} className="pr-3">
                     <p className="truncate text-[12px] font-medium text-brava-text" title={activity.name}>
                       {activity.name}
@@ -105,7 +117,42 @@ export default function GanttChart({ activities }: { activities: Activity[] }) {
                     <p className="text-[10px] text-brava-text-secondary">
                       {formatShort(activity.plannedStart)} – {formatShort(activity.plannedEnd)}
                     </p>
+                    {pendingMaterials.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setOpenActivityId(isOpen ? null : activity.id)}
+                        className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-brava-warning hover:underline"
+                      >
+                        <TriangleAlert className="h-3 w-3" strokeWidth={2} />
+                        Material Pendente
+                      </button>
+                    )}
                   </div>
+
+                  {isOpen && pendingMaterials.length > 0 && (
+                    <div
+                      className="absolute left-0 top-full z-20 mt-1 w-72 rounded-brava-md border border-brava-border bg-brava-white p-3 shadow-brava-lg"
+                      style={{ minWidth: LABEL_W }}
+                    >
+                      <p className="mb-2 text-[10.5px] font-bold uppercase tracking-wide text-brava-text-secondary">
+                        {pendingMaterials.length} material(is) pendente(s)
+                      </p>
+                      <ul className="space-y-2">
+                        {pendingMaterials.map((m) => (
+                          <li key={m.id} className="flex items-center justify-between gap-2 text-[12px]">
+                            <span className="min-w-0 truncate text-brava-text">{m.description}</span>
+                            <span className="flex shrink-0 items-center gap-1.5">
+                              <MaterialCriticalityBadge criticality={m.criticality} size="sm" />
+                              <span className="text-[10.5px] text-brava-text-secondary">
+                                {m.expectedDeliveryDate ? formatShort(m.expectedDeliveryDate) : "sem previsão"}
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   <div className="relative" style={{ width: CHART_W, height: ROW_H }}>
                     {showBaseline && (
                       <div

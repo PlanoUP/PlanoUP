@@ -6,6 +6,7 @@ import FeaturedTankCard from "@/components/brava/FeaturedTankCard";
 import UpcomingMilestones from "@/components/brava/UpcomingMilestones";
 import ProgramOverviewMini from "@/components/brava/ProgramOverviewMini";
 import TankControlGrid from "@/components/brava/TankControlGrid";
+import MaterialsHomeSummary from "@/components/brava/materials/MaterialsHomeSummary";
 
 export default function BravaOverviewPage() {
   return (
@@ -13,6 +14,7 @@ export default function BravaOverviewPage() {
       <HeroExecutive />
       <div className="space-y-10 px-5 py-8 sm:px-8 sm:py-10 lg:space-y-12">
         <KpiRow />
+        <MaterialsHomeSummary />
         <InspectionSummary />
         <UpcomingInspectionsTimeline />
 
