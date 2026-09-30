@@ -13,7 +13,7 @@ npm run build    # typecheck + build de produção
 npm run preview  # serve o build
 ```
 
-Requer Node.js 20.19+ (recomendado 22). Copie `.env.example` para `.env` para configurar o número do WhatsApp e
+Requer Node.js 22.x (fixado em `engines`). Copie `.env.example` para `.env` para configurar o número do WhatsApp e
 (futuramente) Supabase, Meta Pixel e GA4 — todas as variáveis são opcionais nesta fase.
 
 ```bash
