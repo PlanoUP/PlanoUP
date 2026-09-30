@@ -1,4 +1,4 @@
-import { useEffect, useState, type DependencyList } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 
 interface AsyncState<T> {
   data: T | undefined
@@ -6,27 +6,40 @@ interface AsyncState<T> {
   error: Error | null
 }
 
+interface Resolved<T> {
+  key: string
+  data: T | undefined
+  error: Error | null
+}
+
 /**
  * Executa uma função assíncrona (serviço de dados) e expõe loading/erro.
- * Descarta respostas obsoletas quando as dependências mudam.
+ * `key` identifica a consulta: quando muda, a função é executada novamente.
+ * Enquanto a nova consulta carrega, o último resultado continua disponível em `data`;
+ * respostas obsoletas são descartadas.
  */
-export function useAsyncData<T>(loader: () => Promise<T>, deps: DependencyList): AsyncState<T> {
-  const [state, setState] = useState<AsyncState<T>>({ data: undefined, loading: true, error: null })
+export function useAsyncData<T>(loader: () => Promise<T>, key: string): AsyncState<T> {
+  const [resolved, setResolved] = useState<Resolved<T> | null>(null)
+  const load = useEffectEvent(loader)
 
   useEffect(() => {
     let active = true
-    setState((prev) => ({ ...prev, loading: true, error: null }))
-    loader()
-      .then((data) => active && setState({ data, loading: false, error: null }))
-      .catch((error: unknown) =>
-        active &&
-        setState({ data: undefined, loading: false, error: error instanceof Error ? error : new Error(String(error)) }),
-      )
+    load()
+      .then((data) => {
+        if (active) setResolved({ key, data, error: null })
+      })
+      .catch((error: unknown) => {
+        if (active)
+          setResolved({ key, data: undefined, error: error instanceof Error ? error : new Error(String(error)) })
+      })
     return () => {
       active = false
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
+  }, [key])
 
-  return state
+  return {
+    data: resolved?.data,
+    loading: resolved?.key !== key,
+    error: resolved?.key === key ? resolved.error : null,
+  }
 }

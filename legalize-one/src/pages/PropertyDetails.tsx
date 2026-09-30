@@ -21,10 +21,10 @@ import { formatLocation, formatPropertyPrice } from '@/utils/format'
 
 export default function PropertyDetails() {
   const { slug = '' } = useParams()
-  const { data: property, loading } = useAsyncData(() => getPropertyBySlug(slug), [slug])
+  const { data: property, loading } = useAsyncData(() => getPropertyBySlug(slug), slug)
   const { data: related } = useAsyncData(
     () => (property ? listRelatedProperties(property) : Promise.resolve([])),
-    [property?.id],
+    property?.id ?? '',
   )
   const [imageState, setImageState] = useState({ slug, index: 0 })
   const activeImage = imageState.slug === slug ? imageState.index : 0

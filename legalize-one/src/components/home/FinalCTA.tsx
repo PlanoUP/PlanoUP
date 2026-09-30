@@ -4,7 +4,7 @@ import { SmartImage } from '@/components/ui/SmartImage'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { track } from '@/lib/analytics'
 import { whatsappLink } from '@/lib/whatsapp'
-import { unsplash } from '@/utils/media'
+import { unsplash } from '@/lib/images'
 
 const perks = [
   { icon: WhatsAppIcon, title: 'Atendimento rápido', text: 'via WhatsApp' },

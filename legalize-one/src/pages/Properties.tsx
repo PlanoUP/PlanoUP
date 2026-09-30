@@ -15,7 +15,7 @@ export default function Properties() {
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchParams])
   const filtersKey = searchParams.toString()
-  const { data: results, loading } = useAsyncData(() => listProperties(filters), [filtersKey])
+  const { data: results, loading } = useAsyncData(() => listProperties(filters), filtersKey)
 
   const purposeLabel = filters.purpose === 'aluguel' ? 'para alugar' : 'à venda'
   usePageTitle(`Imóveis ${purposeLabel}`)

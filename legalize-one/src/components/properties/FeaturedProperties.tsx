@@ -10,7 +10,7 @@ import { PropertyCard, PropertyCardSkeleton } from './PropertyCard'
 const cardWidth = 'w-[84%] shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-60px)/4)]'
 
 export function FeaturedProperties() {
-  const { data: properties, loading } = useAsyncData(() => listFeaturedProperties(), [])
+  const { data: properties, loading } = useAsyncData(() => listFeaturedProperties(), 'featured')
   const trackRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ start: true, end: false })
 

@@ -1,5 +1,5 @@
 import type { Property } from '@/types/property'
-import { unsplash } from '@/utils/media'
+import { unsplash } from '@/lib/images'
 
 /**
  * MOCK DATA — imóveis fictícios.

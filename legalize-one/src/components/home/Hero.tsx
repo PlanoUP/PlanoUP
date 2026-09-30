@@ -1,7 +1,7 @@
 import { ShieldCheck } from 'lucide-react'
 import { PropertySearch } from '@/components/forms/PropertySearch'
 import { SmartImage } from '@/components/ui/SmartImage'
-import { unsplash } from '@/utils/media'
+import { unsplash } from '@/lib/images'
 
 const heroImage = {
   src: unsplash('photo-1613490493576-7fde63acd811', 2200, 80),

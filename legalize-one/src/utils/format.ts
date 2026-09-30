@@ -28,7 +28,11 @@ export function pluralize(count: number, singular: string, plural: string): stri
 export function normalizeText(value: string): string {
   return value
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim()
+}
+
+export function bedroomLabel({ bedrooms, suites }: Pick<Property, 'bedrooms' | 'suites'>): string {
+  return suites > 0 && suites === bedrooms ? pluralize(suites, 'suíte', 'suítes') : pluralize(bedrooms, 'quarto', 'quartos')
 }

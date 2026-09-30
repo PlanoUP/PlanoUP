@@ -16,12 +16,14 @@ interface SmartImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src
 type Status = 'loading' | 'loaded' | 'error'
 
 /**
- * Imagem com fallback ilustrado: enquanto carrega ou se falhar,
- * exibe uma ilustração arquitetônica — nunca uma imagem quebrada.
+ * Imagem com fallback ilustrado: enquanto carrega, se falhar ou se não houver
+ * URL (ex.: Supabase Storage ainda não configurado), exibe uma ilustração
+ * arquitetônica — nunca uma imagem quebrada. A experiência não depende do
+ * provedor externo estar disponível. URLs são montadas em `lib/images.ts`.
  */
 export function SmartImage({ src, alt, fallback, className, imgClassName, loading = 'lazy', ...rest }: SmartImageProps) {
   const [state, setState] = useState<{ src: string; status: Status }>({ src, status: 'loading' })
-  const status = state.src === src ? state.status : 'loading'
+  const status: Status = !src ? 'error' : state.src === src ? state.status : 'loading'
 
   const handleRef = useCallback(
     (img: HTMLImageElement | null) => {

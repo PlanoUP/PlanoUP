@@ -8,7 +8,7 @@ import { getTourById } from '@/services/propertyService'
 const TOUR_PROPERTY_SLUG = 'casa-condominio-nova-parnamirim'
 
 export function Experience3D() {
-  const { data: tour } = useAsyncData(() => getTourById(), [])
+  const { data: tour } = useAsyncData(() => getTourById(), 'default-tour')
 
   return (
     <section id="tour-3d" aria-labelledby="tour-title" className="relative overflow-hidden bg-navy-950 text-white">

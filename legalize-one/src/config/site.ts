@@ -18,6 +18,8 @@ export const integrations = {
   supabase: {
     url: import.meta.env.VITE_SUPABASE_URL ?? '',
     anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY ?? '',
+    /** Bucket público das fotos dos imóveis (ver lib/images.ts). */
+    storageBucket: import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'imoveis',
   },
   metaPixelId: import.meta.env.VITE_META_PIXEL_ID ?? '',
   gaMeasurementId: import.meta.env.VITE_GA_MEASUREMENT_ID ?? '',

@@ -1,13 +1,9 @@
-import { lazy, Suspense, type ReactNode } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import { createBrowserRouter } from 'react-router'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import Home from '@/pages/Home'
 import NotFound from '@/pages/NotFound'
-
-// Páginas secundárias carregadas sob demanda.
-const Properties = lazy(() => import('@/pages/Properties'))
-const PropertyDetails = lazy(() => import('@/pages/PropertyDetails'))
-const Sell = lazy(() => import('@/pages/Sell'))
+import { Properties, PropertyDetails, Sell } from './lazyPages'
 
 function withSuspense(node: ReactNode) {
   return <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>{node}</Suspense>

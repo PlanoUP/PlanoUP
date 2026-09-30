@@ -10,7 +10,7 @@ import { usePageTitle } from '@/hooks/usePageTitle'
 import { track } from '@/lib/analytics'
 import { whatsappLink } from '@/lib/whatsapp'
 import { cn } from '@/utils/cn'
-import { unsplash } from '@/utils/media'
+import { unsplash } from '@/lib/images'
 
 interface SellLead {
   name: string

@@ -1,5 +1,5 @@
 import type { PropertyTour } from '@/types/tour'
-import { unsplash } from '@/utils/media'
+import { unsplash } from '@/lib/images'
 
 /**
  * MOCK DATA — tours 3D.

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { SmartImage } from '@/components/ui/SmartImage'
+import { resizeImage } from '@/lib/images'
 import type { TourScene } from '@/types/tour'
 import { cn } from '@/utils/cn'
 
@@ -45,7 +46,7 @@ export function SceneThumbnails({ scenes, activeId, onSelect }: SceneThumbnailsP
             )}
           >
             <SmartImage
-              src={scene.image.replace(/w=\d+/, 'w=240')}
+              src={resizeImage(scene.image, 240)}
               alt=""
               fallback={scene.fallback}
               className="absolute inset-0"

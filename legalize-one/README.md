@@ -13,7 +13,44 @@ npm run build    # typecheck + build de produção
 npm run preview  # serve o build
 ```
 
-Copie `.env.example` para `.env` para configurar o número do WhatsApp e (futuramente) Supabase, Meta Pixel e GA4.
+Requer Node.js 20.19+ (recomendado 22). Copie `.env.example` para `.env` para configurar o número do WhatsApp e
+(futuramente) Supabase, Meta Pixel e GA4 — todas as variáveis são opcionais nesta fase.
+
+```bash
+npm run lint       # oxlint
+npm run typecheck  # tsc -b
+```
+
+## Deploy na Vercel
+
+O app fica na subpasta `legalize-one/` do repositório (a raiz contém outro projeto, PlanoUP).
+
+| Configuração     | Valor                        |
+| ---------------- | ---------------------------- |
+| Root Directory   | `legalize-one`               |
+| Framework Preset | Vite                         |
+| Install Command  | `npm ci`                     |
+| Build Command    | `npm run build`              |
+| Output Directory | `dist`                       |
+| Node.js          | 22.x                         |
+
+`vercel.json` (dentro de `legalize-one/`) já define esses comandos, o fallback de SPA
+(qualquer rota que não seja arquivo estático → `index.html`, permitindo refresh em `/imoveis` e `/imovel/:slug`)
+e cache imutável para `/assets/*`. Arquivos inexistentes em `/assets/` retornam 404 real.
+
+### Variáveis de ambiente
+
+| Variável                       | Obrigatória | Uso                                                      |
+| ------------------------------ | ----------- | -------------------------------------------------------- |
+| `VITE_WHATSAPP_NUMBER`         | Não*        | WhatsApp de atendimento (dígitos com DDI+DDD)            |
+| `VITE_SUPABASE_URL`            | Não         | Futuro — ativa URLs do Supabase Storage em `lib/images`  |
+| `VITE_SUPABASE_ANON_KEY`       | Não         | Futuro                                                   |
+| `VITE_SUPABASE_STORAGE_BUCKET` | Não         | Futuro — bucket das fotos (padrão `imoveis`)             |
+| `VITE_META_PIXEL_ID`           | Não         | Futuro                                                   |
+| `VITE_GA_MEASUREMENT_ID`       | Não         | Futuro                                                   |
+
+\* Sem ela o site usa o número provisório `5584999999999`. Variáveis `VITE_*` são embutidas no bundle no build:
+após alterá-las na Vercel, faça um novo deploy.
 
 ## Rotas
 
@@ -41,7 +78,8 @@ src/
   config/           Marca, integrações, menu
   data/             MOCK DATA (imóveis, tours, filtros, textos)
   services/         Camada de dados (troca mock → Supabase aqui)
-  hooks/ lib/ utils/ types/ routes/ pages/
+  lib/              analytics, whatsapp, images (URLs de imagem)
+  hooks/ utils/ types/ routes/ pages/
 ```
 
 ## Pontos de integração
@@ -55,5 +93,12 @@ src/
 
 ## Imagens
 
-As fotos são do Unsplash. O componente `SmartImage` mostra uma ilustração arquitetônica (`SceneArt`)
-enquanto carrega ou se a foto falhar, então nenhuma imagem aparece quebrada.
+URLs de imagem são montadas em `src/lib/images.ts`:
+
+- `unsplash(id, largura)` — fotos de demonstração atuais;
+- `storageImage('pasta/arquivo.jpg', { width })` — Supabase Storage (retorna vazio enquanto não configurado);
+- `resizeImage(src, largura)` — variação de largura respeitando o provedor (usado nas miniaturas do tour).
+
+O `SmartImage` exibe a ilustração arquitetônica (`SceneArt`) enquanto a foto carrega, se ela falhar ou se a URL
+estiver vazia — a experiência não depende do Unsplash estar disponível. Migrar para o Supabase Storage é trocar as
+chamadas `unsplash(...)` por `storageImage(...)` nos dados, sem alterar componentes.

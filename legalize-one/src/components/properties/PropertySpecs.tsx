@@ -1,13 +1,9 @@
 import { Bath, BedDouble, Car, Ruler } from 'lucide-react'
 import type { Property } from '@/types/property'
 import { cn } from '@/utils/cn'
-import { pluralize } from '@/utils/format'
+import { bedroomLabel, pluralize } from '@/utils/format'
 
 type Specs = Pick<Property, 'area' | 'bedrooms' | 'suites' | 'bathrooms' | 'parking'>
-
-export function bedroomLabel({ bedrooms, suites }: Pick<Property, 'bedrooms' | 'suites'>): string {
-  return suites > 0 && suites === bedrooms ? pluralize(suites, 'suíte', 'suítes') : pluralize(bedrooms, 'quarto', 'quartos')
-}
 
 export function PropertySpecs({ property, size = 'sm', className }: { property: Specs; size?: 'sm' | 'md'; className?: string }) {
   const items = [
