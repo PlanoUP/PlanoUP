@@ -85,11 +85,52 @@ src/
 ## Pontos de integração
 
 - **Supabase**: `src/services/propertyService.ts` — as funções já são assíncronas; basta trocar o corpo.
-- **Tour 3D**: `PropertyTour` (`src/types/tour.ts`) suporta `tourType` = `mock | matterport | kuula | iframe`,
-  `tourUrl`, `scenes` e `hotspots`. Com `tourType` diferente de `mock` e `tourUrl`, o componente renderiza o iframe do provedor.
+- **Tour 3D**: ver a seção _Legalize 3D Experience_ abaixo.
 - **Analytics / Meta Pixel**: `src/lib/analytics.ts` — todos os eventos (busca, WhatsApp, tour, lead) passam por `track()`,
   que já envia para `dataLayer`, `fbq` e `gtag` quando presentes.
 - **WhatsApp**: `src/lib/whatsapp.ts` + `VITE_WHATSAPP_NUMBER`.
+
+## Legalize 3D Experience
+
+Fluxo: **entrada** (`TourEntry` / `TourCtaCard`) → **modo imersivo** (`ImmersiveTour`, chunk carregado sob demanda).
+
+- `useTourLauncher` abre o tour pela URL (`?tour=<cena>`): o "voltar" do celular fecha o tour, e links diretos
+  (`/imovel/<slug>?tour=cozinha`) abrem no ambiente escolhido.
+- Modo imersivo: topo (fechar, imóvel, ambiente, contador, tela cheia) · centro (renderizador) · base (ambientes,
+  planta, anterior/próximo). Controles recolhem após 4s sem interação; fechar nunca some. Esc fecha o card e depois o tour.
+- Planta: painel sincronizado no desktop; bottom sheet no mobile/tablet. Tocar em um cômodo navega para a cena.
+- Hotspots: `navigation` (pílula com destino), `info` (ponto "+") e `feature` (destaque comercial dourado).
+- Transição entre ambientes: a cena atual "avança" em direção ao ponto clicado enquanto a nova surge (desligada com
+  `prefers-reduced-motion`).
+
+### Dois modos (`src/types/tour.ts`)
+
+| Modo       | `tourType`                     | Renderizador (`components/tour/renderers`)                  |
+| ---------- | ------------------------------ | ----------------------------------------------------------- |
+| `tour-360` | `mock`, `panorama`             | `PanoramaRenderer` (hoje: panorâmica plana arrastável)      |
+| externo    | `matterport`, `kuula`, `iframe` | `EmbedRenderer` (iframe, só monta no modo imersivo)        |
+| `model-3d` | `model` (+ `tour.model` GLB/GLTF) | `ModelRenderer` (chunk lazy; ponto de entrada da engine) |
+
+Todos seguem `TourRendererProps`, então a interface imersiva não muda com a tecnologia.
+
+- **360 real**: cenas com `panorama: { src, projection: 'equirectangular', initialPan }` e hotspots com
+  `spherical: { yaw, pitch }`. Falta apenas um renderizador WebGL esférico com o mesmo contrato.
+- **GLB/GLTF**: `tour.model: { format, url, poster, unitsPerMeter }`, cenas com `viewpoint: { position, target }` e
+  hotspots com `point: [x, y, z]`. A engine (Three.js/React Three Fiber) entra em `ModelRenderer` sem pesar no resto.
+
+### Eventos
+
+`tour_entry_viewed`, `tour_started`, `tour_opened`, `tour_scene_changed` (`source`), `tour_hotspot_clicked` (`kind`),
+`tour_floorplan_opened` (`surface`), `tour_fullscreen_entered`, `tour_completed`, `tour_closed`,
+`property_tour_cta_clicked`, `property_whatsapp_clicked`, `property_schedule_clicked`, `filters_opened`.
+
+## Mobile
+
+- Busca: no celular, "Onde você quer morar?" + filtros em bottom sheet (contagem ao vivo); tablet/desktop mantêm o formulário completo.
+- CTA fixo (`MobileStickyCTA`): some com camadas abertas (tour, filtros, menu), teclado ativo e enquanto a busca do hero
+  está visível; páginas podem trocar as ações (`setStickyActions`) — no imóvel: WhatsApp + Agendar visita.
+- Camadas (`useModal` + `lib/uiStore`): Esc fecha só a do topo, foco preso e devolvido, scroll travado.
+- Campos com fonte ≥ 16px abaixo de `lg` (sem zoom automático no iOS) e alvos de toque ≥ 44px.
 
 ## Imagens
 
@@ -97,7 +138,8 @@ URLs de imagem são montadas em `src/lib/images.ts`:
 
 - `unsplash(id, largura)` — fotos de demonstração atuais;
 - `storageImage('pasta/arquivo.jpg', { width })` — Supabase Storage (retorna vazio enquanto não configurado);
-- `resizeImage(src, largura)` — variação de largura respeitando o provedor (usado nas miniaturas do tour).
+- `resizeImage(src, largura)` — variação de largura respeitando o provedor (usado nas miniaturas do tour);
+- `buildSrcSet(src)` — usado pelo `SmartImage` quando recebe `sizes`, para o celular não baixar fotos de 2000px.
 
 O `SmartImage` exibe a ilustração arquitetônica (`SceneArt`) enquanto a foto carrega, se ela falhar ou se a URL
 estiver vazia — a experiência não depende do Unsplash estar disponível. Migrar para o Supabase Storage é trocar as

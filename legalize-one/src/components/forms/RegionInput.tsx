@@ -9,11 +9,21 @@ interface RegionInputProps {
   value: string
   suggestions: string[]
   onChange: (value: string) => void
+  label?: string
+  placeholder?: string
   className?: string
 }
 
 /** Campo de região com autocomplete acessível (combobox). */
-export function RegionInput({ id, value, suggestions, onChange, className }: RegionInputProps) {
+export function RegionInput({
+  id,
+  value,
+  suggestions,
+  onChange,
+  label = 'Região',
+  placeholder = 'Ex: Parnamirim, Natal',
+  className,
+}: RegionInputProps) {
   const listId = useId()
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
@@ -50,11 +60,12 @@ export function RegionInput({ id, value, suggestions, onChange, className }: Reg
 
   return (
     <FieldShell
-      label="Região"
+      label={label}
       htmlFor={id}
       className={className}
       icon={<MapPin className="size-5 shrink-0 text-navy-950" strokeWidth={1.8} aria-hidden="true" />}
     >
+      <span className="h-6" aria-hidden="true" />
       <input
         id={id}
         type="text"
@@ -64,7 +75,9 @@ export function RegionInput({ id, value, suggestions, onChange, className }: Reg
         aria-autocomplete="list"
         aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
         autoComplete="off"
-        placeholder="Ex: Parnamirim, Natal"
+        placeholder={placeholder}
+        enterKeyHint="search"
+        autoCapitalize="words"
         value={value}
         onChange={(e) => {
           onChange(e.target.value)
@@ -74,7 +87,7 @@ export function RegionInput({ id, value, suggestions, onChange, className }: Reg
         onFocus={() => setOpen(true)}
         onBlur={() => window.setTimeout(() => setOpen(false), 120)}
         onKeyDown={onKeyDown}
-        className="w-full bg-transparent text-[13.5px] text-navy-950 outline-none placeholder:text-slate"
+        className="absolute inset-0 w-full rounded-xl bg-transparent pt-[26px] pr-4 pl-12 text-base text-navy-950 outline-none placeholder:text-slate lg:text-[13.5px]"
       />
       {showList && (
         <ul
@@ -93,7 +106,7 @@ export function RegionInput({ id, value, suggestions, onChange, className }: Reg
                 select(option)
               }}
               className={cn(
-                'flex cursor-pointer items-center gap-2.5 px-4 py-2.5 text-[13.5px] text-navy-950',
+                'flex min-h-11 cursor-pointer items-center gap-2.5 px-4 py-2.5 text-[15px] text-navy-950 lg:text-[13.5px]',
                 i === active ? 'bg-sand' : 'hover:bg-sand',
               )}
             >

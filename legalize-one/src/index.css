@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Telas baixas (celular em paisagem): compacta a interface do tour. */
+@custom-variant short (@media (max-height: 520px));
+
 @theme {
   /* Paleta Legalize */
   --color-white: #ffffff;
@@ -26,6 +29,11 @@
   --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-pop: pop 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-tour-enter: tour-enter 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-sheet-up: sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-in: fade-in 0.3s ease-out both;
+  --animate-scene-in: scene-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-scene-out: scene-out 0.45s cubic-bezier(0.4, 0, 0.6, 1) both;
+  --animate-poster-pan: poster-pan 26s ease-in-out infinite alternate;
   --animate-pulse-ring: pulse-ring 2.2s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
 
   @keyframes fade-up {
@@ -56,6 +64,53 @@
     to {
       opacity: 1;
       scale: 1;
+    }
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  /* Troca de ambiente: a cena nova surge com leve aproximação... */
+  @keyframes scene-in {
+    from {
+      opacity: 0;
+      scale: 1.045;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+  /* ...e a anterior "avança" em direção ao ponto escolhido enquanto some. */
+  @keyframes scene-out {
+    from {
+      opacity: 1;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: 1.14;
+    }
+  }
+  /* Movimento lento da capa do tour (entrada). */
+  @keyframes poster-pan {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: -23% 0;
     }
   }
   @keyframes pulse-ring {

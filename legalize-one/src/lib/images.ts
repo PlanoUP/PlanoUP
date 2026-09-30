@@ -47,3 +47,16 @@ export function resizeImage(src: string, width: number): string {
     return src
   }
 }
+
+const SRCSET_WIDTHS = [480, 768, 1080, 1440, 2000]
+
+/**
+ * `srcSet` responsivo para provedores com redimensionamento (Unsplash, Supabase).
+ * Retorna `undefined` para outras URLs (ex.: arquivos locais).
+ */
+export function buildSrcSet(src: string, widths: number[] = SRCSET_WIDTHS): string | undefined {
+  if (!src) return undefined
+  const variants = widths.map((w) => [resizeImage(src, w), w] as const)
+  if (variants.every(([url]) => url === src)) return undefined
+  return variants.map(([url, w]) => `${url} ${w}w`).join(', ')
+}

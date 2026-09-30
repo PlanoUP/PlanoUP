@@ -1,5 +1,6 @@
 import { useCallback, useState, type ImgHTMLAttributes } from 'react'
 import { SceneArt } from '@/components/illustrations/SceneArt'
+import { buildSrcSet } from '@/lib/images'
 import type { SceneArtVariant } from '@/types/media'
 import { cn } from '@/utils/cn'
 
@@ -11,6 +12,8 @@ interface SmartImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src
   className?: string
   /** Classes aplicadas à imagem (object-position, transform...). */
   imgClassName?: string
+  /** Quando informado, gera `srcSet` responsivo (evita baixar fotos grandes no celular). */
+  sizes?: string
 }
 
 type Status = 'loading' | 'loaded' | 'error'
@@ -21,7 +24,7 @@ type Status = 'loading' | 'loaded' | 'error'
  * arquitetônica — nunca uma imagem quebrada. A experiência não depende do
  * provedor externo estar disponível. URLs são montadas em `lib/images.ts`.
  */
-export function SmartImage({ src, alt, fallback, className, imgClassName, loading = 'lazy', ...rest }: SmartImageProps) {
+export function SmartImage({ src, alt, fallback, className, imgClassName, sizes, loading = 'lazy', ...rest }: SmartImageProps) {
   const [state, setState] = useState<{ src: string; status: Status }>({ src, status: 'loading' })
   const status: Status = !src ? 'error' : state.src === src ? state.status : 'loading'
 
@@ -41,6 +44,8 @@ export function SmartImage({ src, alt, fallback, className, imgClassName, loadin
         <img
           ref={handleRef}
           src={src}
+          srcSet={sizes ? buildSrcSet(src) : undefined}
+          sizes={sizes}
           alt={alt}
           loading={loading}
           decoding="async"

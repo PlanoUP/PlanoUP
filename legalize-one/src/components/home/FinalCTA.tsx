@@ -19,6 +19,7 @@ export function FinalCTA() {
         src={unsplash('photo-1483729558449-99ef09a8c325', 2200, 75)}
         alt=""
         fallback="coast"
+        sizes="100vw"
         className="absolute inset-0 -z-10"
         imgClassName="object-[70%_center]"
       />

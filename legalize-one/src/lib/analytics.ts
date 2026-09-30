@@ -6,11 +6,23 @@ export type AnalyticsEvent =
   | 'search_submitted'
   | 'property_viewed'
   | 'property_favorited'
-  | 'tour_opened'
-  | 'tour_hotspot_clicked'
-  | 'tour_scene_changed'
   | 'whatsapp_clicked'
   | 'lead_submitted'
+  | 'filters_opened'
+  // Tour 3D (funil: entrada vista → início → cenas/hotspots → conclusão)
+  | 'tour_entry_viewed'
+  | 'tour_started'
+  | 'tour_opened'
+  | 'tour_scene_changed'
+  | 'tour_hotspot_clicked'
+  | 'tour_floorplan_opened'
+  | 'tour_fullscreen_entered'
+  | 'tour_completed'
+  | 'tour_closed'
+  // Página do imóvel
+  | 'property_whatsapp_clicked'
+  | 'property_schedule_clicked'
+  | 'property_tour_cta_clicked'
 
 type EventPayload = Record<string, string | number | boolean | undefined>
 
@@ -26,6 +38,8 @@ const metaStandardEvents: Partial<Record<AnalyticsEvent, string>> = {
   search_submitted: 'Search',
   property_viewed: 'ViewContent',
   whatsapp_clicked: 'Contact',
+  property_whatsapp_clicked: 'Contact',
+  property_schedule_clicked: 'Schedule',
   lead_submitted: 'Lead',
 }
 

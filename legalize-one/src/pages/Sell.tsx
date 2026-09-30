@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type FocusEvent, type FormEvent, type ReactNode } from 'react'
 import { Button, ButtonAnchor } from '@/components/ui/Button'
 import { IconCircle } from '@/components/ui/IconCircle'
 import { SmartImage } from '@/components/ui/SmartImage'
@@ -47,7 +47,11 @@ export default function Sell() {
     if (lead.phone.replace(/\D/g, '').length < 10) next.phone = 'Informe um telefone válido com DDD.'
     if (!lead.neighborhood.trim()) next.neighborhood = 'Informe o bairro ou cidade.'
     setErrors(next)
-    if (Object.keys(next).length) return
+    const firstInvalid = (['name', 'phone', 'neighborhood'] as const).find((k) => next[k])
+    if (firstInvalid) {
+      document.getElementById(`lead-${firstInvalid}`)?.focus()
+      return
+    }
     // Futuro: persistir em `leads` no Supabase.
     track('lead_submitted', { source: 'sell_page', type: lead.type, has_docs: lead.hasDocs })
     setSent(true)
@@ -62,31 +66,24 @@ export default function Sell() {
           src={unsplash('photo-1600585154340-be6161a56a0c', 2000, 75)}
           alt=""
           fallback="townhouse"
+          sizes="100vw"
           className="absolute inset-0 -z-10"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-navy-950 via-navy-950/90 to-navy-950/40" />
-        <div className="container-page grid gap-12 py-14 sm:py-20 lg:grid-cols-[1fr_440px] lg:items-center">
-          <div>
+        {/* Mobile: título → formulário → etapas. Desktop: texto e etapas à esquerda, formulário à direita. */}
+        <div className="container-page grid gap-8 py-10 sm:py-20 lg:grid-cols-[1fr_440px] lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:gap-y-10">
+          <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
             <p className="eyebrow text-[11px] text-gold-400">Vender com a Legalize</p>
-            <h1 className="mt-4 font-display text-[40px] leading-[0.98] font-extrabold tracking-[-0.05em] sm:text-[58px]">
+            <h1 className="mt-3 font-display text-[clamp(34px,10vw,40px)] leading-[0.98] font-extrabold tracking-[-0.05em] sm:mt-4 sm:text-[58px]">
               Venda seu imóvel
               <span className="block text-gold-400">com segurança jurídica.</span>
             </h1>
-            <p className="mt-5 max-w-lg text-[15.5px] leading-relaxed text-white/80">
+            <p className="mt-4 max-w-lg text-[15.5px] leading-relaxed text-white/80 sm:mt-5">
               Cuidamos da documentação, da divulgação estratégica e da negociação — do documento à chave.
             </p>
-            <ul className="mt-10 grid gap-5 sm:grid-cols-3">
-              {sellSteps.map((step) => (
-                <li key={step.title}>
-                  <IconCircle icon={step.icon} size="md" />
-                  <p className="mt-3 font-display text-[15px] font-semibold">{step.title}</p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-white/65">{step.description}</p>
-                </li>
-              ))}
-            </ul>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 text-navy-950 shadow-2xl sm:p-7">
+          <div className="rounded-2xl bg-white p-5 text-navy-950 shadow-2xl sm:p-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
             {sent ? (
               <div className="py-6 text-center" role="status">
                 <CheckCircle2 className="mx-auto size-12 text-[#3f9a6b]" strokeWidth={1.5} />
@@ -117,38 +114,47 @@ export default function Sell() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={submit} noValidate>
+              <form onSubmit={submit} noValidate onFocus={keepFieldVisible}>
                 <h2 className="font-display text-[22px] font-bold tracking-[-0.03em]">Avaliação gratuita</h2>
                 <p className="mt-1 text-[13.5px] text-slate">Resposta em até 1 dia útil.</p>
                 <div className="mt-5 space-y-3.5">
-                  <Field label="Nome" error={errors.name}>
+                  <Field id="lead-name" label="Nome" error={errors.name}>
                     <input
+                      {...fieldProps('lead-name', errors.name)}
+                      type="text"
                       value={lead.name}
                       onChange={(e) => update('name', e.target.value)}
                       autoComplete="name"
-                      className={inputClass(errors.name)}
+                      autoCapitalize="words"
+                      enterKeyHint="next"
                     />
                   </Field>
-                  <Field label="WhatsApp" error={errors.phone}>
+                  <Field id="lead-phone" label="WhatsApp" error={errors.phone}>
                     <input
+                      {...fieldProps('lead-phone', errors.phone)}
+                      type="tel"
                       value={lead.phone}
                       onChange={(e) => update('phone', formatPhone(e.target.value))}
                       inputMode="tel"
-                      autoComplete="tel"
+                      autoComplete="tel-national"
+                      enterKeyHint="next"
                       placeholder="(84) 99999-9999"
-                      className={inputClass(errors.phone)}
                     />
                   </Field>
                   <div className="grid gap-3.5 sm:grid-cols-2">
-                    <Field label="Bairro / cidade" error={errors.neighborhood}>
+                    <Field id="lead-neighborhood" label="Bairro / cidade" error={errors.neighborhood}>
                       <input
+                        {...fieldProps('lead-neighborhood', errors.neighborhood)}
+                        type="text"
                         value={lead.neighborhood}
                         onChange={(e) => update('neighborhood', e.target.value)}
-                        className={inputClass(errors.neighborhood)}
+                        autoComplete="address-level2"
+                        autoCapitalize="words"
+                        enterKeyHint="done"
                       />
                     </Field>
-                    <Field label="Tipo de imóvel">
-                      <select value={lead.type} onChange={(e) => update('type', e.target.value)} className={inputClass()}>
+                    <Field id="lead-type" label="Tipo de imóvel">
+                      <select id="lead-type" value={lead.type} onChange={(e) => update('type', e.target.value)} className={inputClass()}>
                         {propertyTypeOptions.map((opt) => (
                           <option key={opt.value} value={opt.value === '' ? '' : opt.label}>
                             {opt.value === '' ? 'Selecione' : opt.label}
@@ -158,7 +164,7 @@ export default function Sell() {
                     </Field>
                   </div>
                   <fieldset>
-                    <legend className="text-[12.5px] font-semibold">A documentação está em dia?</legend>
+                    <legend className="text-[13px] font-semibold">A documentação está em dia?</legend>
                     <div className="mt-2 grid grid-cols-3 gap-2">
                       {(
                         [
@@ -170,7 +176,7 @@ export default function Sell() {
                         <label
                           key={value}
                           className={cn(
-                            'flex h-10 cursor-pointer items-center justify-center rounded-lg border text-[13px] font-medium transition-colors',
+                            'flex h-12 cursor-pointer items-center justify-center rounded-lg border text-[14px] font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold-500',
                             lead.hasDocs === value
                               ? 'border-navy-800 bg-navy-800 text-white'
                               : 'border-navy-950/12 hover:border-navy-950/30',
@@ -200,25 +206,57 @@ export default function Sell() {
               </form>
             )}
           </div>
+
+          <ul className="grid gap-5 sm:grid-cols-3 lg:col-start-1 lg:row-start-2">
+            {sellSteps.map((step) => (
+              <li key={step.title}>
+                <IconCircle icon={step.icon} size="md" />
+                <p className="mt-3 font-display text-[15px] font-semibold">{step.title}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-white/65">{step.description}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </>
   )
 }
 
+/** Com o teclado virtual aberto, centraliza o campo focado para ele não ficar escondido. */
+function keepFieldVisible(e: FocusEvent<HTMLFormElement>) {
+  const target = e.target
+  if (!(target instanceof HTMLElement) || window.innerWidth >= 1024) return
+  window.setTimeout(() => target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300)
+}
+
 function inputClass(error?: string) {
   return cn(
-    'mt-1.5 h-11 w-full rounded-lg border bg-white px-3.5 text-[14px] text-navy-950 outline-none transition-colors placeholder:text-slate/70 focus:border-navy-800',
+    'mt-1.5 h-12 w-full rounded-lg border bg-white px-3.5 text-base text-navy-950 outline-none transition-colors placeholder:text-slate/70 focus:border-navy-800 focus:ring-2 focus:ring-navy-800/15 lg:h-11 lg:text-[14px]',
     error ? 'border-red-400' : 'border-navy-950/12',
   )
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
+function fieldProps(id: string, error?: string) {
+  return {
+    id,
+    className: inputClass(error),
+    'aria-invalid': error ? true : undefined,
+    'aria-describedby': error ? `${id}-error` : undefined,
+  }
+}
+
+function Field({ id, label, error, children }: { id: string; label: string; error?: string; children: ReactNode }) {
   return (
-    <label className="block">
-      <span className="text-[12.5px] font-semibold">{label}</span>
+    <div>
+      <label htmlFor={id} className="text-[13px] font-semibold">
+        {label}
+      </label>
       {children}
-      {error && <span className="mt-1 block text-[12px] text-red-600">{error}</span>}
-    </label>
+      {error && (
+        <p id={`${id}-error`} className="mt-1.5 text-[13px] text-red-600">
+          {error}
+        </p>
+      )}
+    </div>
   )
 }

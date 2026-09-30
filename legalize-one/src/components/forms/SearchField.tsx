@@ -22,7 +22,7 @@ export function FieldShell({ label, htmlFor, icon, children, className }: FieldS
     >
       {icon}
       <div className="flex min-w-0 flex-1 flex-col">
-        <label htmlFor={htmlFor} className="text-[12px] font-semibold text-navy-950">
+        <label htmlFor={htmlFor} className="pointer-events-none text-[12px] font-semibold text-navy-950">
           {label}
         </label>
         {children}
@@ -40,14 +40,16 @@ interface SearchSelectProps<T extends string> {
   className?: string
 }
 
+/** Select nativo ocupando a caixa inteira (toda a área é tocável). */
 export function SearchSelect<T extends string>({ id, label, value, options, onChange, className }: SearchSelectProps<T>) {
   return (
     <FieldShell label={label} htmlFor={id} className={className}>
+      <span className="h-5" aria-hidden="true" />
       <select
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
-        className="w-full cursor-pointer appearance-none truncate bg-transparent pr-6 text-[13.5px] text-slate outline-none"
+        className="absolute inset-0 w-full cursor-pointer appearance-none truncate rounded-xl bg-transparent pt-[26px] pr-10 pl-4 text-base text-slate outline-none lg:text-[13.5px]"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

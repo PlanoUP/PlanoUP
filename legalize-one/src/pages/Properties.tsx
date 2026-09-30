@@ -41,25 +41,25 @@ export default function Properties() {
 
   return (
     <>
-      <section className="bg-navy-950 pt-10 pb-24 text-white sm:pt-14">
+      <section className="bg-navy-950 pt-7 pb-20 text-white sm:pt-14 sm:pb-24">
         <div className="container-page">
           <p className="eyebrow text-[11px] text-gold-400">Imóveis Legalize</p>
-          <h1 className="mt-3 font-display text-[34px] leading-[1.02] font-extrabold tracking-[-0.045em] sm:text-[48px]">
+          <h1 className="mt-3 font-display text-[30px] leading-[1.02] font-extrabold tracking-[-0.045em] sm:text-[48px]">
             Imóveis {purposeLabel}
           </h1>
-          <p className="mt-3 max-w-xl text-[15px] text-white/75">
+          <p className="mt-2 max-w-xl text-[14.5px] text-white/75 sm:mt-3 sm:text-[15px]">
             Todos os imóveis passam por curadoria. Filtre por região, tipo, faixa de preço e quartos.
           </p>
         </div>
       </section>
 
       <section className="bg-sand pb-16">
-        <div className="container-page -mt-16">
+        <div className="container-page -mt-14 sm:-mt-16">
           <PropertySearch variant="panel" initialFilters={filters} onSearch={apply} className="relative z-10" />
 
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="mr-2 text-[14px] text-navy-950" aria-live="polite">
+              <p className="mr-1 text-[15px] text-navy-950" aria-live="polite">
                 <strong className="font-semibold">{results?.length ?? 0}</strong>{' '}
                 {results?.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
               </p>
@@ -68,20 +68,30 @@ export default function Properties() {
                   key={chip.key}
                   type="button"
                   onClick={() => removeChip(chip.key)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-navy-950/10 bg-white py-1 pr-2 pl-3 text-[12.5px] text-navy-950 hover:border-navy-950/25"
+                  aria-label={`Remover filtro: ${chip.label}`}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full border border-navy-950/10 bg-white pr-2.5 pl-3.5 text-[13px] text-navy-950 hover:border-navy-950/25"
                 >
                   {chip.label}
-                  <X className="size-3.5 text-slate" aria-label="Remover filtro" />
+                  <X className="size-4 text-slate" aria-hidden="true" />
                 </button>
               ))}
+              {chips.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => apply({ ...filters, region: '', type: '', priceRange: '', bedrooms: 0 })}
+                  className="inline-flex h-10 items-center px-2 text-[13.5px] font-semibold text-navy-800 underline-offset-4 hover:underline"
+                >
+                  Limpar filtros
+                </button>
+              )}
             </div>
-            <label className="flex items-center gap-2 text-[13px] text-slate">
+            <label className="flex items-center gap-2 self-start text-[13px] text-slate sm:self-auto">
               <ArrowUpDown className="size-4" aria-hidden="true" />
-              <span className="sr-only sm:not-sr-only">Ordenar por</span>
+              <span>Ordenar por</span>
               <select
                 value={filters.sort}
                 onChange={(e) => apply({ ...filters, sort: e.target.value as SortOption })}
-                className="h-10 cursor-pointer rounded-full border border-navy-950/10 bg-white px-4 text-[13px] font-medium text-navy-950 outline-none focus:border-navy-800"
+                className="h-11 cursor-pointer rounded-full border border-navy-950/10 bg-white px-4 text-base font-medium text-navy-950 outline-none focus:border-navy-800 lg:text-[13px]"
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>

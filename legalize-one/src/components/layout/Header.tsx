@@ -1,10 +1,11 @@
 import { ArrowRight, Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, type Location } from 'react-router'
 import { ButtonAnchor } from '@/components/ui/Button'
 import { Logo } from '@/components/ui/Logo'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
-import { mainNav, type NavItem } from '@/config/site'
+import { mainNav, site, type NavItem } from '@/config/site'
+import { useModal } from '@/hooks/useModal'
 import { track } from '@/lib/analytics'
 import { whatsappLink } from '@/lib/whatsapp'
 import { cn } from '@/utils/cn'
@@ -42,12 +43,9 @@ export function Header() {
     setOpen(false)
   }
 
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [open])
+  // Menu aberto = camada: trava o scroll, Esc fecha, esconde o CTA fixo e devolve o foco ao botão.
+  const menuRef = useRef<HTMLDivElement>(null)
+  useModal(menuRef, open, () => setOpen(false), { trapFocus: false })
 
   return (
     <>
@@ -57,7 +55,7 @@ export function Header() {
         scrolled ? 'border-navy-950/8 shadow-[0_6px_24px_-18px_rgb(7_27_46/0.5)]' : 'border-transparent',
       )}
     >
-      <div className="container-page flex h-[68px] items-center justify-between gap-6 lg:h-[76px]">
+      <div className="container-page flex h-16 items-center justify-between gap-4 lg:h-[76px] lg:gap-6">
         <Logo />
 
         <nav aria-label="Principal" className="hidden lg:block">
@@ -118,12 +116,13 @@ export function Header() {
       {/* Menu mobile (fora do header: o backdrop-filter criaria outro contexto para `fixed`) */}
       <div
         id="mobile-menu"
+        ref={menuRef}
         className={cn(
-          'fixed inset-x-0 top-[68px] bottom-0 z-40 bg-white transition-all duration-300 lg:hidden',
+          'fixed inset-x-0 top-16 bottom-0 z-[60] overflow-y-auto overscroll-contain bg-white transition-all duration-300 lg:hidden',
           open ? 'visible opacity-100' : 'invisible opacity-0',
         )}
       >
-        <nav aria-label="Menu mobile" className="container-page flex h-full flex-col pt-4 pb-8">
+        <nav aria-label="Menu mobile" className="container-page flex min-h-full flex-col pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           <ul className="divide-y divide-navy-950/8">
             {mainNav.map((item, i) => (
               <li key={item.label} style={{ transitionDelay: open ? `${i * 30}ms` : '0ms' }}
@@ -132,7 +131,7 @@ export function Header() {
                   to={item.to}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    'flex items-center justify-between py-4 font-display text-[22px] tracking-[-0.02em]',
+                    'flex min-h-14 items-center justify-between py-3 font-display text-[21px] tracking-[-0.02em]',
                     isActive(item, location) ? 'font-bold text-navy-950' : 'font-medium text-navy-950/80',
                   )}
                 >
@@ -142,17 +141,22 @@ export function Header() {
               </li>
             ))}
           </ul>
-          <ButtonAnchor
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            size="lg"
-            className="mt-auto w-full"
-            onClick={() => track('whatsapp_clicked', { placement: 'mobile_menu' })}
-          >
-            <WhatsAppIcon className="size-5" />
-            Fale com um especialista
-          </ButtonAnchor>
+          <div className="mt-auto space-y-3 pt-8">
+            <ButtonAnchor
+              href={whatsappLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="lg"
+              className="w-full"
+              onClick={() => track('whatsapp_clicked', { placement: 'mobile_menu' })}
+            >
+              <WhatsAppIcon className="size-5" />
+              Fale com um especialista
+            </ButtonAnchor>
+            <p className="text-center text-[13px] text-slate">
+              {site.phoneDisplay} · Seg. a sáb., 8h às 18h
+            </p>
+          </div>
         </nav>
       </div>
     </>

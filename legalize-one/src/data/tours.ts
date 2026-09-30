@@ -49,6 +49,7 @@ export const tours: PropertyTour[] = [
         fallback: 'living',
         floorId: 'terreo',
         roomId: 'sala',
+        panorama: { projection: 'flat' },
         heading: 35,
         hotspots: [
           {
@@ -70,6 +71,15 @@ export const tours: PropertyTour[] = [
             description: 'Piso contínuo entre sala, cozinha e varanda, com rodapé embutido.',
           },
           {
+            id: 'sala-automacao',
+            kind: 'feature',
+            x: 36,
+            y: 52,
+            title: 'Preparação para automação',
+            highlight: 'Iluminação e persianas',
+            description: 'Infraestrutura pronta para automação de iluminação, persianas e climatização por aplicativo.',
+          },
+          {
             id: 'sala-para-cozinha',
             kind: 'navigation',
             x: 65,
@@ -87,14 +97,15 @@ export const tours: PropertyTour[] = [
         fallback: 'kitchen',
         floorId: 'terreo',
         roomId: 'cozinha',
+        panorama: { projection: 'flat' },
         heading: 90,
         hotspots: [
           {
             id: 'cozinha-ilha',
-            kind: 'info',
+            kind: 'feature',
             x: 48,
             y: 64,
-            title: 'Ilha em quartzo',
+            title: 'Bancada em quartzo',
             highlight: '3,20 m de bancada',
             description: 'Ilha central com cooktop por indução e espaço para refeições rápidas.',
           },
@@ -124,6 +135,7 @@ export const tours: PropertyTour[] = [
         fallback: 'suite',
         floorId: 'superior',
         roomId: 'suite-master',
+        panorama: { projection: 'flat' },
         heading: 160,
         hotspots: [
           {
@@ -137,11 +149,21 @@ export const tours: PropertyTour[] = [
           },
           {
             id: 'suite-varanda',
-            kind: 'info',
+            kind: 'feature',
             x: 59,
             y: 40,
-            title: 'Varanda privativa',
+            title: 'Suíte master com varanda',
+            highlight: 'Vista para o jardim',
             description: 'Vista para o jardim e para a piscina, com proteção solar.',
+          },
+          {
+            id: 'suite-para-sala',
+            kind: 'navigation',
+            x: 66,
+            y: 62,
+            title: 'Descer para a sala',
+            description: 'Escada em granito com iluminação de LED.',
+            targetSceneId: 'sala',
           },
         ],
       },
@@ -152,15 +174,16 @@ export const tours: PropertyTour[] = [
         fallback: 'gourmet',
         floorId: 'terreo',
         roomId: 'gourmet',
+        panorama: { projection: 'flat' },
         heading: 180,
         hotspots: [
           {
             id: 'gourmet-churrasqueira',
-            kind: 'info',
+            kind: 'feature',
             x: 39,
             y: 46,
-            title: 'Churrasqueira e forno',
-            highlight: 'Exaustão dedicada',
+            title: 'Varanda gourmet',
+            highlight: 'Churrasqueira e forno de pizza',
             description: 'Bancada gourmet com churrasqueira, forno de pizza e cuba dupla.',
           },
           {
@@ -181,6 +204,7 @@ export const tours: PropertyTour[] = [
         fallback: 'pool',
         floorId: 'terreo',
         roomId: 'piscina',
+        panorama: { projection: 'flat' },
         heading: 250,
         hotspots: [
           {
@@ -210,6 +234,7 @@ export const tours: PropertyTour[] = [
         fallback: 'facade-night',
         floorId: 'terreo',
         roomId: 'acesso',
+        panorama: { projection: 'flat' },
         heading: 0,
         hotspots: [
           {
@@ -223,7 +248,7 @@ export const tours: PropertyTour[] = [
           },
           {
             id: 'fachada-documentacao',
-            kind: 'info',
+            kind: 'feature',
             x: 41,
             y: 58,
             title: 'Documentação verificada',

@@ -16,7 +16,7 @@ export function PropertySpecs({ property, size = 'sm', className }: { property: 
     <ul
       className={cn(
         'flex flex-wrap items-center text-slate',
-        size === 'sm' ? 'gap-x-3.5 gap-y-1.5 text-[12px]' : 'gap-x-6 gap-y-3 text-[14px]',
+        size === 'sm' ? 'gap-x-3.5 gap-y-1.5 text-[13px] sm:text-[12px]' : 'gap-x-6 gap-y-3 text-[14px]',
         className,
       )}
     >

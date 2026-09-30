@@ -46,7 +46,7 @@ export function FeaturedProperties() {
           action={
             <Link
               to="/imoveis"
-              className="group inline-flex items-center gap-2 text-[14px] font-semibold text-navy-800 hover:text-navy-950"
+              className="group inline-flex min-h-11 items-center gap-2 text-[14px] font-semibold text-navy-800 hover:text-navy-950"
             >
               Ver todos os imóveis
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
