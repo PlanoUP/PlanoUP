@@ -124,27 +124,41 @@ Todos seguem `TourRendererProps`, então a interface imersiva não muda com a te
 `tour_floorplan_opened` (`surface`), `tour_fullscreen_entered`, `tour_completed`, `tour_closed`,
 `property_tour_cta_clicked`, `property_whatsapp_clicked`, `property_schedule_clicked`, `filters_opened`.
 
-Modelo 3D: `model3d_card_viewed`, `model3d_started`, `model3d_loaded` (`duration_ms`, `draw_calls`, `triangles`),
+Modelo 3D: `model3d_card_viewed`, `model3d_started`, `model3d_loaded` (`duration_ms`, `download_ms`, `parse_ms`, `prepare_ms`, `draw_calls`, `triangles`),
 `model3d_load_failed` (`reason`), `model3d_view_changed`, `model3d_plan_view`, `model3d_hotspot_clicked`,
-`model3d_fullscreen_entered`, `model3d_fullscreen_exited`, `model3d_closed`, `model3d_whatsapp_clicked`,
-`model3d_schedule_clicked`.
+`model3d_fullscreen_entered`, `model3d_fullscreen_exited`, `model3d_view_reset`, `model3d_rooms_opened`,
+`model3d_closed`, `model3d_whatsapp_clicked`, `model3d_schedule_clicked`.
 
 ## Modelo 3D interativo (GLB)
 
-Experiência diferente do tour 360: **"Explore o imóvel por todos os ângulos"** (exterior, planta por pavimento e
-pontos de vista). Stack: `three` + `@react-three/fiber` + `@react-three/drei`, isolados em um chunk carregado
-somente após o clique em **Explorar modelo 3D** (a Home e a página do imóvel nunca baixam o GLB sozinhas).
+Experiência diferente do tour 360: **"Explore o imóvel por todos os ângulos"**. Stack: `three` +
+`@react-three/fiber` + `@react-three/drei`, isolados em um chunk carregado somente após o clique em
+**Explorar modelo 3D** (a Home e a página do imóvel nunca baixam o GLB sozinhas).
 
+- Fluxo: capa → fade → loader "LEGALIZE 3D EXPERIENCE · Preparando sua visita…" (progresso real em bytes) →
+  primeiro quadro desenhado → fade do loader → pequena entrada de câmera (desligada com `prefers-reduced-motion`).
+- Desktop: abre no próprio card (altura proporcional à tela) com **Tela cheia**. Celular/tablet (< 1024 px): abre
+  direto em modo imersivo (100vw × 100dvh, sem header/CTA fixo); ao fechar, a página volta exatamente onde estava.
+- Barra: **Visão geral · Planta · Ambientes · Tela cheia** + **Redefinir visão** (volta exatamente à composição inicial).
+- Planta: vista superior de baixa perspectiva (FOV 16°), sem girar. Abre em **Terreno** (lote inteiro, sem cortes);
+  os pavimentos (Térreo/Social/Superior) são cortes opcionais escolhidos pelo usuário.
+- Ambientes: bottom sheet "Explore os ambientes" (Visão geral + viewpoints configurados).
+- Transições: interpolação esférica em torno do alvo (~850 ms, easing suave); qualquer gesto interrompe a animação.
+- Limites: não passa abaixo do horizonte, zoom entre 0,2× o raio e 1,8× a distância da visão geral, pan preso ao volume.
+- CTA "Gostou do imóvel? · Agendar visita" discreto no canto (desktop) / compacto na base (celular); some durante gestos,
+  com a lista de ambientes aberta e na planta (celular).
 - Componentes: `src/components/three/` — `Property3DExperience` (capa → visualizador, sem three.js),
   `Property3DViewer` (chunk lazy), `Property3DCanvas`, `Property3DControls`, `Property3DHotspots`,
   `Property3DToolbar`, `Property3DLoader`, `Property3DErrorBoundary`, `Property3DFallback`.
-- Carregamento: `loadModel.ts` baixa via `fetch` com progresso real em bytes e cancelamento; `prepareModel.ts`
-  agrupa geometrias por material (2207 → 270 draw calls no modelo atual) e centraliza pelo bounding box.
-- Câmera: `cameraGoals.ts` resolve Exterior/Planta/Visita a partir do tamanho real do modelo e do formato da tela.
-- Performance: `dpr={[1, 1.5]}`, `frameloop="demand"`, sem sombras/pós-processamento, ambiente procedural
-  (sem baixar HDR), Canvas desmontado e memória da GPU liberada ao fechar.
+- Carregamento: `loadModel.ts` baixa via `fetch` com progresso real e cancelamento; `prepareModel.ts` agrupa
+  geometrias por material (2207 → 270 draw calls no modelo atual) e centraliza pelo bounding box.
+- Câmera: `cameraGoals.ts` enquadra a composição a partir do volume configurado, da direção e da área livre da tela
+  (descontando as barras), em perspectiva real — vale para paisagem e retrato.
+- Performance: `dpr={[1, 1.5]}`, `frameloop="demand"` (sem giro automático: nada é desenhado com o modelo parado),
+  sem sombras/pós-processamento, ambiente procedural (sem HDR para baixar), tone mapping Neutral, Canvas desmontado e
+  memória da GPU liberada ao fechar. `model3d_loaded` informa `download_ms`, `parse_ms` e `prepare_ms`.
 
-### Trocar o modelo de um imóvel
+### Configurar / trocar o modelo de um imóvel
 
 1. Coloque o arquivo em `public/models/<slug>/<arquivo>.glb` (ou use uma URL do Supabase Storage no futuro).
 2. No imóvel (`src/data/properties.ts`):
@@ -152,12 +166,17 @@ somente após o clique em **Explorar modelo 3D** (a Home e a página do imóvel 
    has3DModel: true,
    model3DUrl: '/models/<slug>/<arquivo>.glb',
    model3DPoster: '/models/<slug>/poster.webp',
-   model3DConfig: meuModelo, // src/data/models3d.ts
+   model3DConfig: meuModelo, // src/data/property3DConfig.ts
    ```
-3. Em `src/data/models3d.ts`, ajuste `sizeBytes` (progresso), `planLevels` (altura dos cortes da planta),
-   `viewpoints` e `hotspots`. Câmeras usam coordenadas **normalizadas pelo bounding box** (valem para qualquer
-   escala/origem); hotspots usam coordenadas **originais do arquivo**, tiradas da geometria nomeada.
-   Sem configuração, o modelo abre enquadrado automaticamente.
+3. Em `src/data/property3DConfig.ts` (tudo centralizado por imóvel):
+   - `presentation` — composição inicial: `focus` (volume da casa), `azimuth`, `elevation`, `fill`;
+   - `planFocus` / `planLevels` — área da planta e cortes por pavimento;
+   - `viewpoints` — `{ id, label, description, icon, cameraPosition, target, cutHeight? }`;
+   - `hotspots`, `sizeBytes`, `minDistance`, `maxDistance`.
+
+   Câmeras usam coordenadas **normalizadas pelo bounding box** (o helper `m()` converte metros da cena centralizada);
+   hotspots usam coordenadas **originais do arquivo**, tiradas da geometria nomeada. Sem configuração, o modelo abre
+   enquadrado automaticamente.
 
 ## Mobile
 

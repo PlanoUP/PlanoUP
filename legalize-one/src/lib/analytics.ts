@@ -26,6 +26,8 @@ export type AnalyticsEvent =
   | 'model3d_load_failed'
   | 'model3d_view_changed'
   | 'model3d_plan_view'
+  | 'model3d_view_reset'
+  | 'model3d_rooms_opened'
   | 'model3d_hotspot_clicked'
   | 'model3d_fullscreen_entered'
   | 'model3d_fullscreen_exited'

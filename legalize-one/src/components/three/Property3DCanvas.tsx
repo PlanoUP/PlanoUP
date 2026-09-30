@@ -1,6 +1,6 @@
-import { Canvas, useThree } from '@react-three/fiber'
-import { useEffect, useLayoutEffect, type RefObject } from 'react'
-import { ACESFilmicToneMapping, PMREMGenerator, SRGBColorSpace, type Group, type Scene, type Texture } from 'three'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
+import { NeutralToneMapping, PMREMGenerator, SRGBColorSpace, type Group, type Scene, type Texture } from 'three'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import type { Model3DConfig, Model3DHotspot } from '@/types/model3d'
 import { FOV, type Model3DView } from './cameraGoals'
@@ -13,11 +13,15 @@ interface Property3DCanvasProps {
   fit: ModelFit
   config: Model3DConfig
   view: Model3DView
-  autoRotate: boolean
+  insets: { top: number; bottom: number }
+  /** O primeiro quadro já apareceu (a entrada da câmera só começa depois do fade do loader). */
+  sceneReady: boolean
+  onFirstFrame: () => void
   reducedMotion: boolean
   activeHotspotId: string | null
   onHotspotSelect: (hotspot: Model3DHotspot) => void
   onUserInteract: () => void
+  onInteractionChange: (active: boolean) => void
   onContextLost: () => void
   hotspotLayer: RefObject<HTMLDivElement | null>
 }
@@ -28,14 +32,18 @@ function setEnvironment(scene: Scene, texture: Texture | null, intensity = 1) {
   scene.environmentIntensity = intensity
 }
 
-/** Iluminação de estúdio leve: ambiente procedural (sem baixar HDR) + sol + céu. */
+/**
+ * Iluminação arquitetônica leve (sem sombras em tempo real nem HDR para baixar):
+ * ambiente procedural de estúdio para reflexos suaves + céu/chão + sol quente
+ * a 3/4 que desenha os volumes da fachada + contraluz frio que abre as sombras.
+ */
 function Lighting({ fit }: { fit: ModelFit }) {
   const { gl, scene, invalidate } = useThree()
   useLayoutEffect(() => {
     const pmrem = new PMREMGenerator(gl)
     const room = new RoomEnvironment()
     const env = pmrem.fromScene(room, 0.04).texture
-    setEnvironment(scene, env, 0.45)
+    setEnvironment(scene, env, 0.55)
     invalidate()
     return () => {
       setEnvironment(scene, null)
@@ -48,11 +56,22 @@ function Lighting({ fit }: { fit: ModelFit }) {
   const r = fit.radius
   return (
     <>
-      <hemisphereLight args={['#f4efe6', '#3b4a3a', 0.9]} />
-      <directionalLight position={[r * 0.6, r * 1.1, r * 0.8]} intensity={2.1} color="#fff4e2" />
-      <directionalLight position={[-r * 0.8, r * 0.5, -r * 0.6]} intensity={0.45} color="#cfe0ff" />
+      <hemisphereLight args={['#fbf8f2', '#8a8f86', 1.05]} />
+      <directionalLight position={[r * 0.9, r * 1.2, r * 0.45]} intensity={1.7} color="#fff3df" />
+      <directionalLight position={[-r * 0.7, r * 0.6, -r * 0.9]} intensity={0.55} color="#dde8ff" />
     </>
   )
+}
+
+/** Avisa depois que o primeiro quadro (com a compilação dos shaders) foi desenhado. */
+function FirstFrame({ onDone }: { onDone: () => void }) {
+  const done = useRef(false)
+  useFrame(() => {
+    if (done.current) return
+    done.current = true
+    requestAnimationFrame(() => requestAnimationFrame(onDone))
+  })
+  return null
 }
 
 function ContextLossWatcher({ onLost }: { onLost: () => void }) {
@@ -79,11 +98,14 @@ export function Property3DCanvas({
   fit,
   config,
   view,
-  autoRotate,
+  insets,
+  sceneReady,
+  onFirstFrame,
   reducedMotion,
   activeHotspotId,
   onHotspotSelect,
   onUserInteract,
+  onInteractionChange,
   onContextLost,
   hotspotLayer,
 }: Property3DCanvasProps) {
@@ -94,14 +116,16 @@ export function Property3DCanvas({
       camera={{ fov: FOV, position: [fit.radius, fit.radius * 0.6, fit.radius] }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: false }}
       onCreated={({ gl }) => {
-        gl.toneMapping = ACESFilmicToneMapping
-        gl.toneMappingExposure = 0.9
+        // "Neutral" (Khronos PBR Neutral): preserva o branco e as cores dos materiais — sem o contraste de cinema do ACES.
+        gl.toneMapping = NeutralToneMapping
+        gl.toneMappingExposure = 0.95
         gl.outputColorSpace = SRGBColorSpace
       }}
       // Sem aria-hidden: os hotspots (botões DOM do <Html>) vivem dentro deste contêiner.
       className="touch-none"
     >
       <ContextLossWatcher onLost={onContextLost} />
+      <FirstFrame onDone={onFirstFrame} />
       <Lighting fit={fit} />
       <primitive object={model} dispose={null} />
       <Property3DHotspots
@@ -116,9 +140,11 @@ export function Property3DCanvas({
         fit={fit}
         config={config}
         view={view}
-        autoRotate={autoRotate}
+        insets={insets}
+        sceneReady={sceneReady}
         reducedMotion={reducedMotion}
         onUserInteract={onUserInteract}
+        onInteractionChange={onInteractionChange}
       />
     </Canvas>
   )

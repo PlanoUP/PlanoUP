@@ -1,4 +1,4 @@
-import { casaMobiliadaModel } from '@/data/models3d'
+import { casaMobiliadaModel } from '@/data/property3DConfig'
 import type { Property } from '@/types/property'
 import { unsplash } from '@/lib/images'
 

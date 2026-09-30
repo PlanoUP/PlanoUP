@@ -1,4 +1,4 @@
-import { Box, Eye, LayoutGrid, Wifi } from 'lucide-react'
+import { Box, DoorOpen, LayoutGrid, Wifi } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { SmartImage } from '@/components/ui/SmartImage'
 import { track } from '@/lib/analytics'
@@ -87,15 +87,15 @@ export function Property3DEntry({ poster, posterAlt, sizeBytes, onStart, classNa
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-white/75">
             <li className="inline-flex items-center gap-1.5">
               <Box className="size-3.5 text-gold-400" aria-hidden="true" />
-              Exterior
+              Visão geral
             </li>
             <li className="inline-flex items-center gap-1.5">
               <LayoutGrid className="size-3.5 text-gold-400" aria-hidden="true" />
               Planta
             </li>
             <li className="inline-flex items-center gap-1.5">
-              <Eye className="size-3.5 text-gold-400" aria-hidden="true" />
-              Visita
+              <DoorOpen className="size-3.5 text-gold-400" aria-hidden="true" />
+              Ambientes
             </li>
           </ul>
         </div>

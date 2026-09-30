@@ -1,21 +1,21 @@
-import { CalendarCheck } from 'lucide-react'
-import { lazy, Suspense, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router'
-import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
-import { useIsDesktop } from '@/hooks/useMediaQuery'
+import { useIsDesktop, useReducedMotion } from '@/hooks/useMediaQuery'
 import { useModal } from '@/hooks/useModal'
 import { track } from '@/lib/analytics'
-import { whatsappLink } from '@/lib/whatsapp'
 import type { Model3DConfig } from '@/types/model3d'
 import { cn } from '@/utils/cn'
 import { Property3DEntry } from './Property3DEntry'
 import { Property3DFallback } from './Property3DFallback'
 import { Property3DLoader } from './Property3DLoader'
+import type { FullscreenControl } from './Property3DToolbar'
 import { loadViewer, supportsWebGL } from './webgl'
 
 const Property3DViewer = lazy(loadViewer)
 
 const PARAM = 'modelo3d'
+/** Altura do cabeçalho fixo + respiro, para o visualizador inline ficar inteiro na tela. */
+const HEADER_OFFSET = 88
 
 interface Property3DExperienceProps {
   url: string
@@ -24,16 +24,17 @@ interface Property3DExperienceProps {
   title: string
   config: Model3DConfig
   scheduleMessage: string
-  whatsappMessage: string
   onShowPhotos: () => void
   className?: string
 }
 
 /**
  * Orquestra a experiência do modelo 3D sem carregar three.js:
- * capa → (clique) → visualizador. Desktop abre no próprio card, com opção de
- * tela cheia; celular abre direto em tela cheia (evita conflito entre girar o
- * modelo e rolar a página). Tela cheia fica na URL: o "voltar" do celular sai dela.
+ * capa → (clique) → visualizador.
+ * - Desktop: abre no próprio card (altura proporcional à tela), com "Tela cheia".
+ * - Celular/tablet: abre direto em modo imersivo (100dvh, sem header nem CTA fixo);
+ *   a página continua intacta por trás e, ao fechar, volta exatamente onde estava.
+ * O modo imersivo fica na URL: o "voltar" do celular fecha o visualizador.
  */
 export function Property3DExperience({
   url,
@@ -42,18 +43,20 @@ export function Property3DExperience({
   title,
   config,
   scheduleMessage,
-  whatsappMessage,
   onShowPhotos,
   className,
 }: Property3DExperienceProps) {
   const isDesktop = useIsDesktop()
+  const reducedMotion = useReducedMotion()
   const [params, setParams] = useSearchParams()
   const location = useLocation()
   const navigate = useNavigate()
   const [active, setActive] = useState(false)
   const [unsupported, setUnsupported] = useState(false)
+  const [nativeFullscreen, setNativeFullscreen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const closeFocusRef = useRef<HTMLElement | null>(null)
+  const savedScroll = useRef<number | null>(null)
 
   const immersive = active && params.get(PARAM) === '1'
 
@@ -68,6 +71,36 @@ export function Property3DExperience({
     if (prevImmersive.current && !immersive) track('model3d_fullscreen_exited')
     prevImmersive.current = immersive
   }, [immersive])
+
+  // Ao fechar (botão, Esc ou "voltar"), a página volta exatamente para onde estava.
+  const prevActive = useRef(active)
+  useEffect(() => {
+    if (prevActive.current && !active && savedScroll.current !== null) {
+      const top = savedScroll.current
+      savedScroll.current = null
+      requestAnimationFrame(() => window.scrollTo({ top, behavior: 'instant' }))
+    }
+    prevActive.current = active
+  }, [active])
+
+  // Desktop: o visualizador aparece inteiro, logo abaixo do cabeçalho.
+  useEffect(() => {
+    if (!active || !isDesktop || immersive) return
+    const el = rootRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    if (rect.top < HEADER_OFFSET || rect.bottom > window.innerHeight - 16)
+      window.scrollBy({ top: rect.top - HEADER_OFFSET, behavior: reducedMotion ? 'instant' : 'smooth' })
+    // Só na abertura.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active])
+
+  // Tela cheia nativa (Android/desktop); o iPhone não permite em elementos.
+  useEffect(() => {
+    const onChange = () => setNativeFullscreen(Boolean(document.fullscreenElement))
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
 
   // Link aberto com ?modelo3d=1 sem clique nesta sessão: não carrega sozinho (remove o parâmetro).
   const stripStaleParam = useEffectEvent(() => {
@@ -91,6 +124,7 @@ export function Property3DExperience({
   }, [setParams])
 
   const exitImmersive = useCallback(() => {
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
     if ((location.state as { m3dPushed?: boolean } | null)?.m3dPushed) navigate(-1)
     else
       setParams(
@@ -111,6 +145,7 @@ export function Property3DExperience({
       return
     }
     closeFocusRef.current = document.activeElement as HTMLElement | null
+    if (!isDesktop) savedScroll.current = window.scrollY
     setActive(true)
     if (!isDesktop) enterImmersive()
   }
@@ -124,6 +159,18 @@ export function Property3DExperience({
 
   // Tela cheia = camada modal: Esc sai, CTA fixo escondido, rolagem travada, foco preso.
   useModal(rootRef, immersive, isDesktop ? exitImmersive : close)
+
+  const fullscreen = useMemo<FullscreenControl | null>(() => {
+    if (isDesktop) return { active: immersive, toggle: immersive ? exitImmersive : enterImmersive }
+    if (typeof document === 'undefined' || !document.fullscreenEnabled) return null
+    return {
+      active: nativeFullscreen,
+      toggle: () => {
+        if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+        else void rootRef.current?.requestFullscreen?.().catch(() => undefined)
+      },
+    }
+  }, [isDesktop, immersive, nativeFullscreen, enterImmersive, exitImmersive])
 
   const showPhotos = () => {
     close()
@@ -140,64 +187,35 @@ export function Property3DExperience({
 
   return (
     <div id="modelo-3d" className={className}>
-      {!active ? (
+      {/* No celular a capa continua na página (o visualizador abre por cima): nada salta ao fechar. */}
+      {(!active || !isDesktop) && (
         <Property3DEntry poster={poster} posterAlt={posterAlt} sizeBytes={config.sizeBytes} onStart={start} />
-      ) : (
-        <>
-          {/* Reserva a altura do card enquanto o visualizador está em tela cheia (sem salto de layout). */}
-          <div className="relative h-[480px] sm:h-[540px] lg:h-[600px]">
-            <div
-              ref={rootRef}
-              role={immersive ? 'dialog' : 'region'}
-              aria-modal={immersive || undefined}
-              aria-label={`Modelo 3D interativo — ${title}`}
-              className={cn(immersive ? 'fixed inset-0 z-[100] h-dvh w-screen' : 'absolute inset-0')}
-            >
-              <Suspense fallback={<Property3DLoader poster={poster} ratio={null} loadedBytes={0} stage="starting" />}>
-                <Property3DViewer
-                  url={url}
-                  poster={poster}
-                  title={title}
-                  config={config}
-                  immersive={immersive}
-                  canToggleImmersive={isDesktop}
-                  onToggleImmersive={immersive ? exitImmersive : enterImmersive}
-                  onClose={isDesktop && immersive ? exitImmersive : close}
-                  onShowPhotos={showPhotos}
-                  scheduleMessage={scheduleMessage}
-                  whatsappMessage={whatsappMessage}
-                />
-              </Suspense>
-            </div>
+      )}
+      {active && (
+        // Desktop: reserva a altura do card (também enquanto em tela cheia — sem salto de layout).
+        <div className={cn(isDesktop && 'relative h-[clamp(460px,calc(100dvh-170px),660px)]')}>
+          <div
+            ref={rootRef}
+            role={immersive ? 'dialog' : 'region'}
+            aria-modal={immersive || undefined}
+            aria-label={`Modelo 3D interativo — ${title}`}
+            className={cn(immersive || !isDesktop ? 'fixed inset-0 z-[100] h-dvh w-screen' : 'absolute inset-0')}
+          >
+            <Suspense fallback={<Property3DLoader poster={poster} ratio={null} loadedBytes={0} stage="starting" />}>
+              <Property3DViewer
+                url={url}
+                poster={poster}
+                title={title}
+                config={config}
+                immersive={immersive || !isDesktop}
+                fullscreen={fullscreen}
+                onClose={isDesktop && immersive ? exitImmersive : close}
+                onShowPhotos={showPhotos}
+                scheduleMessage={scheduleMessage}
+              />
+            </Suspense>
           </div>
-
-          {/* CTA comercial discreto, abaixo do visualizador */}
-          <div className="mt-3 flex flex-col gap-3 rounded-2xl border border-navy-950/8 bg-sand p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[12px] font-semibold tracking-[0.16em] text-navy-950 uppercase">Gostou do que viu?</p>
-            <div className="grid grid-cols-2 gap-2.5 sm:flex">
-              <a
-                href={whatsappLink(scheduleMessage)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => track('model3d_schedule_clicked', { placement: 'below_viewer' })}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-navy-800 px-5 text-[14px] font-semibold text-white hover:bg-navy-700"
-              >
-                <CalendarCheck className="size-4" aria-hidden="true" />
-                Agendar visita
-              </a>
-              <a
-                href={whatsappLink(whatsappMessage)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => track('model3d_whatsapp_clicked', { placement: 'below_viewer' })}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#1f8a5b]/25 bg-[#effaf4] px-5 text-[14px] font-semibold text-[#136b44]"
-              >
-                <WhatsAppIcon className="size-4" />
-                Falar no WhatsApp
-              </a>
-            </div>
-          </div>
-        </>
+        </div>
       )}
     </div>
   )

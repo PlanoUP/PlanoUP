@@ -11,13 +11,39 @@
 
 export type Vec3 = [x: number, y: number, z: number]
 
-export type Model3DMode = 'exterior' | 'plan' | 'tour'
+/** Modos do visualizador: visão geral (apresentação) · planta · ambientes. */
+export type Model3DMode = 'overview' | 'plan' | 'rooms'
+
+/** Caixa em coordenadas normalizadas (ex.: o volume da residência dentro do terreno). */
+export interface Model3DBox {
+  min: Vec3
+  max: Vec3
+}
+
+/**
+ * Composição da primeira visão (e do "Redefinir visão"): a câmera enquadra
+ * automaticamente `focus` a partir de uma direção 3/4 levemente elevada.
+ */
+export interface Model3DPresentation {
+  /** Volume que deve ocupar a tela (normalmente a casa, sem o terreno inteiro). */
+  focus: Model3DBox
+  /** Direção horizontal da câmera, em graus (0° = eixo +x; 90° = eixo +z). */
+  azimuth: number
+  /** Inclinação acima do horizonte, em graus. */
+  elevation: number
+  /** Quanto do espaço livre da tela o volume ocupa (0–1). Padrão 0.86. */
+  fill?: number
+}
 
 export interface Model3DViewpoint {
   id: string
   label: string
+  /** Frase curta exibida na lista de ambientes. */
+  description?: string
+  /** Ícone na lista de ambientes. */
+  icon?: 'facade' | 'living' | 'kitchen' | 'outdoor'
   /** Posição da câmera (coordenadas normalizadas). */
-  position: Vec3
+  cameraPosition: Vec3
   /** Ponto observado (coordenadas normalizadas). */
   target: Vec3
   /**
@@ -25,20 +51,17 @@ export interface Model3DViewpoint {
    * no estilo "casa de bonecas". Omitido = sem corte.
    */
   cutHeight?: number
-  /**
-   * Enquadramento automático: mantém a direção do olhar, mas recalcula alvo e
-   * distância para o imóvel inteiro caber na tela (qualquer proporção de tela).
-   */
-  fitAll?: boolean
 }
 
 export interface Model3DPlanLevel {
   id: string
   label: string
-  /** Altura do corte da planta (0–1 da altura do modelo). */
-  cutHeight: number
+  /** Altura do corte da planta (0–1 da altura do modelo). Omitido = vista superior sem corte. */
+  cutHeight?: number
   /** Altura do olhar (0–1), normalmente o piso do pavimento. */
   focusHeight: number
+  /** Área enquadrada neste nível (padrão: `planFocus`). Ex.: o terreno inteiro na vista sem corte. */
+  focus?: Model3DBox
 }
 
 export type Model3DHotspotType = 'feature' | 'navigation' | 'info'
@@ -58,24 +81,25 @@ export interface Model3DHotspot {
   visibleIn: Model3DMode[]
   /** Na planta, mostra apenas neste pavimento (ponto abaixo do corte). */
   planLevelId?: string
-  /** No modo visita, mostra apenas neste viewpoint (omitido = todos). */
+  /** Em ambientes, mostra apenas neste viewpoint (omitido = todos). */
   viewpointIds?: string[]
   /** Hotspot de navegação: viewpoint de destino. */
   targetViewpointId?: string
 }
 
 export interface Model3DConfig {
-  /** Posição inicial da câmera (normalizada). */
-  initialCamera?: Vec3
-  /** Alvo inicial (normalizado). */
-  target?: Vec3
-  /** Distâncias mínima/máxima do zoom, em múltiplos do raio do modelo. */
-  minDistance?: number
-  maxDistance?: number
-  autoRotate?: boolean
   /** Tamanho do arquivo em bytes — usado no progresso quando o servidor não informa. */
   sizeBytes?: number
+  /** Primeira visão / "Redefinir visão". Sem ela, enquadra o modelo inteiro. */
+  presentation?: Model3DPresentation
+  /** Área centralizada na planta (padrão: `presentation.focus`). */
+  planFocus?: Model3DBox
+  /** Zoom mínimo, em múltiplos do raio do modelo (evita atravessar paredes). */
+  minDistance?: number
+  /** Zoom máximo, em múltiplos da distância da visão geral. */
+  maxDistance?: number
   planLevels?: Model3DPlanLevel[]
+  /** Pontos de vista da lista "Explore os ambientes" (a visão geral entra automaticamente). */
   viewpoints?: Model3DViewpoint[]
   hotspots?: Model3DHotspot[]
 }

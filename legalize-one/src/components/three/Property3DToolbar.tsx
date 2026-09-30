@@ -1,46 +1,44 @@
-import { Box, Eye, LayoutGrid, Undo2 } from 'lucide-react'
+import { Box, DoorOpen, LayoutGrid, Maximize, Minimize, Undo2, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { Model3DConfig, Model3DMode } from '@/types/model3d'
+import type { Model3DConfig } from '@/types/model3d'
 import { cn } from '@/utils/cn'
 import type { Model3DView } from './cameraGoals'
+
+export interface FullscreenControl {
+  active: boolean
+  toggle: () => void
+}
 
 interface Property3DToolbarProps {
   config: Model3DConfig
   view: Model3DView
   onChange: (view: Model3DView) => void
+  onOpenRooms: () => void
+  /** `null` quando não se aplica (ex.: iPhone, que não tem tela cheia de elemento). */
+  fullscreen: FullscreenControl | null
 }
 
-const modes: { id: Model3DMode; label: string; icon: typeof Box }[] = [
-  { id: 'exterior', label: 'Exterior', icon: Box },
-  { id: 'plan', label: 'Planta', icon: LayoutGrid },
-  { id: 'tour', label: 'Visita', icon: Eye },
-]
+/** Planta abre sem cortes (vista superior estável); os pavimentos cortados são opcionais. */
+function defaultPlanLevel(config: Model3DConfig) {
+  return config.planLevels?.[0]?.id ?? 'default'
+}
 
-const modeOf = (view: Model3DView): Model3DMode =>
-  view.kind === 'plan' ? 'plan' : view.kind === 'viewpoint' ? 'tour' : 'exterior'
-
-/** Barra de modos: Exterior · Planta (pavimentos) · Visita (pontos de vista). Rolável no celular. */
-export function Property3DToolbar({ config, view, onChange }: Property3DToolbarProps) {
-  const mode = modeOf(view)
+/**
+ * Barra principal: Visão geral · Planta · Ambientes · Tela cheia.
+ * No celular vira uma "tab bar" (ícone sobre o texto); no desktop, pílulas.
+ */
+export function Property3DToolbar({ config, view, onChange, onOpenRooms, fullscreen }: Property3DToolbarProps) {
   const levels = config.planLevels ?? []
-  const viewpoints = config.viewpoints ?? []
-
-  function selectMode(next: Model3DMode) {
-    if (next === 'exterior') onChange({ kind: 'exterior' })
-    else if (next === 'plan') onChange({ kind: 'plan', levelId: levels[1]?.id ?? levels[0]?.id ?? 'default' })
-    else onChange({ kind: 'viewpoint', id: viewpoints[0]?.id ?? 'geral' })
-  }
 
   return (
-    <div className="flex flex-col items-center gap-2" onPointerDown={(e) => e.stopPropagation()}>
-      {/* Sub-opções do modo atual */}
-      {mode === 'plan' && (
-        <div className="flex max-w-full flex-wrap items-center justify-center gap-2 px-1">
+    <div className="flex flex-col items-center gap-2 sm:items-start" onPointerDown={(e) => e.stopPropagation()}>
+      {view.kind === 'plan' && (
+        <div className="flex max-w-full flex-wrap items-center justify-center gap-2 sm:justify-start" role="group" aria-label="Pavimentos">
           {levels.length > 1 &&
             levels.map((level) => (
               <Chip
                 key={level.id}
-                selected={view.kind === 'plan' && view.levelId === level.id}
+                selected={view.levelId === level.id}
                 onClick={() => onChange({ kind: 'plan', levelId: level.id })}
               >
                 {level.label}
@@ -48,51 +46,81 @@ export function Property3DToolbar({ config, view, onChange }: Property3DToolbarP
             ))}
           <button
             type="button"
-            onClick={() => onChange({ kind: 'exterior' })}
-            className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-gold-400/50 bg-navy-950/70 px-4 text-[13px] font-semibold text-gold-400 backdrop-blur-md hover:bg-navy-950/90"
+            onClick={() => onChange({ kind: 'overview' })}
+            className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-navy-950 px-4 text-[13px] font-semibold text-white shadow-md hover:bg-navy-800"
           >
             <Undo2 className="size-4" aria-hidden="true" />
-            Voltar para perspectiva
+            Voltar à perspectiva
           </button>
         </div>
       )}
-      {mode === 'tour' && viewpoints.length > 0 && (
-        <div className="no-scrollbar flex max-w-full items-center gap-2 overflow-x-auto px-1" role="group" aria-label="Pontos de vista">
-          {viewpoints.map((vp) => (
-            <Chip
-              key={vp.id}
-              selected={view.kind === 'viewpoint' && view.id === vp.id}
-              onClick={() => onChange({ kind: 'viewpoint', id: vp.id })}
-            >
-              {vp.label}
-            </Chip>
-          ))}
-        </div>
-      )}
 
-      {/* Modos */}
-      <div role="tablist" aria-label="Modo de visualização" className="flex gap-1 rounded-full border border-white/15 bg-navy-950/75 p-1 shadow-2xl backdrop-blur-md">
-        {modes.map(({ id, label, icon: Icon }) => {
-          const selected = mode === id
-          return (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => selectMode(id)}
-              className={cn(
-                'inline-flex h-11 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold transition-colors sm:px-5',
-                selected ? 'bg-white text-navy-950' : 'text-white/85 hover:bg-white/10 hover:text-white',
-              )}
-            >
-              <Icon className="size-4" aria-hidden="true" />
-              {label}
-            </button>
-          )
-        })}
+      <div
+        role="toolbar"
+        aria-label="Modos do modelo 3D"
+        className="flex w-full gap-1 rounded-2xl border border-navy-950/10 bg-white/92 p-1 shadow-[0_10px_30px_-12px_rgb(7_27_46/0.35)] backdrop-blur-md sm:w-auto sm:rounded-full"
+      >
+        <ToolButton
+          icon={Box}
+          label="Visão geral"
+          selected={view.kind === 'overview'}
+          onClick={() => onChange({ kind: 'overview' })}
+        />
+        <ToolButton
+          icon={LayoutGrid}
+          label="Planta"
+          selected={view.kind === 'plan'}
+          onClick={() => onChange({ kind: 'plan', levelId: defaultPlanLevel(config) })}
+        />
+        {(config.viewpoints?.length ?? 0) > 0 && (
+          <ToolButton icon={DoorOpen} label="Ambientes" selected={view.kind === 'viewpoint'} onClick={onOpenRooms} haspopup />
+        )}
+        {fullscreen && (
+          <ToolButton
+            icon={fullscreen.active ? Minimize : Maximize}
+            label={fullscreen.active ? 'Sair da tela cheia' : 'Tela cheia'}
+            shortLabel={fullscreen.active ? 'Sair' : 'Tela cheia'}
+            selected={false}
+            onClick={fullscreen.toggle}
+          />
+        )}
       </div>
     </div>
+  )
+}
+
+function ToolButton({
+  icon: Icon,
+  label,
+  shortLabel,
+  selected,
+  onClick,
+  haspopup,
+}: {
+  icon: LucideIcon
+  label: string
+  shortLabel?: string
+  selected: boolean
+  onClick: () => void
+  haspopup?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={haspopup ? undefined : selected}
+      aria-haspopup={haspopup ? 'dialog' : undefined}
+      aria-current={haspopup && selected ? 'true' : undefined}
+      aria-label={shortLabel ? label : undefined}
+      className={cn(
+        'inline-flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[11.5px] font-semibold whitespace-nowrap transition-colors sm:min-h-11 sm:flex-none sm:flex-row sm:gap-2 sm:rounded-full sm:px-4 sm:text-[13.5px]',
+        selected ? 'bg-navy-950 text-white' : 'text-navy-950/80 hover:bg-navy-950/6 hover:text-navy-950',
+      )}
+    >
+      <Icon className="size-[18px] sm:size-4" aria-hidden="true" />
+      <span className="sm:hidden">{shortLabel ?? label}</span>
+      <span className="hidden sm:inline">{label}</span>
+    </button>
   )
 }
 
@@ -103,8 +131,8 @@ function Chip({ selected, onClick, children }: { selected: boolean; onClick: () 
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        'inline-flex h-10 shrink-0 items-center rounded-full px-4 text-[13px] font-semibold whitespace-nowrap backdrop-blur-md transition-colors',
-        selected ? 'bg-gold-500 text-navy-950' : 'border border-white/20 bg-navy-950/70 text-white hover:bg-navy-950/90',
+        'inline-flex h-10 shrink-0 items-center rounded-full px-4 text-[13px] font-semibold whitespace-nowrap shadow-sm backdrop-blur-md transition-colors',
+        selected ? 'bg-gold-500 text-navy-950' : 'border border-navy-950/10 bg-white/92 text-navy-950 hover:bg-white',
       )}
     >
       {children}

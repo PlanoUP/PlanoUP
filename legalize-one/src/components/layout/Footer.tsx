@@ -30,7 +30,8 @@ const YEAR = new Date().getFullYear()
 
 export function Footer() {
   return (
-    <footer id="contato" className="bg-navy-950 text-white">
+    // No celular, o espaço do CTA fixo fica dentro do rodapé (sem faixa branca abaixo dele).
+    <footer id="contato" className="bg-navy-950 pb-[calc(72px+env(safe-area-inset-bottom))] text-white md:pb-0">
       <div className="container-page grid grid-cols-2 gap-x-6 gap-y-10 py-12 md:grid-cols-[1.4fr_1fr_1fr_1.3fr] md:gap-12 md:py-16">
         <div className="col-span-2 md:col-span-1">
           <Logo tone="light" />

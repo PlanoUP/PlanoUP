@@ -18,17 +18,18 @@ const mb = (bytes: number) => (bytes / 1_000_000).toLocaleString('pt-BR', { maxi
  */
 export function Property3DLoader({ poster, ratio, loadedBytes, totalBytes, stage }: Property3DLoaderProps) {
   const percent = ratio === null ? null : Math.round(ratio * 100)
-  const label =
-    stage === 'processing' ? 'Montando os ambientes…' : stage === 'starting' ? 'Iniciando o visualizador…' : 'Preparando sua visita…'
+  const label = stage === 'processing' ? 'Montando os ambientes…' : 'Preparando sua visita…'
   const detail =
     stage === 'processing'
       ? 'Otimizando o modelo para o seu dispositivo'
       : totalBytes && stage === 'downloading'
         ? `Carregando o imóvel em alta qualidade · ${mb(loadedBytes)} de ${mb(totalBytes)} MB`
-        : 'Carregando o imóvel em alta qualidade'
+        : stage === 'starting'
+          ? 'Iniciando o visualizador'
+          : 'Carregando o imóvel em alta qualidade'
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-navy-950 text-white">
+    <div className="absolute inset-0 flex animate-fade-in items-center justify-center overflow-hidden bg-navy-950 text-white">
       {poster && (
         <SmartImage
           src={poster}

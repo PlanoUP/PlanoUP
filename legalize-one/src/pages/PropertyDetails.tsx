@@ -221,7 +221,6 @@ export default function PropertyDetails() {
               title={`${property.title} em ${property.location.neighborhood}`}
               config={property.model3DConfig ?? {}}
               scheduleMessage={messages.schedule}
-              whatsappMessage={messages.interest}
               onShowPhotos={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             />
           )}

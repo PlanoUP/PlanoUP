@@ -7,9 +7,9 @@ import { cn } from '@/utils/cn'
 import { fromModelSpace, type ModelFit } from './prepareModel'
 
 const modeOf = (view: Model3DView): Model3DMode =>
-  view.kind === 'plan' ? 'plan' : view.kind === 'viewpoint' ? 'tour' : 'exterior'
+  view.kind === 'plan' ? 'plan' : view.kind === 'viewpoint' ? 'rooms' : 'overview'
 
-/** Regras de visibilidade: modo + pavimento (planta) + ponto de vista (visita). */
+/** Regras de visibilidade: modo + pavimento (planta) + ponto de vista (ambientes). */
 function isVisible(h: Model3DHotspot, view: Model3DView) {
   if (!h.visibleIn.includes(modeOf(view))) return false
   if (view.kind === 'plan' && h.planLevelId && h.planLevelId !== view.levelId) return false
