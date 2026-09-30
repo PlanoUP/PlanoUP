@@ -1,4 +1,5 @@
 import type { SceneArtVariant } from './media'
+import type { Model3DConfig } from './model3d'
 import type { PropertyTour } from './tour'
 
 export type PropertyPurpose = 'venda' | 'aluguel'
@@ -42,6 +43,13 @@ export interface Property {
   documentationVerified: boolean
   /** Tour 3D vinculado ao imóvel (id em data/tours.ts). */
   tourId?: string
+  /** Modelo 3D navegável (GLB/GLTF) — experiência diferente do tour 360. */
+  has3DModel?: boolean
+  /** Caminho do arquivo (ex.: `/models/<slug>/<arquivo>.glb`) ou URL do Storage. */
+  model3DUrl?: string
+  /** Imagem de capa exibida antes do carregamento (nunca baixa o GLB). */
+  model3DPoster?: string
+  model3DConfig?: Model3DConfig
 }
 
 export interface PropertyWithTour extends Property {

@@ -19,6 +19,19 @@ export type AnalyticsEvent =
   | 'tour_fullscreen_entered'
   | 'tour_completed'
   | 'tour_closed'
+  // Modelo 3D (GLB)
+  | 'model3d_card_viewed'
+  | 'model3d_started'
+  | 'model3d_loaded'
+  | 'model3d_load_failed'
+  | 'model3d_view_changed'
+  | 'model3d_plan_view'
+  | 'model3d_hotspot_clicked'
+  | 'model3d_fullscreen_entered'
+  | 'model3d_fullscreen_exited'
+  | 'model3d_closed'
+  | 'model3d_whatsapp_clicked'
+  | 'model3d_schedule_clicked'
   // Página do imóvel
   | 'property_whatsapp_clicked'
   | 'property_schedule_clicked'
@@ -40,6 +53,8 @@ const metaStandardEvents: Partial<Record<AnalyticsEvent, string>> = {
   whatsapp_clicked: 'Contact',
   property_whatsapp_clicked: 'Contact',
   property_schedule_clicked: 'Schedule',
+  model3d_whatsapp_clicked: 'Contact',
+  model3d_schedule_clicked: 'Schedule',
   lead_submitted: 'Lead',
 }
 

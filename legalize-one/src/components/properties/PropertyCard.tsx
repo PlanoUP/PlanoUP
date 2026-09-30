@@ -1,4 +1,4 @@
-import { ArrowRight, MapPin, Rotate3d, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Box, MapPin, Rotate3d, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/Badge'
 import { SmartImage } from '@/components/ui/SmartImage'
@@ -46,11 +46,18 @@ export function PropertyCard({ property, className, showFeaturedBadge = true }: 
           ) : (
             <span />
           )}
-          {property.tourEnabled && (
-            <Badge tone="tour" icon={Rotate3d} className="px-3 py-1.5 text-[12px]">
-              Tour 3D
-            </Badge>
-          )}
+          <div className="flex flex-col items-end gap-1.5">
+            {property.has3DModel && (
+              <Badge tone="model3d" icon={Box} className="px-3 py-1.5 text-[11.5px]">
+                3D interativo
+              </Badge>
+            )}
+            {property.tourEnabled && (
+              <Badge tone="tour" icon={Rotate3d} className="px-3 py-1.5 text-[12px]">
+                Tour 3D
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
 

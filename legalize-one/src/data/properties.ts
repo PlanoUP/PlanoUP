@@ -1,3 +1,4 @@
+import { casaMobiliadaModel } from '@/data/models3d'
 import type { Property } from '@/types/property'
 import { unsplash } from '@/lib/images'
 
@@ -186,9 +187,14 @@ export const properties: Property[] = [
     description:
       'Casa de alto padrão com quatro suítes, escritório e espaço gourmet com piscina aquecida. Condomínio com segurança e área verde preservada.',
     amenities: ['Piscina aquecida', 'Escritório', 'Espaço gourmet', 'Área verde'],
-    featured: false,
+    featured: true,
     tourEnabled: false,
     documentationVerified: true,
+    // Imóvel demonstrativo do modelo 3D interativo (GLB).
+    has3DModel: true,
+    model3DUrl: '/models/casa-mobiliada/casa-mobiliada.glb',
+    model3DPoster: '/models/casa-mobiliada/poster.webp',
+    model3DConfig: casaMobiliadaModel,
   },
   {
     id: 'lg-007',

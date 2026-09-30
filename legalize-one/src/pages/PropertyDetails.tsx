@@ -1,10 +1,11 @@
-import { ArrowLeft, CalendarCheck, Check, ChevronRight, MapPin, Rotate3d, Share2, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Box, CalendarCheck, Check, ChevronRight, MapPin, Rotate3d, Share2, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { FavoriteButton } from '@/components/properties/FavoriteButton'
 import { PropertyCard } from '@/components/properties/PropertyCard'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
 import { PropertySpecs } from '@/components/properties/PropertySpecs'
+import { Property3DExperience } from '@/components/three/Property3DExperience'
 import { TourCtaCard } from '@/components/tour/TourCtaCard'
 import { TourEntry } from '@/components/tour/TourEntry'
 import { useTourLauncher } from '@/components/tour/useTourLauncher'
@@ -160,6 +161,15 @@ export default function PropertyDetails() {
                     Tour 3D
                   </button>
                 )}
+                {property.has3DModel && (
+                  <a
+                    href="#modelo-3d"
+                    className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-navy-950/85 px-3 text-[12px] font-bold tracking-[0.04em] text-gold-400 uppercase shadow-sm ring-1 ring-gold-500/40 backdrop-blur"
+                  >
+                    <Box className="size-3.5" strokeWidth={2.2} aria-hidden="true" />
+                    Modelo 3D interativo
+                  </a>
+                )}
               </div>
             }
           />
@@ -200,6 +210,21 @@ export default function PropertyDetails() {
 
           {/* 5. TOUR 3D — diferencial comercial */}
           {tour && <TourCtaCard tour={tour} onEnter={() => openTour('property_summary')} className="mt-6" />}
+
+          {/* 5b. MODELO 3D — só baixa o arquivo depois do clique */}
+          {property.has3DModel && property.model3DUrl && (
+            <Property3DExperience
+              className="mt-6 scroll-mt-24"
+              url={property.model3DUrl}
+              poster={property.model3DPoster}
+              posterAlt={`Modelo 3D do imóvel ${property.title} em ${property.location.neighborhood}: vista geral com fachada, garagem e piscina`}
+              title={`${property.title} em ${property.location.neighborhood}`}
+              config={property.model3DConfig ?? {}}
+              scheduleMessage={messages.schedule}
+              whatsappMessage={messages.interest}
+              onShowPhotos={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            />
+          )}
 
           {/* 6. DESCRIÇÃO E DIFERENCIAIS */}
           <h2 className="mt-8 font-display text-xl font-bold tracking-[-0.02em] text-navy-950">Sobre o imóvel</h2>

@@ -124,6 +124,41 @@ Todos seguem `TourRendererProps`, então a interface imersiva não muda com a te
 `tour_floorplan_opened` (`surface`), `tour_fullscreen_entered`, `tour_completed`, `tour_closed`,
 `property_tour_cta_clicked`, `property_whatsapp_clicked`, `property_schedule_clicked`, `filters_opened`.
 
+Modelo 3D: `model3d_card_viewed`, `model3d_started`, `model3d_loaded` (`duration_ms`, `draw_calls`, `triangles`),
+`model3d_load_failed` (`reason`), `model3d_view_changed`, `model3d_plan_view`, `model3d_hotspot_clicked`,
+`model3d_fullscreen_entered`, `model3d_fullscreen_exited`, `model3d_closed`, `model3d_whatsapp_clicked`,
+`model3d_schedule_clicked`.
+
+## Modelo 3D interativo (GLB)
+
+Experiência diferente do tour 360: **"Explore o imóvel por todos os ângulos"** (exterior, planta por pavimento e
+pontos de vista). Stack: `three` + `@react-three/fiber` + `@react-three/drei`, isolados em um chunk carregado
+somente após o clique em **Explorar modelo 3D** (a Home e a página do imóvel nunca baixam o GLB sozinhas).
+
+- Componentes: `src/components/three/` — `Property3DExperience` (capa → visualizador, sem three.js),
+  `Property3DViewer` (chunk lazy), `Property3DCanvas`, `Property3DControls`, `Property3DHotspots`,
+  `Property3DToolbar`, `Property3DLoader`, `Property3DErrorBoundary`, `Property3DFallback`.
+- Carregamento: `loadModel.ts` baixa via `fetch` com progresso real em bytes e cancelamento; `prepareModel.ts`
+  agrupa geometrias por material (2207 → 270 draw calls no modelo atual) e centraliza pelo bounding box.
+- Câmera: `cameraGoals.ts` resolve Exterior/Planta/Visita a partir do tamanho real do modelo e do formato da tela.
+- Performance: `dpr={[1, 1.5]}`, `frameloop="demand"`, sem sombras/pós-processamento, ambiente procedural
+  (sem baixar HDR), Canvas desmontado e memória da GPU liberada ao fechar.
+
+### Trocar o modelo de um imóvel
+
+1. Coloque o arquivo em `public/models/<slug>/<arquivo>.glb` (ou use uma URL do Supabase Storage no futuro).
+2. No imóvel (`src/data/properties.ts`):
+   ```ts
+   has3DModel: true,
+   model3DUrl: '/models/<slug>/<arquivo>.glb',
+   model3DPoster: '/models/<slug>/poster.webp',
+   model3DConfig: meuModelo, // src/data/models3d.ts
+   ```
+3. Em `src/data/models3d.ts`, ajuste `sizeBytes` (progresso), `planLevels` (altura dos cortes da planta),
+   `viewpoints` e `hotspots`. Câmeras usam coordenadas **normalizadas pelo bounding box** (valem para qualquer
+   escala/origem); hotspots usam coordenadas **originais do arquivo**, tiradas da geometria nomeada.
+   Sem configuração, o modelo abre enquadrado automaticamente.
+
 ## Mobile
 
 - Busca: no celular, "Onde você quer morar?" + filtros em bottom sheet (contagem ao vivo); tablet/desktop mantêm o formulário completo.
