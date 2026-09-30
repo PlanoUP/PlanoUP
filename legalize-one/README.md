@@ -4,6 +4,84 @@ Plataforma imobiliária da **Legalize Soluções Imobiliárias** — _do documen
 
 React + TypeScript + Vite + Tailwind CSS v4 + React Router + Lucide.
 
+## Versão atual — LEGALIZE ONE · V1 3D EXPERIENCE
+
+| Item            | Valor                                                             |
+| --------------- | ----------------------------------------------------------------- |
+| Versão          | **1.0.0** (`package.json`)                                        |
+| Tag Git         | `legalize-one-v1-3d-experience`                                   |
+| Estado          | Demonstração (dados mock, sem backend/login) — validada em Preview |
+| Production      | Ainda na versão de preparação para a Vercel (sem os sprints 3D)   |
+
+Checkpoint criado antes de novas funcionalidades. Para voltar a este estado:
+`git checkout legalize-one-v1-3d-experience`.
+
+### Funcionalidades disponíveis
+
+- **Home**: hero, busca com filtros, diferenciais, imóveis em destaque, seção Legalize 3D Experience (com acesso ao
+  modelo 3D interativo), linha do tempo da documentação e CTA final.
+- **Imóveis** (`/imoveis`): listagem com filtros na URL (finalidade, região, tipo, preço, quartos, ordem); no celular,
+  filtros em bottom sheet com contagem ao vivo. Selos distintos "3D interativo" (navy/dourado) e "Tour 3D" (verde).
+- **Detalhes do imóvel** (`/imovel/:slug`): galeria, preço, especificações, diferenciais, documentação verificada,
+  CTAs de WhatsApp/agendamento e imóveis relacionados.
+- **Tour 360 (Legalize 3D Experience)**: modo imersivo com ambientes, planta sincronizada, hotspots
+  (navegação/informação/destaque), transições e abertura por URL (`?tour=<cena>`).
+- **Modelo 3D interativo (GLB)**: capa → carregamento com progresso real → composição arquitetônica inicial;
+  Visão geral · Planta (Terreno + cortes por pavimento) · Ambientes · Tela cheia; Redefinir visão; hotspots;
+  CTA "Gostou do imóvel? · Agendar visita"; fallback quando o dispositivo não suporta WebGL ou o arquivo falha.
+- **Vender** (`/vender`): formulário de captação em etapas.
+- **Mobile first**: CTA fixo contextual, camadas acessíveis (Esc, foco, scroll travado), campos ≥ 16px, alvos ≥ 44px;
+  no celular o modelo 3D abre imersivo (100dvh) e, ao fechar, a página volta à mesma posição.
+- **Analytics**: todos os eventos passam por `track()` (dataLayer / Meta Pixel / GA4 quando configurados) —
+  ver [Eventos](#eventos).
+
+### Primeiro imóvel com modelo 3D
+
+| Campo        | Valor                                                                    |
+| ------------ | ------------------------------------------------------------------------ |
+| Imóvel       | `lg-006` — Casa em condomínio, Capim Macio (Natal/RN)                    |
+| Rota         | `/imovel/casa-condominio-capim-macio-natal` (seção `#modelo-3d`)         |
+| Arquivo      | `public/models/casa-mobiliada/casa-mobiliada.glb` — 25,6 MB, original, sem conversão |
+| Capa         | `public/models/casa-mobiliada/poster.webp` (80 KB, renderizada do próprio modelo) |
+| Configuração | `casaMobiliadaModel` em `src/data/property3DConfig.ts`                   |
+| Modelo       | 921 mil triângulos · 2207 malhas → 270 draw calls após otimização        |
+| Ambientes    | Visão geral, Fachada, Sala, Cozinha, Área externa                        |
+| Hotspots     | Garagem coberta, Cozinha integrada, Bancada em mármore                   |
+
+### Arquitetura do 3D (resumo)
+
+```
+PropertyDetails
+└─ Property3DExperience      capa, WebGL check, imersivo na URL (?modelo3d=1) — SEM three.js
+   └─ lazy(Property3DViewer) chunk sob demanda (three + R3F + drei, ~272 KB gzip)
+      ├─ loadModel.ts        fetch com progresso real + cancelamento → GLTFLoader.parseAsync
+      ├─ prepareModel.ts     mescla por material, centraliza pelo bounding box, dispose
+      ├─ Property3DCanvas    dpr [1, 1.5], frameloop "demand", luz leve + ambiente procedural
+      │  ├─ Property3DControls   OrbitControls + transições esféricas, limites, intro de câmera
+      │  │  └─ cameraGoals.ts   composição/planta/ambientes a partir do modelo e da tela
+      │  └─ Property3DHotspots  marcadores DOM ancorados na geometria
+      ├─ Property3DToolbar / Property3DLoader / Property3DFallback / Property3DErrorBoundary
+      └─ BottomSheet         "Explore os ambientes"
+```
+
+Dados por imóvel: `has3DModel`, `model3DUrl`, `model3DPoster`, `model3DConfig` (`src/types/property.ts`,
+`src/types/model3d.ts`). Detalhes em [Modelo 3D interativo (GLB)](#modelo-3d-interativo-glb).
+
+### Limitações conhecidas
+
+- **Performance real não medida em celulares**: testes automatizados rodam com WebGL por CPU (SwiftShader); FPS e
+  tempo do primeiro quadro precisam ser medidos em aparelhos reais.
+- **Arquivo pesado (25,6 MB)**: sem compressão (Draco/Meshopt) nem versão mobile reduzida; leitura e otimização
+  rodam na thread principal (~1–2 s de travamento em aparelhos fracos, além da compilação do primeiro quadro).
+- **Ambientes em corte ("casa de bonecas")**: sem caminhada em primeira pessoa pelo interior.
+- **Planta**: "Terreno" mostra a cobertura como laje; pavimentos aparecem apenas em corte, por escolha do usuário.
+- **Poucos hotspots** (3), todos ancorados em objetos nomeados; sem hotspot da piscina (geometria da água pouco confiável).
+- **Mobile em retrato**: ambientes centralizados, mas com espaço livre acima do modelo.
+- **Tablets (< 1024 px)** usam o modo imersivo do celular.
+- **Dados de demonstração**: imóveis, fotos (Unsplash) e WhatsApp provisório (`5584999999999`); sem Supabase,
+  login ou painel administrativo.
+- **Previews protegidos** pela Vercel Authentication (acesso apenas ao time PlanoUp).
+
 ## Rodando
 
 ```bash
