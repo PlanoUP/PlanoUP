@@ -31,9 +31,7 @@ export async function resolveTenant(hostname: string = window.location.hostname)
   if (!match) throw new TenantNotFoundError(hostname)
 
   const { data: profile, error: profileError } = await supabase
-    .from('public_tenant_profiles')
-    .select('*')
-    .eq('tenant_id', match.tenant_id)
+    .rpc('get_tenant_profile', { p_tenant_id: match.tenant_id })
     .single<PublicTenantProfileRow>()
   if (profileError) throw profileError
   return mapTenantProfile(profile)

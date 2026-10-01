@@ -2,7 +2,7 @@
 // Rodar: npm run test:db
 import { PGlite } from '@electric-sql/pglite'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { after, before, describe, test } from 'node:test'
 
 const root = new URL('..', import.meta.url)
@@ -46,7 +46,9 @@ async function rejects(promise, pattern) {
 before(async () => {
   db = new PGlite()
   await db.exec(sql('tests/supabase-shim.sql'))
-  await db.exec(sql('migrations/0001_saas_foundation.sql'))
+  for (const file of readdirSync(new URL('migrations/', root)).filter((f) => f.endsWith('.sql')).sort()) {
+    await db.exec(sql(`migrations/${file}`))
+  }
   await db.exec(sql('seed.sql'))
   for (const [name, id] of Object.entries(U)) {
     await q(`insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)`, [
@@ -155,10 +157,10 @@ describe('isolamento de imóveis', () => {
   })
 
   test('site público: só imóveis publicados, com endereço exato oculto quando pedido', async () => {
-    let pub = await as('anon', () => q(`select id from public.public_properties where tenant_id = $1`, [tenantA]))
+    let pub = await as('anon', () => q(`select id from public.get_published_properties($1)`, [tenantA]))
     assert.equal(pub.length, 0, 'rascunho não aparece')
     await as('ownerA', () => q(`update public.properties set status = 'published' where id = $1`, [propA]))
-    pub = await as('anon', () => q(`select slug, street, street_number, neighborhood, published_at from public.public_properties where tenant_id = $1`, [tenantA]))
+    pub = await as('anon', () => q(`select slug, street, street_number, neighborhood, published_at from public.get_published_properties($1)`, [tenantA]))
     assert.equal(pub.length, 1)
     assert.equal(pub[0].street, null)
     assert.equal(pub[0].street_number, null)
@@ -168,7 +170,7 @@ describe('isolamento de imóveis', () => {
 
   test('imobiliária suspensa some do site público', async () => {
     await as('platform', () => q(`update public.tenants set status = 'suspended' where id = $1`, [tenantA]))
-    const pub = await as('anon', () => q(`select id from public.public_properties where tenant_id = $1`, [tenantA]))
+    const pub = await as('anon', () => q(`select id from public.get_published_properties($1)`, [tenantA]))
     assert.equal(pub.length, 0)
     const resolved = await as('anon', () => q(`select * from public.resolve_tenant(null, 'imob-a')`))
     assert.equal(resolved.length, 0)
@@ -180,10 +182,10 @@ describe('isolamento de imóveis', () => {
     await as('ownerA', () =>
       q(`update public.properties set model3d = '{"enabled": false, "url": "/m.glb"}' where id = $1`, [propA]),
     )
-    let pub = await as('anon', () => q(`select model3d from public.public_properties where id = $1`, [propA]))
+    let pub = await as('anon', () => q(`select model3d from public.get_published_properties($1) where id = $2`, [tenantA, propA]))
     assert.equal(pub[0].model3d, null)
     await as('ownerA', () => q(`update public.properties set model3d = '{"enabled": true, "url": "/m.glb"}' where id = $1`, [propA]))
-    pub = await as('anon', () => q(`select model3d from public.public_properties where id = $1`, [propA]))
+    pub = await as('anon', () => q(`select model3d from public.get_published_properties($1) where id = $2`, [tenantA, propA]))
     assert.equal(pub[0].model3d.url, '/m.glb')
   })
 
@@ -197,7 +199,7 @@ describe('isolamento de imóveis', () => {
     assert.deepEqual(priority, [{ slug: 'legalize' }])
     const fallback = await as('anon', () => q(`select slug from public.resolve_tenant('localhost', 'imob-a')`))
     assert.deepEqual(fallback, [{ slug: 'imob-a' }])
-    const profile = await as('anon', () => q(`select display_name, legal_name, whatsapp from public.public_tenant_profiles where slug = 'legalize'`))
+    const profile = await as('anon', () => q(`select display_name, legal_name, whatsapp from public.get_tenant_profile('00000000-0000-4000-8000-000000000001')`))
     assert.deepEqual(profile, [{ display_name: 'Legalize', legal_name: 'Legalize Soluções Imobiliárias', whatsapp: '5584999999999' }])
   })
 })
@@ -358,14 +360,42 @@ describe('salvaguardas do schema', () => {
     assert.deepEqual(rows, [], `tabelas sem RLS: ${rows.map((r) => r.tablename).join(', ')}`)
   })
 
-  test('anônimo só lê as views públicas e o catálogo de planos', async () => {
+  test('anônimo só lê o catálogo de planos (demais leituras via funções públicas)', async () => {
     const rows = await q(`
       select table_name from information_schema.role_table_grants
-      where grantee = 'anon' and table_schema = 'public' and privilege_type = 'SELECT' order by table_name`)
-    assert.deepEqual(rows.map((r) => r.table_name), ['plans', 'public_properties', 'public_property_media', 'public_tenant_profiles'])
+      where grantee = 'anon' and table_schema in ('public', 'private') and privilege_type = 'SELECT' order by table_name`)
+    assert.deepEqual(rows.map((r) => r.table_name), ['plans'])
     const writes = await q(`
       select table_name, privilege_type from information_schema.role_table_grants
       where grantee = 'anon' and table_schema = 'public' and privilege_type <> 'SELECT'`)
     assert.deepEqual(writes, [])
+  })
+
+  test('views ficam fora do schema exposto e não são lidas diretamente', async () => {
+    for (const view of ['public_properties', 'public_tenant_profiles', 'public_property_media']) {
+      await as('anon', () => rejects(q(`select 1 from private.${view} limit 1`), /permission denied/))
+      const inPublic = await q(`select 1 from pg_views where schemaname = 'public' and viewname = $1`, [view])
+      assert.equal(inPublic.length, 0)
+    }
+  })
+
+  test('funções expostas pela API = só a superfície pública intencional', async () => {
+    // SECURITY DEFINER no schema public executáveis por anon/authenticated (viram endpoints RPC).
+    const rows = await q(`
+      select p.proname, has_function_privilege('anon', p.oid, 'execute') as anon
+      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.prosecdef
+        and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))
+      order by p.proname`)
+    assert.deepEqual(rows, [
+      { proname: 'create_tenant_with_owner', anon: false },
+      { proname: 'get_published_media', anon: true },
+      { proname: 'get_published_properties', anon: true },
+      { proname: 'get_tenant_profile', anon: true },
+      { proname: 'resolve_tenant', anon: true },
+      { proname: 'submit_lead', anon: true },
+      { proname: 'tenant_entitlements', anon: false },
+      { proname: 'track_event', anon: true },
+    ])
   })
 })

@@ -1,6 +1,6 @@
 /**
  * Configuração pública de uma imobiliária (tenant), usada pelo site.
- * Vem do Supabase (view `public_tenant_profiles`) ou, sem backend, da marca padrão.
+ * Vem do Supabase (função `get_tenant_profile`) ou, sem backend, da marca padrão.
  */
 export interface TenantConfig {
   /** UUID no banco; `null` no modo sem backend. */
@@ -36,7 +36,7 @@ export interface TenantConfig {
   source: 'default' | 'backend'
 }
 
-/** Linha da view `public_tenant_profiles`. */
+/** Linha retornada por `get_tenant_profile` (view privada `public_tenant_profiles`). */
 export interface PublicTenantProfileRow {
   tenant_id: string
   slug: string

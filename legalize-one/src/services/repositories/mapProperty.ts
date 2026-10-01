@@ -4,7 +4,7 @@ import type { Model3DConfig } from '@/types/model3d'
 import type { Property, PropertyImage, PropertyType } from '@/types/property'
 import type { PropertyTour } from '@/types/tour'
 
-/** Linha da view `public_properties` (somente campos públicos). */
+/** Linha retornada por `get_published_properties` (somente campos públicos). */
 export interface PublicPropertyRow {
   id: string
   tenant_id: string
@@ -36,7 +36,7 @@ export interface PublicPropertyRow {
   published_at: string | null
 }
 
-/** Linha da view `public_property_media`. */
+/** Linha retornada por `get_published_media`. */
 export interface PublicMediaRow {
   property_id: string
   kind: 'photo' | 'video' | 'floor_plan' | 'virtual_tour' | 'model_3d'
@@ -45,6 +45,8 @@ export interface PublicMediaRow {
   alt: string | null
   position: number
   is_cover: boolean
+  /** Ex.: { fallback: 'living' } — ilustração exibida se a foto não carregar. */
+  metadata?: { fallback?: string } | null
 }
 
 const KNOWN_TYPES: PropertyType[] = ['casa', 'casa-condominio', 'apartamento', 'cobertura', 'terreno']
@@ -57,6 +59,12 @@ const FALLBACK_BY_TYPE: Record<string, SceneArtVariant> = {
   cobertura: 'coast',
   terreno: 'facade-day',
 }
+
+const SCENE_VARIANTS: SceneArtVariant[] = [
+  'facade-night', 'facade-day', 'townhouse', 'apartment-tower', 'living', 'kitchen', 'suite', 'gourmet', 'pool', 'coast',
+]
+const variantOf = (v: unknown): SceneArtVariant | null =>
+  typeof v === 'string' && (SCENE_VARIANTS as string[]).includes(v) ? (v as SceneArtVariant) : null
 
 const num = (v: number | string | null | undefined) => (v === null || v === undefined || v === '' ? 0 : Number(v))
 
@@ -77,10 +85,14 @@ export function mapPublicProperty(row: PublicPropertyRow, media: PublicMediaRow[
     .filter((m) => m.property_id === row.id && m.kind === 'photo')
     .sort((a, b) => Number(b.is_cover) - Number(a.is_cover) || a.position - b.position)
   const gallery: PropertyImage[] = photos
-    .map((m, i) => ({ src: mediaUrl(m), alt: m.alt || `${row.title} — foto ${i + 1}`, fallback }))
+    .map((m, i) => ({
+      src: mediaUrl(m),
+      alt: m.alt || `${row.title} — foto ${i + 1}`,
+      fallback: variantOf(m.metadata?.fallback) ?? fallback,
+    }))
     .filter((img) => img.src)
   const cover: PropertyImage = row.cover_image_url
-    ? { src: row.cover_image_url, alt: row.title, fallback }
+    ? { src: row.cover_image_url, alt: gallery[0]?.alt ?? row.title, fallback: gallery[0]?.fallback ?? fallback }
     : (gallery[0] ?? { src: '', alt: row.title, fallback })
   const model = row.model3d?.enabled && row.model3d.url ? row.model3d : null
 

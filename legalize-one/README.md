@@ -142,11 +142,18 @@ Variáveis `VITE_*` são públicas e embutidas no build (refaça o deploy após 
 
 Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.md).
 
-- **Banco:** `supabase/migrations/0001_saas_foundation.sql` (tabelas por `tenant_id`, RLS em todas, views públicas,
-  RPCs `resolve_tenant` / `submit_lead` / `track_event` / `create_tenant_with_owner`, limites de plano, Storage por
-  pasta de tenant) + `supabase/seed.sql` (planos provisórios e a Legalize como primeiro tenant).
+- **Banco:** `supabase/migrations/0001_saas_foundation.sql` (tabelas por `tenant_id`, RLS em todas, RPCs
+  `resolve_tenant` / `submit_lead` / `track_event` / `create_tenant_with_owner`, limites de plano, Storage por
+  pasta de tenant) + `0002_harden_api_surface.sql` (views e auxiliares de autorização no schema `private`, fora da
+  API; o site lê por `get_tenant_profile` / `get_published_properties` / `get_published_media`) +
+  `supabase/seed.sql` (planos provisórios e a Legalize como primeiro tenant).
+- **Catálogo:** `supabase/seed_catalog.sql` importa os imóveis de `src/data` (fotos, tour 360 e 3D) para a Legalize.
+  É gerado por `npm run catalog:export` (IDs determinísticos, idempotente) e o teste `catalog.test.ts` garante que o
+  banco devolve exatamente o catálogo da V1.
+- **Projeto Supabase:** `legalize-one` (ref `nngmusfeumqwvmcjrgrz`, São Paulo) com 0001, 0002, seed e catálogo
+  aplicados.
 - **Ativar num projeto Supabase:** `supabase link --project-ref <ref>` → `supabase db push` → rodar `supabase/seed.sql`
-  no SQL Editor → definir `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` na Vercel → novo deploy. Promover o primeiro
+  e `supabase/seed_catalog.sql` no SQL Editor → definir `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` na Vercel → novo deploy. Promover o primeiro
   super admin: `update profiles set is_platform_admin = true where id = '<uuid do usuário>';` (SQL Editor).
 - **Frontend:** `src/tenant/` (imobiliária ativa por domínio, tema por variáveis CSS, marca/contato),
   `src/lib/backend.ts` (modo duplo), `src/lib/supabase.ts` (cliente sob demanda), `src/services/repositories/`
@@ -188,8 +195,9 @@ src/
   lib/              analytics + eventSink, attribution, backend/supabase, entitlements, permissions, images
   hooks/ utils/ types/ routes/ pages/
 supabase/
-  migrations/       Schema + RLS
+  migrations/       Schema + RLS (0001) e superfície da API (0002)
   seed.sql          Planos e tenant inicial
+  seed_catalog.sql  Catálogo da Legalize (gerado por scripts/export-catalog.ts)
   tests/            Isolamento entre imobiliárias (PGlite)
 ```
 

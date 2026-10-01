@@ -6,7 +6,7 @@ import { setCatalogSnapshot } from './catalogSnapshot'
 import { mapPublicProperty, type PublicMediaRow, type PublicPropertyRow } from './mapProperty'
 
 /**
- * Imóveis da imobiliária ativa, lidos das views públicas (RLS + filtros do banco garantem
+ * Imóveis da imobiliária ativa, lidos pelas funções públicas do banco (que garantem
  * que só aparecem imóveis publicados de tenants ativos).
  * O catálogo é pequeno por imobiliária (dezenas/centenas): carregamos uma vez e filtramos
  * em memória com a mesma lógica da V1 — mesmos resultados, menos round-trips.
@@ -25,18 +25,15 @@ async function fetchCatalog(id: string): Promise<Property[]> {
   tourCache.clear()
   const supabase = await requireSupabase()
   const { data: rows, error } = await supabase
-    .from('public_properties')
-    .select('*')
-    .eq('tenant_id', id)
+    .rpc('get_published_properties', { p_tenant_id: id })
     .order('featured', { ascending: false })
     .order('published_at', { ascending: false })
   if (error) throw error
   const list = (rows ?? []) as PublicPropertyRow[]
   if (!list.length) return []
   const { data: media, error: mediaError } = await supabase
-    .from('public_property_media')
-    .select('property_id, kind, url, storage_path, alt, position, is_cover')
-    .eq('tenant_id', id)
+    .rpc('get_published_media', { p_tenant_id: id })
+    .select('property_id, kind, url, storage_path, alt, position, is_cover, metadata')
     .eq('kind', 'photo')
     .order('position')
   if (mediaError) throw mediaError

@@ -95,7 +95,8 @@ Navegador (SPA React — Vercel)
 Supabase (Postgres + Auth + Storage)
  ├─ RLS em todas as tabelas por tenant_id
  ├─ RPCs públicas validadas: resolve_tenant, submit_lead, track_event
- ├─ Views públicas: public_tenant_profiles, public_properties (mascara endereço)
+ ├─ Leitura pública por RPC: get_tenant_profile, get_published_properties, get_published_media
+ │   (views em schema `private`, fora da API; mascaram endereço)
  └─ Storage: buckets por tipo, pastas por tenant (<tenant_id>/...)
 Funções de servidor (fase posterior: Vercel Functions ou Supabase Edge)
  └─ operações com service_role: convite de usuários, criação de tenant pelo super admin, domínios, cobrança
@@ -160,8 +161,9 @@ políticas, e o projeto já previa `VITE_SUPABASE_*`. Mantemos a SPA (sem migrar
 | `leads`, `lead_notes` | Contatos e acompanhamento                                                             |
 | `analytics_events`  | Eventos de uso (sem dados pessoais)                                                     |
 
-Views: `public_tenant_profiles`, `public_properties`. RPCs: `resolve_tenant`, `submit_lead`, `track_event`,
-`create_tenant_with_owner`, `tenant_entitlements`.
+Views (schema `private`, migration 0002): `public_tenant_profiles`, `public_properties`, `public_property_media`.
+RPCs: `resolve_tenant`, `get_tenant_profile`, `get_published_properties`, `get_published_media`, `submit_lead`,
+`track_event`, `create_tenant_with_owner`, `tenant_entitlements`.
 
 ## 9. Roadmap técnico
 
@@ -186,11 +188,19 @@ Views: `public_tenant_profiles`, `public_properties`. RPCs: `resolve_tenant`, `s
   tenant, `published_at` automático, limite de imóveis e recurso 3D por plano (trigger), guardas de papel (corretor
   não muda status/3D; owner não muda plano/status), views públicas que ocultam endereço exato, RPCs públicas validadas
   (anti-abuso simples em leads), Storage com pastas `<tenant_id>/…`.
+- `migrations/0002_harden_api_surface.sql` — resposta ao linter de segurança do Supabase: views públicas e
+  funções auxiliares de autorização movidas para o schema `private` (não exposto pela API); leitura pública passa
+  por `get_tenant_profile` / `get_published_properties` / `get_published_media`; funções de trigger sem `EXECUTE`
+  para os papéis da API. Restam no linter só os avisos das 8 funções públicas intencionais.
+- `seed_catalog.sql` — catálogo da Legalize (10 imóveis, 25 fotos, tour 360, config 3D), gerado de `src/data` por
+  `scripts/export-catalog.ts` (`npm run catalog:export`), idempotente. `src/__tests__/catalog.test.ts` aplica tudo
+  no PGlite e confere, como visitante anônimo, que o conversor devolve exatamente o catálogo da V1.
 - `seed.sql` — planos START / PRO / PREMIUM (provisórios) e o tenant **Legalize** com a marca e os contatos atuais.
-- `tests/rls.test.mjs` — **30 testes** em Postgres 18 real (PGlite) com os papéis `anon`/`authenticated` e JWT
+- `tests/rls.test.mjs` — **32 testes** em Postgres 18 real (PGlite) com os papéis `anon`/`authenticated` e JWT
   simulado: isolamento de leitura/escrita entre tenants, corretor × admin × super admin, site público só com
   publicados, tenant suspenso some, domínio → tenant, validações de lead, analytics sem vazamento, limites de plano,
-  Storage por pasta, e salvaguardas (toda tabela com RLS; anônimo só lê views públicas).
+  Storage por pasta, e salvaguardas (toda tabela com RLS; anônimo só lê `plans` diretamente; conjunto exato de
+  funções `security definer` expostas).
 
 ### Frontend (`src/`)
 - **Modo duplo** (`lib/backend.ts`): sem `VITE_SUPABASE_URL`/`ANON_KEY` → comportamento da V1, verificado
@@ -209,7 +219,8 @@ Views: `public_tenant_profiles`, `public_properties`. RPCs: `resolve_tenant`, `s
   demanda que o site público não baixa.
 
 ### Ainda mock/hardcoded (próximas etapas)
-- Catálogo, tours 360 e config 3D seguem em `src/data` até o import para o banco (etapa 2).
+- Catálogo, tours 360 e config 3D: já importados para o banco; `src/data` continua como fonte do modo V1 (sem
+  backend). O GLB e o poster seguem servidos pelo próprio site (`/models/…`), referenciados no `model3d` do imóvel.
 - Conteúdo institucional da Home (hero, diferenciais, documentação, CTA final) e o imóvel em destaque do 3D na Home
   (`Experience3D.tsx`) são da Legalize — viram configuração do tenant na etapa do site dinâmico.
 - Menu principal e filtros (tipos/faixas de preço); finalidade "temporada" exibida como aluguel; tipos novos
@@ -218,10 +229,8 @@ Views: `public_tenant_profiles`, `public_properties`. RPCs: `resolve_tenant`, `s
   (etapa de leads). `gallery_interaction` e `phone_click` ainda não são emitidos.
 
 ### Riscos / pendências conhecidas
-- Fluxos com Supabase real (login, RPCs via PostgREST, Storage) **não foram executados ponta a ponta** — não há
-  projeto Supabase neste ambiente. O SQL foi validado em Postgres real; o cliente, por testes unitários e tipos.
-- Views públicas rodam com privilégio do dono (intencional, filtradas): o linter do Supabase as sinaliza como
-  "security definer view". Alternativa futura: RPCs `security definer` dedicadas.
+- Projeto Supabase real criado (`legalize-one`, ref `nngmusfeumqwvmcjrgrz`): migrations, seed e catálogo
+  aplicados; o catálogo no banco confere byte a byte (checksum) com o gerado e validado localmente.
 - O Supabase concede privilégios padrão a `anon` em tabelas NOVAS: toda migration futura deve habilitar RLS e
   revisar grants (o teste de salvaguarda falha se esquecer).
 - Anti-abuso de leads é básico (por sessão); para produção aberta, adicionar rate limit por IP numa função de
