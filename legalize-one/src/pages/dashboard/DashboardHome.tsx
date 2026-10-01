@@ -1,7 +1,8 @@
-import { ArrowRight, Plus, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Inbox, Plus, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { ButtonLink } from '@/components/ui/Button'
+import { listLeads } from '@/dashboard/leadsApi'
 import { listProperties, STATUS_LABELS, type PropertyStatus } from '@/dashboard/propertiesApi'
 import { useWorkspace } from '@/dashboard/workspace'
 import { useAsyncData } from '@/hooks/useAsyncData'
@@ -19,6 +20,9 @@ export default function DashboardHome() {
   const ws = useWorkspace()
 
   const { data: properties } = useAsyncData(() => listProperties(ws.tenantId), ws.tenantId)
+  const { data: leads } = useAsyncData(() => listLeads(ws.tenantId), `leads:${ws.tenantId}`)
+  const newLeads = (leads ?? []).filter((l) => l.status === 'new').length
+  const openLeads = (leads ?? []).filter((l) => l.status !== 'converted' && l.status !== 'lost').length
   const { data: entitlements } = useAsyncData(async () => {
     const supabase = await requireSupabase()
     const { data, error } = await supabase.rpc('tenant_entitlements', { p_tenant_id: ws.tenantId })
@@ -57,6 +61,24 @@ export default function DashboardHome() {
           {ROLE_LABELS.platform_admin}
         </p>
       )}
+
+      <Link
+        to="/dashboard/contatos"
+        className="flex items-center gap-4 rounded-2xl bg-navy-950 p-5 text-white shadow-card transition-shadow hover:shadow-float"
+      >
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-gold-500 text-navy-950">
+          <Inbox className="size-5" aria-hidden="true" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-[20px] font-bold">
+            {leads ? (newLeads === 1 ? '1 contato novo' : `${newLeads} contatos novos`) : 'Contatos'}
+          </span>
+          <span className="block text-[14px] text-white/70">
+            {leads ? `${openLeads} em aberto · ${ws.can('leads.view_all') ? 'toda a imobiliária' : 'sob sua responsabilidade'}` : 'Carregando…'}
+          </span>
+        </span>
+        <ArrowRight className="size-5 shrink-0 text-gold-400" aria-hidden="true" />
+      </Link>
 
       <section aria-labelledby="resumo-imoveis">
         <div className="flex items-center justify-between">

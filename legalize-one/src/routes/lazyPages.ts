@@ -12,3 +12,5 @@ export const DashboardLayout = lazy(() => import('@/pages/dashboard/DashboardLay
 export const DashboardHome = lazy(() => import('@/pages/dashboard/DashboardHome'))
 export const PropertyList = lazy(() => import('@/pages/dashboard/PropertyList'))
 export const PropertyEditor = lazy(() => import('@/pages/dashboard/PropertyEditor'))
+export const LeadList = lazy(() => import('@/pages/dashboard/LeadList'))
+export const LeadDetail = lazy(() => import('@/pages/dashboard/LeadDetail'))

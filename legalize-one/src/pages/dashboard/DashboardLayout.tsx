@@ -1,10 +1,12 @@
-import { Building2, Home, LayoutDashboard, LogOut, type LucideIcon } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router'
+import { Building2, Home, Inbox, LayoutDashboard, LogOut, type LucideIcon } from 'lucide-react'
+import { NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { RequireAuth } from '@/auth/RequireAuth'
 import { Logo } from '@/components/ui/Logo'
 import { WorkspaceProvider } from '@/dashboard/WorkspaceProvider'
+import { countNewLeads } from '@/dashboard/leadsApi'
 import { useWorkspaceState } from '@/dashboard/workspace'
+import { useAsyncData } from '@/hooks/useAsyncData'
 import { ROLE_LABELS } from '@/lib/permissions'
 import { cn } from '@/utils/cn'
 
@@ -13,12 +15,26 @@ interface NavItem {
   label: string
   icon: LucideIcon
   end?: boolean
+  badge?: boolean
 }
 
 const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Visão geral', icon: LayoutDashboard, end: true },
   { to: '/dashboard/imoveis', label: 'Imóveis', icon: Home },
+  { to: '/dashboard/contatos', label: 'Contatos', icon: Inbox, badge: true },
 ]
+
+function NewBadge({ count, className }: { count: number; className?: string }) {
+  if (!count) return null
+  return (
+    <span
+      aria-label={`${count} ${count === 1 ? 'contato novo' : 'contatos novos'}`}
+      className={cn('inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gold-500 px-1.5 text-[11.5px] font-bold text-navy-950 tabular-nums', className)}
+    >
+      {count > 99 ? '99+' : count}
+    </span>
+  )
+}
 
 function TenantSwitcher() {
   const { current, options, select } = useWorkspaceState()
@@ -47,6 +63,12 @@ function TenantSwitcher() {
 function Shell() {
   const auth = useAuth()
   const { current } = useWorkspaceState()
+  const location = useLocation()
+  // Recalcula ao navegar (ex.: depois de atender um contato novo).
+  const { data: newLeads } = useAsyncData(
+    () => (current ? countNewLeads(current.tenantId) : Promise.resolve(0)),
+    `${current?.tenantId}:${location.pathname}`,
+  )
 
   return (
     <div className="min-h-dvh bg-sand pb-20 lg:pb-0">
@@ -91,6 +113,7 @@ function Shell() {
                 >
                   <item.icon className="size-[18px]" aria-hidden="true" />
                   {item.label}
+                  {item.badge && <NewBadge count={newLeads ?? 0} className="ml-auto" />}
                 </NavLink>
               </li>
             ))}
@@ -118,7 +141,7 @@ function Shell() {
         aria-label="Painel"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-navy-950/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
-        <ul className="grid grid-cols-2">
+        <ul className="grid grid-cols-3">
           {NAV.map((item) => (
             <li key={item.to}>
               <NavLink
@@ -131,7 +154,10 @@ function Shell() {
                   )
                 }
               >
-                <item.icon className="size-5" aria-hidden="true" />
+                <span className="relative">
+                  <item.icon className="size-5" aria-hidden="true" />
+                  {item.badge && <NewBadge count={newLeads ?? 0} className="absolute -top-2 left-3" />}
+                </span>
                 {item.label}
               </NavLink>
             </li>

@@ -335,6 +335,29 @@ describe('corretores', () => {
         rejects(q(`insert into public.lead_notes (tenant_id, lead_id, body) values ($1, $2, 'x')`, [tenantA, leadMine]), /row-level security/),
       )
     })
+
+    test('corretor registra contato só em nome próprio; atualiza status do próprio lead', async () => {
+      const own = await as('brokerA', () =>
+        q(`insert into public.leads (tenant_id, broker_id, name, phone, channel) values ($1, $2, 'Cliente WhatsApp', '84999990001', 'whatsapp') returning id`, [tenantA, brokerRow]),
+      )
+      assert.equal(own.length, 1)
+      await as('brokerA', () =>
+        rejects(q(`insert into public.leads (tenant_id, name, channel) values ($1, 'Sem corretor', 'call')`, [tenantA]), /row-level security/),
+      )
+      const moved = await as('brokerA', () => q(`update public.leads set status = 'contacted' where id = $1 returning status`, [leadMine]))
+      assert.equal(moved[0].status, 'contacted')
+      const notMine = await as('brokerA', () => q(`update public.leads set status = 'lost' where id = $1 returning id`, [leadOther]))
+      assert.equal(notMine.length, 0)
+    })
+
+    test('colegas veem o nome uns dos outros; outra imobiliária não', async () => {
+      const seen = await as('brokerA', () => q(`select id, full_name from public.profiles where id = $1`, [U.ownerA]))
+      assert.equal(seen[0]?.full_name, 'ownerA')
+      const foreign = await as('ownerB', () => q(`select id from public.profiles where id = $1`, [U.ownerA]))
+      assert.equal(foreign.length, 0)
+      const outsider = await as('outsider', () => q(`select id from public.profiles where id <> $1`, [U.outsider]))
+      assert.equal(outsider.length, 0)
+    })
   })
 })
 

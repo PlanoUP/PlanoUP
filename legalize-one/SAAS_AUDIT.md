@@ -228,6 +228,13 @@ RPCs: `resolve_tenant`, `get_tenant_profile`, `get_published_properties`, `get_p
 - Validado no navegador (gerente e corretor, desktop e celular) com backend simulado; regras de acesso validadas
   no Postgres (PGlite) e no projeto real.
 
+### Etapa 3 — Painel: contatos (leads)
+- `migrations/0004_panel_leads.sql` — colegas da mesma imobiliária veem o nome uns dos outros (autor das
+  anotações); corretor registra contato só em nome próprio. 36 testes de RLS.
+- Painel: lista com filtros por situação e busca (nome, telefone, e-mail, imóvel), selo de contatos novos no menu,
+  detalhe com atendimento (WhatsApp/ligar/e-mail), situação, responsável, dados editáveis, anotações e origem.
+- Production ligada ao banco desde a etapa 2 (site idêntico ao anterior, verificado em 16 comparações de tela).
+
 ### Ainda mock/hardcoded (próximas etapas)
 - Catálogo, tours 360 e config 3D: já importados para o banco; `src/data` continua como fonte do modo V1 (sem
   backend). O GLB e o poster seguem servidos pelo próprio site (`/models/…`), referenciados no `model3d` do imóvel.

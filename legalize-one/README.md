@@ -166,6 +166,10 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
   - Papéis: **Gerente** (owner/admin) gerencia tudo da imobiliária; **Corretor** cadastra rascunhos e edita só os
     próprios imóveis (status, destaque e "documentação verificada" ficam com o gerente — regra no banco, migration
     0003). Admin da plataforma alterna entre imobiliárias.
+  - **Contatos**: caixa de entrada dos leads (formulários do site + contatos registrados pela equipe), situação
+    (novo → em atendimento → visita agendada → em negociação → fechado/perdido), atendimento com 1 toque
+    (WhatsApp com saudação, ligar, e-mail; contato novo vira "em atendimento"), corretor responsável, anotações
+    da equipe, origem/campanha (UTM). Corretor vê e registra só os próprios contatos (migration 0004).
   - Sem backend, `/entrar` informa que o painel ainda não está ativo.
 
 ## Rotas
@@ -201,7 +205,7 @@ src/
   lib/              analytics + eventSink, attribution, backend/supabase, entitlements, permissions, images
   hooks/ utils/ types/ routes/ pages/
 supabase/
-  migrations/       Schema + RLS (0001), superfície da API (0002), painel de imóveis (0003)
+  migrations/       Schema + RLS (0001), superfície da API (0002), painel de imóveis (0003), contatos (0004)
   seed.sql          Planos e tenant inicial
   seed_catalog.sql  Catálogo da Legalize (gerado por scripts/export-catalog.ts)
   tests/            Isolamento entre imobiliárias (PGlite)
