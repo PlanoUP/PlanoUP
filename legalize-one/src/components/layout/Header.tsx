@@ -4,10 +4,11 @@ import { Link, useLocation, type Location } from 'react-router'
 import { ButtonAnchor } from '@/components/ui/Button'
 import { Logo } from '@/components/ui/Logo'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
-import { mainNav, site, type NavItem } from '@/config/site'
+import { mainNav, type NavItem } from '@/config/site'
 import { useModal } from '@/hooks/useModal'
 import { track } from '@/lib/analytics'
 import { whatsappLink } from '@/lib/whatsapp'
+import { useTenant } from '@/tenant/store'
 import { cn } from '@/utils/cn'
 
 function isActive(item: NavItem, location: Location): boolean {
@@ -25,6 +26,7 @@ function isActive(item: NavItem, location: Location): boolean {
 }
 
 export function Header() {
+  const tenant = useTenant()
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -154,7 +156,7 @@ export function Header() {
               Fale com um especialista
             </ButtonAnchor>
             <p className="text-center text-[13px] text-slate">
-              {site.phoneDisplay} · Seg. a sáb., 8h às 18h
+              {[tenant.contact.phoneDisplay, tenant.contact.businessHours].filter(Boolean).join(' · ')}
             </p>
           </div>
         </nav>

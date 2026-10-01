@@ -34,6 +34,14 @@ export function storageImage(path: string, { width = 1200, quality = 75 }: Image
   return `${base}/storage/v1/render/image/public/${storageBucket}/${cleanPath}?width=${width}&quality=${quality}&resize=cover`
 }
 
+/** URL pública (sem transformação) de um arquivo do Storage — ex.: GLB, vídeo, PDF da planta. */
+export function storagePublicUrl(path: string, bucket: string = integrations.supabase.storageBucket): string {
+  const { url } = integrations.supabase
+  if (!url || !path) return ''
+  if (/^https?:\/\//.test(path)) return path
+  return `${url.replace(/\/+$/, '')}/storage/v1/object/public/${bucket}/${path.replace(/^\/+/, '')}`
+}
+
 /** Gera a versão em outra largura da mesma imagem, respeitando o provedor. */
 export function resizeImage(src: string, width: number): string {
   if (!src) return src

@@ -9,6 +9,7 @@ import { propertyTypeOptions } from '@/data/filters'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { track } from '@/lib/analytics'
 import { whatsappLink } from '@/lib/whatsapp'
+import { submitLead } from '@/services/leadService'
 import { cn } from '@/utils/cn'
 import { unsplash } from '@/lib/images'
 
@@ -52,8 +53,16 @@ export default function Sell() {
       document.getElementById(`lead-${firstInvalid}`)?.focus()
       return
     }
-    // Futuro: persistir em `leads` no Supabase.
     track('lead_submitted', { source: 'sell_page', type: lead.type, has_docs: lead.hasDocs })
+    // Com o backend ligado, o contato fica registrado no painel da imobiliária
+    // (sem backend, segue só pelo WhatsApp, como na V1). Nunca bloqueia a confirmação.
+    void submitLead({
+      channel: 'form',
+      source: 'sell_page',
+      name: lead.name,
+      phone: lead.phone,
+      message: `Quer vender: ${lead.type || 'tipo não informado'} em ${lead.neighborhood}. Documentação em dia: ${lead.hasDocs}.`,
+    })
     setSent(true)
   }
 

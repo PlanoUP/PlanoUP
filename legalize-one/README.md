@@ -95,12 +95,14 @@ npm run build    # typecheck + build de produção
 npm run preview  # serve o build
 ```
 
-Requer Node.js 22.x (fixado em `engines`). Copie `.env.example` para `.env` para configurar o número do WhatsApp e
-(futuramente) Supabase, Meta Pixel e GA4 — todas as variáveis são opcionais nesta fase.
+Requer Node.js 22.x (fixado em `engines`). Copie `.env.example` para `.env`. Todas as variáveis são opcionais:
+sem o Supabase o site roda no **modo V1** (catálogo local, marca Legalize).
 
 ```bash
 npm run lint       # oxlint
 npm run typecheck  # tsc -b
+npm test           # testes unitários (Vitest) — src/__tests__
+npm run test:db    # migrations + RLS em Postgres real embutido (PGlite) — supabase/tests
 ```
 
 ## Deploy na Vercel
@@ -122,17 +124,36 @@ e cache imutável para `/assets/*`. Arquivos inexistentes em `/assets/` retornam
 
 ### Variáveis de ambiente
 
-| Variável                       | Obrigatória | Uso                                                      |
-| ------------------------------ | ----------- | -------------------------------------------------------- |
-| `VITE_WHATSAPP_NUMBER`         | Não*        | WhatsApp de atendimento (dígitos com DDI+DDD)            |
-| `VITE_SUPABASE_URL`            | Não         | Futuro — ativa URLs do Supabase Storage em `lib/images`  |
-| `VITE_SUPABASE_ANON_KEY`       | Não         | Futuro                                                   |
-| `VITE_SUPABASE_STORAGE_BUCKET` | Não         | Futuro — bucket das fotos (padrão `imoveis`)             |
-| `VITE_META_PIXEL_ID`           | Não         | Futuro                                                   |
-| `VITE_GA_MEASUREMENT_ID`       | Não         | Futuro                                                   |
+| Variável                       | Obrigatória | Uso                                                                  |
+| ------------------------------ | ----------- | -------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL`            | Não†        | Liga a plataforma (imobiliária, imóveis, leads e eventos no banco)   |
+| `VITE_SUPABASE_ANON_KEY`       | Não†        | Chave pública (anon/publishable) do projeto Supabase                 |
+| `VITE_SUPABASE_STORAGE_BUCKET` | Não         | Bucket das mídias (padrão `property-media`)                           |
+| `VITE_DEFAULT_TENANT`          | Não         | Imobiliária quando o domínio não identifica nenhuma (padrão `legalize`) |
+| `VITE_WHATSAPP_NUMBER`         | Não*        | WhatsApp no modo V1 (sem backend)                                    |
+| `VITE_META_PIXEL_ID`           | Não         | Futuro                                                               |
+| `VITE_GA_MEASUREMENT_ID`       | Não         | Futuro                                                               |
 
-\* Sem ela o site usa o número provisório `5584999999999`. Variáveis `VITE_*` são embutidas no bundle no build:
-após alterá-las na Vercel, faça um novo deploy.
+† As duas juntas ligam o backend; sem elas, modo V1. \* Sem ela o modo V1 usa o número provisório `5584999999999`.
+Variáveis `VITE_*` são públicas e embutidas no build (refaça o deploy após alterar). A `service_role` do Supabase
+**nunca** vai para o frontend.
+
+## Plataforma SaaS (fundação multiempresa)
+
+Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.md).
+
+- **Banco:** `supabase/migrations/0001_saas_foundation.sql` (tabelas por `tenant_id`, RLS em todas, views públicas,
+  RPCs `resolve_tenant` / `submit_lead` / `track_event` / `create_tenant_with_owner`, limites de plano, Storage por
+  pasta de tenant) + `supabase/seed.sql` (planos provisórios e a Legalize como primeiro tenant).
+- **Ativar num projeto Supabase:** `supabase link --project-ref <ref>` → `supabase db push` → rodar `supabase/seed.sql`
+  no SQL Editor → definir `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` na Vercel → novo deploy. Promover o primeiro
+  super admin: `update profiles set is_platform_admin = true where id = '<uuid do usuário>';` (SQL Editor).
+- **Frontend:** `src/tenant/` (imobiliária ativa por domínio, tema por variáveis CSS, marca/contato),
+  `src/lib/backend.ts` (modo duplo), `src/lib/supabase.ts` (cliente sob demanda), `src/services/repositories/`
+  (imóveis do banco → mesmo tipo `Property`), `src/lib/eventSink.ts` + `attribution.ts` (eventos sem dados pessoais),
+  `src/services/leadService.ts`, `src/lib/entitlements.ts` (planos), `src/lib/permissions.ts` (papéis), `src/auth/`.
+- **Painel:** `/entrar` e `/dashboard` (fundação: sessão, imobiliárias, papel e plano). Sem backend, `/entrar` informa
+  que o painel ainda não está ativo.
 
 ## Rotas
 
@@ -142,6 +163,8 @@ após alterá-las na Vercel, faça um novo deploy.
 | `/imoveis`      | Listagem com filtros na URL              |
 | `/imovel/:slug` | Detalhes do imóvel (galeria, tour, docs) |
 | `/vender`       | Captação de imóveis (formulário)         |
+| `/entrar`       | Entrada do painel da imobiliária         |
+| `/dashboard`    | Painel (protegido)                       |
 
 Filtros da listagem via query string: `finalidade` (`venda`/`aluguel`), `regiao`, `tipo`, `preco`, `quartos`, `ordem`.
 
@@ -157,20 +180,26 @@ src/
     forms/          PropertySearch, campos de busca
     ui/             Button, Badge, Logo, SmartImage, ...
     illustrations/  SceneArt (fallback vetorial de imagens)
-  config/           Marca, integrações, menu
-  data/             MOCK DATA (imóveis, tours, filtros, textos)
-  services/         Camada de dados (troca mock → Supabase aqui)
-  lib/              analytics, whatsapp, images (URLs de imagem)
+  config/           Marca padrão, integrações, menu
+  data/             MOCK DATA (modo V1: imóveis, tours, filtros, textos)
+  tenant/           Imobiliária ativa: resolução por domínio, tema, store
+  auth/             Sessão, papéis e guarda de rotas do painel
+  services/         Camada de dados (modo duplo: catálogo local ou Supabase), leads
+  lib/              analytics + eventSink, attribution, backend/supabase, entitlements, permissions, images
   hooks/ utils/ types/ routes/ pages/
+supabase/
+  migrations/       Schema + RLS
+  seed.sql          Planos e tenant inicial
+  tests/            Isolamento entre imobiliárias (PGlite)
 ```
 
 ## Pontos de integração
 
-- **Supabase**: `src/services/propertyService.ts` — as funções já são assíncronas; basta trocar o corpo.
+- **Supabase**: ver _Plataforma SaaS_ acima — `services/propertyService.ts` já escolhe entre catálogo local e banco.
 - **Tour 3D**: ver a seção _Legalize 3D Experience_ abaixo.
 - **Analytics / Meta Pixel**: `src/lib/analytics.ts` — todos os eventos (busca, WhatsApp, tour, lead) passam por `track()`,
   que já envia para `dataLayer`, `fbq` e `gtag` quando presentes.
-- **WhatsApp**: `src/lib/whatsapp.ts` + `VITE_WHATSAPP_NUMBER`.
+- **WhatsApp**: `src/lib/whatsapp.ts` — número e mensagem da imobiliária ativa (`VITE_WHATSAPP_NUMBER` no modo V1).
 
 ## Legalize 3D Experience
 

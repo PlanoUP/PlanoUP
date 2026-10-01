@@ -17,6 +17,7 @@ import { propertyTypeLabels } from '@/data/filters'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { track } from '@/lib/analytics'
+import { setAnalyticsContext } from '@/lib/eventSink'
 import { setStickyActions } from '@/lib/uiStore'
 import { whatsappLink } from '@/lib/whatsapp'
 import { getPropertyBySlug, listRelatedProperties } from '@/services/propertyService'
@@ -46,7 +47,11 @@ export default function PropertyDetails() {
   usePageTitle(property ? `${property.title} em ${property.location.neighborhood}` : loading ? undefined : 'Imóvel não encontrado')
 
   useEffect(() => {
-    if (property) track('property_viewed', { property_id: property.id, price: property.price })
+    if (!property) return
+    // Eventos desta página (3D, tour, CTAs) ficam vinculados ao imóvel.
+    setAnalyticsContext({ propertyId: property.id })
+    track('property_viewed', { property_id: property.id, price: property.price })
+    return () => setAnalyticsContext({ propertyId: null })
   }, [property])
 
   // CTA fixo do mobile contextual: conversar sobre ESTE imóvel ou agendar visita.

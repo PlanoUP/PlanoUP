@@ -1,8 +1,12 @@
+import { persistEvent, type StoredEventType } from './eventSink'
+
 /**
- * Camada única de tracking. Hoje apenas empilha eventos no `dataLayer`;
- * quando Meta Pixel / GA4 forem instalados, os eventos já fluem por aqui.
+ * Camada única de tracking: `dataLayer` (GTM), Meta Pixel e GA4 quando instalados e —
+ * com o backend ligado — os eventos relevantes para o painel da imobiliária são gravados
+ * no banco (analytics_events), sem dados pessoais.
  */
 export type AnalyticsEvent =
+  | 'page_viewed'
   | 'search_submitted'
   | 'property_viewed'
   | 'property_favorited'
@@ -61,6 +65,25 @@ const metaStandardEvents: Partial<Record<AnalyticsEvent, string>> = {
   lead_submitted: 'Lead',
 }
 
+/** Eventos do site → tipos gravados no banco (o resto fica só no dataLayer). */
+export const storedEventTypes: Partial<Record<AnalyticsEvent, StoredEventType>> = {
+  page_viewed: 'page_view',
+  property_viewed: 'property_view',
+  search_submitted: 'search',
+  tour_started: 'tour_open',
+  model3d_started: '3d_open',
+  model3d_view_changed: '3d_interaction',
+  model3d_rooms_opened: '3d_interaction',
+  model3d_hotspot_clicked: '3d_interaction',
+  model3d_view_reset: '3d_interaction',
+  model3d_fullscreen_entered: '3d_interaction',
+  whatsapp_clicked: 'whatsapp_click',
+  property_whatsapp_clicked: 'whatsapp_click',
+  model3d_whatsapp_clicked: 'whatsapp_click',
+  property_schedule_clicked: 'visit_request',
+  model3d_schedule_clicked: 'visit_request',
+}
+
 export function track(event: AnalyticsEvent, payload: EventPayload = {}): void {
   if (typeof window === 'undefined') return
   window.dataLayer = window.dataLayer ?? []
@@ -69,4 +92,7 @@ export function track(event: AnalyticsEvent, payload: EventPayload = {}): void {
   const metaEvent = metaStandardEvents[event]
   if (metaEvent && typeof window.fbq === 'function') window.fbq('track', metaEvent, payload)
   if (typeof window.gtag === 'function') window.gtag('event', event, payload)
+
+  const stored = storedEventTypes[event]
+  if (stored) persistEvent(stored, payload)
 }

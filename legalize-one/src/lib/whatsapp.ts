@@ -1,6 +1,8 @@
-import { site } from '@/config/site'
+import { getTenant } from '@/tenant/store'
 
-export function whatsappLink(message: string = site.whatsappDefaultMessage): string {
-  const number = site.whatsappNumber.replace(/\D/g, '')
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
+/** Link do WhatsApp da imobiliária ativa (número e mensagem padrão vêm da configuração do tenant). */
+export function whatsappLink(message?: string): string {
+  const { whatsapp, whatsappMessage } = getTenant().contact
+  const number = whatsapp.replace(/\D/g, '')
+  return `https://wa.me/${number}?text=${encodeURIComponent(message ?? whatsappMessage)}`
 }
