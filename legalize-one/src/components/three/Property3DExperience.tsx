@@ -9,6 +9,7 @@ import { Property3DEntry } from './Property3DEntry'
 import { Property3DFallback } from './Property3DFallback'
 import { Property3DLoader } from './Property3DLoader'
 import type { FullscreenControl } from './Property3DToolbar'
+import { AUTO_START_3D, type AutoStart3DState } from './autoStart'
 import { loadViewer, supportsWebGL } from './webgl'
 
 const Property3DViewer = lazy(loadViewer)
@@ -111,6 +112,20 @@ export function Property3DExperience({
   })
   useEffect(() => stripStaleParam(), [])
 
+  // Chegou por "Explorar modelo 3D" (ex.: Home): abre direto — o clique já foi a intenção.
+  const autoStarted = useRef(false)
+  const autoStart = useEffectEvent(() => {
+    const source = (location.state as AutoStart3DState | null)?.[AUTO_START_3D]
+    if (!source || autoStarted.current) return
+    autoStarted.current = true
+    // Consome o pedido: recarregar a página ou voltar a ela não reabre o modelo sozinho.
+    window.history.replaceState({ ...window.history.state, usr: null }, '')
+    // Posiciona a página na seção do modelo (ao fechar no celular, é para cá que ela volta).
+    document.getElementById('modelo-3d')?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    start(source)
+  })
+  useEffect(() => autoStart(), [])
+
   const enterImmersive = useCallback(() => {
     track('model3d_fullscreen_entered')
     setParams(
@@ -137,8 +152,8 @@ export function Property3DExperience({
       )
   }, [location.state, navigate, setParams])
 
-  function start() {
-    track('model3d_started', { device: isDesktop ? 'desktop' : 'mobile' })
+  function start(source = 'property_card') {
+    track('model3d_started', { device: isDesktop ? 'desktop' : 'mobile', source })
     if (!supportsWebGL()) {
       setUnsupported(true)
       track('model3d_load_failed', { reason: 'webgl_unavailable' })
@@ -189,7 +204,7 @@ export function Property3DExperience({
     <div id="modelo-3d" className={className}>
       {/* No celular a capa continua na página (o visualizador abre por cima): nada salta ao fechar. */}
       {(!active || !isDesktop) && (
-        <Property3DEntry poster={poster} posterAlt={posterAlt} sizeBytes={config.sizeBytes} onStart={start} />
+        <Property3DEntry poster={poster} posterAlt={posterAlt} sizeBytes={config.sizeBytes} onStart={() => start()} />
       )}
       {active && (
         // Desktop: reserva a altura do card (também enquanto em tela cheia — sem salto de layout).

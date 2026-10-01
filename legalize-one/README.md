@@ -10,16 +10,20 @@ React + TypeScript + Vite + Tailwind CSS v4 + React Router + Lucide.
 | --------------- | ----------------------------------------------------------------- |
 | Versão          | **1.0.0** (`package.json`)                                        |
 | Tag Git         | `legalize-one-v1-3d-experience`                                   |
-| Estado          | Demonstração (dados mock, sem backend/login) — validada em Preview |
-| Production      | Ainda na versão de preparação para a Vercel (sem os sprints 3D)   |
+| Estado          | Demonstração (dados mock, sem backend/login)                      |
+| Production      | V1 publicada em 30/09/2026 — `legalize-one.vercel.app`            |
 
 Checkpoint criado antes de novas funcionalidades. Para voltar a este estado:
 `git checkout legalize-one-v1-3d-experience`.
 
+**Após a V1 (em Preview):** na Home, o destaque do Legalize 3D Experience passou a ser o modelo 3D interativo
+(vitrine com a capa do modelo + "Explorar modelo 3D", que abre o visualizador direto na página do imóvel); o tour
+por fotos 360° virou opção secundária ("Fazer tour por fotos").
+
 ### Funcionalidades disponíveis
 
-- **Home**: hero, busca com filtros, diferenciais, imóveis em destaque, seção Legalize 3D Experience (com acesso ao
-  modelo 3D interativo), linha do tempo da documentação e CTA final.
+- **Home**: hero, busca com filtros, diferenciais, imóveis em destaque, seção Legalize 3D Experience (destaque para
+  o modelo 3D interativo; tour por fotos 360° como secundário), linha do tempo da documentação e CTA final.
 - **Imóveis** (`/imoveis`): listagem com filtros na URL (finalidade, região, tipo, preço, quartos, ordem); no celular,
   filtros em bottom sheet com contagem ao vivo. Selos distintos "3D interativo" (navy/dourado) e "Tour 3D" (verde).
 - **Detalhes do imóvel** (`/imovel/:slug`): galeria, preço, especificações, diferenciais, documentação verificada,
@@ -202,7 +206,7 @@ Todos seguem `TourRendererProps`, então a interface imersiva não muda com a te
 `tour_floorplan_opened` (`surface`), `tour_fullscreen_entered`, `tour_completed`, `tour_closed`,
 `property_tour_cta_clicked`, `property_whatsapp_clicked`, `property_schedule_clicked`, `filters_opened`.
 
-Modelo 3D: `model3d_card_viewed`, `model3d_started`, `model3d_loaded` (`duration_ms`, `download_ms`, `parse_ms`, `prepare_ms`, `draw_calls`, `triangles`),
+Modelo 3D: `model3d_card_viewed`, `model3d_cta_clicked`, `model3d_started` (`source`), `model3d_loaded` (`duration_ms`, `download_ms`, `parse_ms`, `prepare_ms`, `draw_calls`, `triangles`),
 `model3d_load_failed` (`reason`), `model3d_view_changed`, `model3d_plan_view`, `model3d_hotspot_clicked`,
 `model3d_fullscreen_entered`, `model3d_fullscreen_exited`, `model3d_view_reset`, `model3d_rooms_opened`,
 `model3d_closed`, `model3d_whatsapp_clicked`, `model3d_schedule_clicked`.
@@ -225,6 +229,9 @@ Experiência diferente do tour 360: **"Explore o imóvel por todos os ângulos"*
 - Limites: não passa abaixo do horizonte, zoom entre 0,2× o raio e 1,8× a distância da visão geral, pan preso ao volume.
 - CTA "Gostou do imóvel? · Agendar visita" discreto no canto (desktop) / compacto na base (celular); some durante gestos,
   com a lista de ambientes aberta e na planta (celular).
+- Home: `Property3DShowcase` (vitrine com a capa do modelo, sem three.js). "Explorar modelo 3D" navega para o imóvel
+  com `state.autoStart3D` (`autoStart.ts`) e o visualizador abre direto; o pedido é consumido na chegada, então
+  recarregar ou voltar à página não reabre o modelo sozinho.
 - Componentes: `src/components/three/` — `Property3DExperience` (capa → visualizador, sem three.js),
   `Property3DViewer` (chunk lazy), `Property3DCanvas`, `Property3DControls`, `Property3DHotspots`,
   `Property3DToolbar`, `Property3DLoader`, `Property3DErrorBoundary`, `Property3DFallback`.

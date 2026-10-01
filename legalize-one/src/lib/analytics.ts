@@ -22,6 +22,7 @@ export type AnalyticsEvent =
   // Modelo 3D (GLB)
   | 'model3d_card_viewed'
   | 'model3d_started'
+  | 'model3d_cta_clicked'
   | 'model3d_loaded'
   | 'model3d_load_failed'
   | 'model3d_view_changed'
