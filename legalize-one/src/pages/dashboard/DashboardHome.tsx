@@ -1,96 +1,109 @@
-import { Building2, LogOut, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Plus, ShieldCheck } from 'lucide-react'
+import { Link } from 'react-router'
 import { useAuth } from '@/auth/context'
-import { RequireAuth } from '@/auth/RequireAuth'
-import { Logo } from '@/components/ui/Logo'
+import { ButtonLink } from '@/components/ui/Button'
+import { listProperties, STATUS_LABELS, type PropertyStatus } from '@/dashboard/propertiesApi'
+import { useWorkspace } from '@/dashboard/workspace'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { parseEntitlements, PLANS } from '@/lib/entitlements'
+import { limitOf, parseEntitlements, PLANS } from '@/lib/entitlements'
 import { ROLE_LABELS } from '@/lib/permissions'
 import { requireSupabase } from '@/lib/supabase'
 
-/**
- * Painel — FUNDAÇÃO. Confirma sessão, imobiliárias, papel e plano vindos do banco.
- * Overview, imóveis, leads e analytics chegam nas próximas etapas.
- */
-function DashboardContent() {
+const ORDER: PropertyStatus[] = ['published', 'draft', 'sold', 'rented', 'archived']
+
+/** Visão geral: resumo da imobiliária ativa e atalhos. */
+export default function DashboardHome() {
   usePageTitle('Painel')
   const auth = useAuth()
-  const first = auth.memberships[0]
+  const ws = useWorkspace()
+
+  const { data: properties } = useAsyncData(() => listProperties(ws.tenantId), ws.tenantId)
   const { data: entitlements } = useAsyncData(async () => {
-    if (!first) return null
     const supabase = await requireSupabase()
-    const { data, error } = await supabase.rpc('tenant_entitlements', { p_tenant_id: first.tenantId })
+    const { data, error } = await supabase.rpc('tenant_entitlements', { p_tenant_id: ws.tenantId })
     if (error) throw error
     return parseEntitlements(data)
-  }, first?.tenantId ?? 'none')
+  }, ws.tenantId)
+
+  const counts = Object.fromEntries(ORDER.map((s) => [s, 0])) as Record<PropertyStatus, number>
+  for (const p of properties ?? []) counts[p.status] += 1
+  const mine = ws.brokerId ? (properties ?? []).filter((p) => p.broker_id === ws.brokerId).length : null
+  const active = (properties ?? []).filter((p) => p.status !== 'archived').length
+  const limit = entitlements ? limitOf(entitlements, 'max_properties') : null
 
   return (
-    <main className="min-h-dvh bg-sand">
-      <header className="border-b border-navy-950/8 bg-white">
-        <div className="container-page flex h-16 items-center justify-between gap-4">
-          <Logo />
-          <button
-            type="button"
-            onClick={() => void auth.signOut()}
-            className="inline-flex h-11 items-center gap-2 rounded-full px-4 text-[14px] font-semibold text-navy-950 hover:bg-sand"
-          >
-            <LogOut className="size-4" aria-hidden="true" />
-            Sair
-          </button>
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">
+            Olá{auth.fullName ? `, ${auth.fullName.split(' ')[0]}` : ''}!
+          </h1>
+          <p className="mt-1 text-[15px] text-slate">
+            {ws.tenantName} · {ROLE_LABELS[ws.role]}
+          </p>
         </div>
-      </header>
-      <div className="container-page py-10">
-        <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">
-          Olá{auth.fullName ? `, ${auth.fullName.split(' ')[0]}` : ''}!
-        </h1>
-        <p className="mt-1 text-[15px] text-slate">Seu painel está sendo preparado. Em breve: imóveis, contatos e resultados.</p>
-
-        {auth.isPlatformAdmin && (
-          <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-navy-950 px-4 py-2 text-[13px] font-semibold text-gold-400">
-            <ShieldCheck className="size-4" aria-hidden="true" />
-            {ROLE_LABELS.platform_admin}
-          </p>
-        )}
-
-        <section aria-labelledby="minhas-imobiliarias" className="mt-8">
-          <h2 id="minhas-imobiliarias" className="text-[13px] font-semibold tracking-[0.14em] text-slate uppercase">
-            Minhas imobiliárias
-          </h2>
-          {auth.memberships.length === 0 ? (
-            <p className="mt-3 rounded-2xl bg-white p-5 text-[15px] text-navy-950 shadow-card">
-              Você ainda não faz parte de nenhuma imobiliária. Na próxima etapa você poderá criar a sua por aqui.
-            </p>
-          ) : (
-            <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-              {auth.memberships.map((m) => (
-                <li key={m.tenantId} className="flex items-center gap-3 rounded-2xl bg-white p-5 shadow-card">
-                  <span className="flex size-11 items-center justify-center rounded-full bg-navy-950 text-gold-400">
-                    <Building2 className="size-5" aria-hidden="true" />
-                  </span>
-                  <span>
-                    <span className="block text-[16px] font-semibold text-navy-950">{m.tenantName}</span>
-                    <span className="block text-[13.5px] text-slate">{ROLE_LABELS[m.role]}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {entitlements && (
-          <p className="mt-6 text-[14px] text-slate">
-            Plano atual: <strong className="text-navy-950">{PLANS[entitlements.plan].name}</strong>
-          </p>
+        {ws.can('properties.create') && (
+          <ButtonLink to="/dashboard/imoveis/novo" size="md">
+            <Plus className="size-4" aria-hidden="true" />
+            Cadastrar imóvel
+          </ButtonLink>
         )}
       </div>
-    </main>
-  )
-}
 
-export default function DashboardHome() {
-  return (
-    <RequireAuth>
-      <DashboardContent />
-    </RequireAuth>
+      {auth.isPlatformAdmin && (
+        <p className="inline-flex items-center gap-2 rounded-full bg-navy-950 px-4 py-2 text-[13px] font-semibold text-gold-400">
+          <ShieldCheck className="size-4" aria-hidden="true" />
+          {ROLE_LABELS.platform_admin}
+        </p>
+      )}
+
+      <section aria-labelledby="resumo-imoveis">
+        <div className="flex items-center justify-between">
+          <h2 id="resumo-imoveis" className="text-[13px] font-semibold tracking-[0.14em] text-slate uppercase">
+            Imóveis
+          </h2>
+          <Link to="/dashboard/imoveis" className="inline-flex items-center gap-1 text-[14px] font-semibold text-navy-800">
+            Ver todos <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+        <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {ORDER.map((status) => (
+            <li key={status}>
+              <Link
+                to={`/dashboard/imoveis?status=${status}`}
+                className="block rounded-2xl bg-white p-4 shadow-card transition-shadow hover:shadow-float"
+              >
+                <span className="block font-display text-[28px] font-bold text-navy-950 tabular-nums">
+                  {properties ? counts[status] : '–'}
+                </span>
+                <span className="text-[14px] text-slate">{STATUS_LABELS[status]}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {mine !== null && (
+          <p className="mt-3 text-[14px] text-slate">
+            Sob sua responsabilidade: <strong className="text-navy-950">{mine}</strong>
+          </p>
+        )}
+      </section>
+
+      {entitlements && (
+        <section aria-labelledby="plano" className="rounded-2xl bg-white p-5 shadow-card">
+          <h2 id="plano" className="text-[13px] font-semibold tracking-[0.14em] text-slate uppercase">
+            Plano
+          </h2>
+          <p className="mt-2 text-[16px] text-navy-950">
+            <strong>{PLANS[entitlements.plan].name}</strong>
+            <span className="text-slate">
+              {' '}
+              · {active} {active === 1 ? 'imóvel ativo' : 'imóveis ativos'}
+              {limit !== null ? ` de ${limit}` : ' (sem limite)'}
+            </span>
+          </p>
+        </section>
+      )}
+    </div>
   )
 }

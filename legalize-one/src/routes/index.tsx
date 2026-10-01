@@ -3,7 +3,17 @@ import { createBrowserRouter } from 'react-router'
 import { SiteLayout } from '@/components/layout/SiteLayout'
 import Home from '@/pages/Home'
 import NotFound from '@/pages/NotFound'
-import { AuthRoot, DashboardHome, Login, Properties, PropertyDetails, Sell } from './lazyPages'
+import {
+  AuthRoot,
+  DashboardHome,
+  DashboardLayout,
+  Login,
+  Properties,
+  PropertyDetails,
+  PropertyEditor,
+  PropertyList,
+  Sell,
+} from './lazyPages'
 
 function withSuspense(node: ReactNode) {
   return <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>{node}</Suspense>
@@ -27,7 +37,17 @@ export const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { path: 'entrar', element: withSuspense(<Login />) },
-      { path: 'dashboard/*', element: withSuspense(<DashboardHome />) },
+      {
+        path: 'dashboard',
+        element: withSuspense(<DashboardLayout />),
+        children: [
+          { index: true, element: withSuspense(<DashboardHome />) },
+          { path: 'imoveis', element: withSuspense(<PropertyList />) },
+          { path: 'imoveis/novo', element: withSuspense(<PropertyEditor />) },
+          { path: 'imoveis/:id', element: withSuspense(<PropertyEditor />) },
+          { path: '*', element: withSuspense(<DashboardHome />) },
+        ],
+      },
     ],
   },
 ])

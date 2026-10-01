@@ -218,6 +218,16 @@ RPCs: `resolve_tenant`, `get_tenant_profile`, `get_published_properties`, `get_p
 - **Impacto no carregamento inicial:** +6 KB gzip (~4,5%). Supabase, repositório, login e painel são chunks sob
   demanda que o site público não baixa.
 
+### Etapa 2 — Painel: imóveis
+- `migrations/0003_panel_properties.sql` — corretor cadastra imóvel próprio só como rascunho; destaque, verificação
+  de documentos, status, 3D e tour são do gerente; Storage `property-media/<tenant>/<imóvel>/…` com escrita por
+  imóvel (gerente/admin da plataforma: qualquer imóvel da imobiliária; corretor: só os seus). 34 testes de RLS.
+- Painel: layout com menu (lateral no desktop, inferior no celular), seletor de imobiliária (admin da plataforma),
+  visão geral, lista de imóveis (busca, filtros por status), cadastro/edição com validação em português, fotos
+  (WebP ≤ 2000 px gerado no navegador, ordem, capa espelhada em `cover_image_url`), publicar/arquivar/excluir.
+- Validado no navegador (gerente e corretor, desktop e celular) com backend simulado; regras de acesso validadas
+  no Postgres (PGlite) e no projeto real.
+
 ### Ainda mock/hardcoded (próximas etapas)
 - Catálogo, tours 360 e config 3D: já importados para o banco; `src/data` continua como fonte do modo V1 (sem
   backend). O GLB e o poster seguem servidos pelo próprio site (`/models/…`), referenciados no `model3d` do imóvel.

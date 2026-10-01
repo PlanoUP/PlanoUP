@@ -45,14 +45,15 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   platform_admin: [...MANAGER, 'platform.tenants.manage', 'platform.metrics.view'],
   owner: MANAGER,
   admin: MANAGER,
-  broker: ['properties.view', 'properties.edit_assigned', 'leads.view_own', 'leads.update'],
+  // Corretor cadastra (o banco força "rascunho") e edita só os imóveis dele; o gerente publica.
+  broker: ['properties.view', 'properties.create', 'properties.edit_assigned', 'leads.view_own', 'leads.update'],
 }
 
 /** Rótulos para a interface (linguagem simples, sem termos técnicos). */
 export const ROLE_LABELS: Record<Role, string> = {
   platform_admin: 'Administrador Legalize One',
-  owner: 'Responsável pela imobiliária',
-  admin: 'Administrador da imobiliária',
+  owner: 'Gerente responsável',
+  admin: 'Gerente',
   broker: 'Corretor',
 }
 

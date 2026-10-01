@@ -240,6 +240,50 @@ describe('corretores', () => {
     await as('brokerA', () => rejects(q(`insert into public.properties (tenant_id, title, type) values ($1, 'Novo', 'casa')`, [tenantA]), /row-level security/))
   })
 
+  test('corretor cadastra imóvel próprio só como rascunho, sem destaque nem verificação', async () => {
+    const draft = await as('brokerA', () =>
+      q(`insert into public.properties (tenant_id, title, type, broker_id) values ($1, 'Casa do corretor', 'casa', $2) returning status`, [tenantA, brokerRow]),
+    )
+    assert.equal(draft[0].status, 'draft')
+    await as('brokerA', () =>
+      rejects(q(`insert into public.properties (tenant_id, title, type, broker_id, status) values ($1, 'Publicada', 'casa', $2, 'published')`, [tenantA, brokerRow]), /row-level security/),
+    )
+    await as('brokerA', () =>
+      rejects(q(`insert into public.properties (tenant_id, title, type, broker_id, featured) values ($1, 'Destaque', 'casa', $2, true)`, [tenantA, brokerRow]), /row-level security/),
+    )
+    await as('brokerA', () =>
+      rejects(q(`insert into public.properties (tenant_id, title, type, broker_id) values ($1, 'Em outro', 'casa', $2)`, [tenantB, brokerRow]), /row-level security|foreign key/),
+    )
+    await as('brokerA', () => rejects(q(`update public.properties set featured = true where id = $1`, [assigned]), /brokers cannot change/))
+    await as('brokerA', () =>
+      rejects(q(`update public.properties set documentation_verified = true where id = $1`, [assigned]), /brokers cannot change/),
+    )
+  })
+
+  test('fotos: corretor grava só na pasta dos próprios imóveis; gerente em qualquer imóvel', async () => {
+    const mine = await as('brokerA', () =>
+      q(`insert into storage.objects (bucket_id, name) values ('property-media', $1) returning id`, [`${tenantA}/${assigned}/a.webp`]),
+    )
+    assert.equal(mine.length, 1)
+    await as('brokerA', () =>
+      rejects(q(`insert into storage.objects (bucket_id, name) values ('property-media', $1)`, [`${tenantA}/${unassigned}/a.webp`]), /row-level security/),
+    )
+    await as('brokerA', () =>
+      rejects(q(`insert into storage.objects (bucket_id, name) values ('property-media', $1)`, [`${tenantA}/qualquer/a.webp`]), /row-level security/),
+    )
+    const manager = await as('ownerA', () =>
+      q(`insert into storage.objects (bucket_id, name) values ('property-media', $1) returning id`, [`${tenantA}/${unassigned}/b.webp`]),
+    )
+    assert.equal(manager.length, 1)
+    const media = await as('brokerA', () =>
+      q(`insert into public.property_media (tenant_id, property_id, storage_path) values ($1, $2, $3) returning id`, [tenantA, assigned, `${tenantA}/${assigned}/a.webp`]),
+    )
+    assert.equal(media.length, 1)
+    await as('brokerA', () =>
+      rejects(q(`insert into public.property_media (tenant_id, property_id, storage_path) values ($1, $2, 'x')`, [tenantA, unassigned]), /row-level security/),
+    )
+  })
+
   test('corretor não ativa/desativa o próprio acesso', async () => {
     await as('brokerA', () => rejects(q(`update public.brokers set active = false where id = $1`, [brokerRow]), /not allowed/))
     const ok = await as('brokerA', () => q(`update public.brokers set phone = '84988887777' where id = $1 returning id`, [brokerRow]))
@@ -350,6 +394,13 @@ describe('storage', () => {
     )
     await as('brokerA', () =>
       rejects(q(`insert into storage.objects (bucket_id, name) values ('tenant-assets', $1)`, [`${tenantA}/logo.png`]), /row-level security/),
+    )
+    const platform = await as('platform', () =>
+      q(`insert into storage.objects (bucket_id, name) values ('property-media', $1) returning id`, [`${tenantB}/casa/foto-2.webp`]),
+    )
+    assert.equal(platform.length, 1)
+    await as('outsider', () =>
+      rejects(q(`insert into storage.objects (bucket_id, name) values ('property-media', $1)`, [`${tenantA}/casa/foto-3.webp`]), /row-level security/),
     )
   })
 })

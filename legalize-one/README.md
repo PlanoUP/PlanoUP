@@ -159,8 +159,14 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
   `src/lib/backend.ts` (modo duplo), `src/lib/supabase.ts` (cliente sob demanda), `src/services/repositories/`
   (imóveis do banco → mesmo tipo `Property`), `src/lib/eventSink.ts` + `attribution.ts` (eventos sem dados pessoais),
   `src/services/leadService.ts`, `src/lib/entitlements.ts` (planos), `src/lib/permissions.ts` (papéis), `src/auth/`.
-- **Painel:** `/entrar` e `/dashboard` (fundação: sessão, imobiliárias, papel e plano). Sem backend, `/entrar` informa
-  que o painel ainda não está ativo.
+- **Painel (área oculta, sem links no site, `noindex`):** `/entrar` e `/dashboard`.
+  - Visão geral (imóveis por status, plano e uso) e **Imóveis**: lista com busca/filtros, cadastro e edição completos,
+    publicação/arquivamento, exclusão e **fotos** (envio do celular/computador, otimização automática para WebP,
+    ordem, capa). Código em `src/dashboard/` e `src/pages/dashboard/`.
+  - Papéis: **Gerente** (owner/admin) gerencia tudo da imobiliária; **Corretor** cadastra rascunhos e edita só os
+    próprios imóveis (status, destaque e "documentação verificada" ficam com o gerente — regra no banco, migration
+    0003). Admin da plataforma alterna entre imobiliárias.
+  - Sem backend, `/entrar` informa que o painel ainda não está ativo.
 
 ## Rotas
 
@@ -195,7 +201,7 @@ src/
   lib/              analytics + eventSink, attribution, backend/supabase, entitlements, permissions, images
   hooks/ utils/ types/ routes/ pages/
 supabase/
-  migrations/       Schema + RLS (0001) e superfície da API (0002)
+  migrations/       Schema + RLS (0001), superfície da API (0002), painel de imóveis (0003)
   seed.sql          Planos e tenant inicial
   seed_catalog.sql  Catálogo da Legalize (gerado por scripts/export-catalog.ts)
   tests/            Isolamento entre imobiliárias (PGlite)
