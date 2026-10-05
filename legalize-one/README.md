@@ -199,6 +199,16 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
     plataforma só com `aal2`) e na função `team`, então uma senha vazada sozinha não abre dados. Celular perdido:
     o gerente usa **Desativar 2 etapas** em Equipe; para o admin da plataforma, remover o fator no Supabase
     (Authentication → Users → usuário → MFA).
+  - **Aviso de contato novo por e-mail** (Edge Function `supabase/functions/notify-lead`, regras em `core.ts`, testadas
+    em `notifyLead.test.ts`): o site chama a função logo após registrar o contato; ela avisa gerentes e o corretor
+    responsável, uma única vez por contato (`leads.notified_at`, migration 0008). Envio pelo Resend: definir o segredo
+    `RESEND_API_KEY` (e `RESEND_FROM` depois de verificar o domínio) em Supabase → Edge Functions → Secrets; sem ele,
+    nada é enviado.
+- **Imobiliárias internas:** `demo` ("Sua Imobiliária", demonstração com imóveis, contatos e visitas fictícios) e
+  `impulsigo` (recebe os pedidos de demonstração da página de venda). Ficam fora dos totais da plataforma
+  (`platform.internalSlugs`).
+- **Página de venda do Impulsigo:** `marketing/impulsigo/` (HTML estático, projeto Vercel próprio). O formulário grava
+  o pedido pela RPC pública `submit_lead` na imobiliária `impulsigo` e dispara o aviso por e-mail.
 - **Pré-visualização:** `/?previa=<endereço-curto>` abre o site de uma imobiliária que ainda não tem domínio
   (faixa "Pré-visualização" no topo; `?previa=sair` volta). `/entrar?previa=<endereço-curto>` mostra o login com a
   marca dela.

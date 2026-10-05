@@ -45,6 +45,8 @@ export async function submitLead(input: LeadInput): Promise<LeadResult> {
       p_utm: utm,
     })
     if (error) throw error
+    // Aviso por e-mail para a equipe (Edge Function notify-lead). Sem esperar e sem afetar o visitante.
+    void supabase.functions.invoke('notify-lead', { body: { leadId: String(data) } }).catch(() => undefined)
     return { stored: true, id: String(data) }
   } catch {
     return { stored: false, reason: 'error' }

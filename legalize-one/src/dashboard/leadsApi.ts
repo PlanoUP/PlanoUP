@@ -33,6 +33,7 @@ export function sourceLabel(source: string | null): string | null {
     vender: 'Página "Vender"',
     property_page: 'Página do imóvel',
     painel: 'Registrado no painel',
+    impulsigo_site: 'Site Impulsigo (pedido de demonstração)',
   }
   return known[source] ?? source
 }
