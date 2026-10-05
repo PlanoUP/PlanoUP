@@ -1,6 +1,7 @@
 import { ArrowRight, Box, MapPin, Rotate3d, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/Badge'
+import { propertyHref } from '@/lib/links'
 import { SmartImage } from '@/components/ui/SmartImage'
 import type { Property } from '@/types/property'
 import { cn } from '@/utils/cn'
@@ -15,7 +16,7 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, className, showFeaturedBadge = true }: PropertyCardProps) {
-  const href = `/imovel/${property.slug}`
+  const href = propertyHref(property.slug)
   return (
     <article
       className={cn(

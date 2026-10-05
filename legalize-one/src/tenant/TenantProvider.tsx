@@ -14,6 +14,7 @@ type Status = 'ready' | 'loading' | 'not_found' | 'error'
  */
 export function TenantProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<Status>(() => (isBackendEnabled() ? 'loading' : 'ready'))
+  const [brokerPage, setBrokerPage] = useState(false)
 
   useEffect(() => {
     if (!isBackendEnabled()) {
@@ -34,6 +35,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       .catch((error: unknown) => {
         if (!active) return
         setStatus(error instanceof Error && error.message.startsWith('tenant_not_found') ? 'not_found' : 'error')
+        setBrokerPage(error instanceof Error && error.message.includes(':corretor:'))
       })
     return () => {
       active = false
@@ -46,11 +48,13 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     <main className="flex min-h-dvh items-center justify-center bg-sand px-6 text-center">
       <div className="max-w-md">
         <p className="font-display text-[22px] font-bold text-navy-950">
-          {status === 'not_found' ? 'Site não encontrado' : 'Não foi possível carregar o site'}
+          {status === 'not_found' ? (brokerPage ? 'Perfil não encontrado' : 'Site não encontrado') : 'Não foi possível carregar o site'}
         </p>
         <p className="mt-2 text-[15px] text-slate">
           {status === 'not_found'
-            ? 'Este endereço ainda não está ligado a nenhuma imobiliária.'
+            ? brokerPage
+              ? 'Este corretor não existe ou a página dele ainda não foi publicada.'
+              : 'Este endereço ainda não está ligado a nenhuma imobiliária.'
             : 'Verifique sua conexão e tente novamente em instantes.'}
         </p>
         {status === 'error' && (

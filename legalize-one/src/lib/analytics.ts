@@ -44,6 +44,8 @@ export type AnalyticsEvent =
   | 'property_schedule_clicked'
   | 'property_tour_cta_clicked'
   | 'property_contact_request_opened'
+  // Página do corretor
+  | 'share_clicked'
 
 type EventPayload = Record<string, string | number | boolean | undefined>
 

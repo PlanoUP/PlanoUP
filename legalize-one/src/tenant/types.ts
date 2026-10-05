@@ -1,3 +1,5 @@
+import type { BrokerProfile } from '@/broker/types'
+
 /**
  * Configuração pública de uma imobiliária (tenant), usada pelo site.
  * Vem do Supabase (função `get_tenant_profile`) ou, sem backend, da marca padrão.
@@ -36,6 +38,8 @@ export interface TenantConfig {
   source: 'default' | 'backend'
   /** Aberto por `?previa=` (imobiliária sem domínio próprio ainda). */
   preview?: boolean
+  /** Página de um corretor (`/corretor/:slug`): o site representa este corretor. */
+  broker?: BrokerProfile
 }
 
 /** Linha retornada por `get_tenant_profile` (view privada `public_tenant_profiles`). */

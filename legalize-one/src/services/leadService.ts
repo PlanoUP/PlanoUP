@@ -30,20 +30,23 @@ export async function submitLead(input: LeadInput): Promise<LeadResult> {
   try {
     const supabase = await client
     const { sessionId, utm, referrer } = getAttribution()
-    const { data, error } = await supabase.rpc('submit_lead', {
-      p_tenant_id: tenantId,
+    const fields = {
       p_channel: input.channel,
       p_property_id: input.propertyId && UUID.test(input.propertyId) ? input.propertyId : null,
       p_name: input.name?.trim() || null,
       p_phone: input.phone?.replace(/\D/g, '') || null,
       p_email: input.email?.trim() || null,
       p_message: input.message?.slice(0, 2000) || null,
-      p_source: input.source,
       p_page_path: window.location.pathname,
       p_referrer: referrer || null,
       p_session_id: sessionId,
       p_utm: utm,
-    })
+    }
+    // Página de corretor: o contato fica com ele (mesmas validações do submit_lead).
+    const broker = getTenant().broker
+    const { data, error } = broker
+      ? await supabase.rpc('submit_broker_lead', { p_broker_slug: broker.slug, ...fields })
+      : await supabase.rpc('submit_lead', { p_tenant_id: tenantId, p_source: input.source, ...fields })
     if (error) throw error
     // Aviso por e-mail para a equipe (Edge Function notify-lead). Sem esperar e sem afetar o visitante.
     void supabase.functions.invoke('notify-lead', { body: { leadId: String(data) } }).catch(() => undefined)

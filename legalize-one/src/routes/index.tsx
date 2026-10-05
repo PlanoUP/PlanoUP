@@ -6,6 +6,8 @@ import NotFound from '@/pages/NotFound'
 import {
   Account,
   AuthRoot,
+  BrokerLayout,
+  BrokerProfile,
   DashboardHome,
   DashboardLayout,
   LeadDetail,
@@ -39,6 +41,17 @@ export const router = createBrowserRouter([
       { path: 'vender', element: withSuspense(<Sell />) },
       { path: 'privacidade', element: withSuspense(<Privacy />) },
       { path: '*', element: <NotFound /> },
+    ],
+  },
+  {
+    // Página profissional do corretor: layout próprio (o corretor é a marca); a página do imóvel é a mesma do site.
+    path: 'corretor/:brokerSlug',
+    element: withSuspense(<BrokerLayout />),
+    errorElement: <NotFound />,
+    children: [
+      { index: true, element: withSuspense(<BrokerProfile />) },
+      { path: 'imovel/:slug', element: withSuspense(<PropertyDetails />) },
+      { path: '*', element: withSuspense(<BrokerProfile />) },
     ],
   },
   {

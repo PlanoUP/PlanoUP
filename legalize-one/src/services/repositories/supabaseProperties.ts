@@ -21,18 +21,22 @@ function tenantId(): string {
   return id
 }
 
-async function fetchCatalog(id: string): Promise<Property[]> {
+async function fetchCatalog(id: string, brokerSlug: string | null): Promise<Property[]> {
   tourCache.clear()
   const supabase = await requireSupabase()
+  // Página de corretor: só os imóveis dele (autônomo = todos os da conta).
+  const source = brokerSlug
+    ? { properties: 'get_broker_properties', media: 'get_broker_media', args: { p_slug: brokerSlug } }
+    : { properties: 'get_published_properties', media: 'get_published_media', args: { p_tenant_id: id } }
   const { data: rows, error } = await supabase
-    .rpc('get_published_properties', { p_tenant_id: id })
+    .rpc(source.properties, source.args)
     .order('featured', { ascending: false })
     .order('published_at', { ascending: false })
   if (error) throw error
   const list = (rows ?? []) as PublicPropertyRow[]
   if (!list.length) return []
   const { data: media, error: mediaError } = await supabase
-    .rpc('get_published_media', { p_tenant_id: id })
+    .rpc(source.media, source.args)
     .select('property_id, kind, url, storage_path, alt, position, is_cover, metadata')
     .eq('kind', 'photo')
     .order('position')
@@ -42,9 +46,10 @@ async function fetchCatalog(id: string): Promise<Property[]> {
 }
 
 export function loadCatalog(): Promise<Property[]> {
-  const id = tenantId()
+  const brokerSlug = getTenant().broker?.slug ?? null
+  const id = brokerSlug ? `${tenantId()}:${brokerSlug}` : tenantId()
   if (!cache || cache.tenantId !== id || Date.now() - cache.at > CACHE_MS) {
-    const data = fetchCatalog(id)
+    const data = fetchCatalog(tenantId(), brokerSlug)
     cache = { tenantId: id, at: Date.now(), data }
     data.then(setCatalogSnapshot).catch(() => (cache = null))
   }

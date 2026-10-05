@@ -18,6 +18,7 @@ import { propertyTypeLabels } from '@/data/filters'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { track } from '@/lib/analytics'
+import { catalogHref, homeHref } from '@/lib/links'
 import { setAnalyticsContext } from '@/lib/eventSink'
 import { setStickyActions } from '@/lib/uiStore'
 import { whatsappLink } from '@/lib/whatsapp'
@@ -25,7 +26,9 @@ import { getPropertyBySlug, listRelatedProperties } from '@/services/propertySer
 import type { PropertyWithTour } from '@/types/property'
 import { cn } from '@/utils/cn'
 import { formatLocation, formatPropertyPrice } from '@/utils/format'
+import { experienceLabel } from '@/tenant/labels'
 import { useTenant } from '@/tenant/store'
+import { BrokerContactCard } from '@/broker/BrokerContactCard'
 
 function contactMessages(property: PropertyWithTour) {
   const ref = `"${property.title}" em ${formatLocation(property.location)} (${formatPropertyPrice(property)})`
@@ -99,7 +102,7 @@ export default function PropertyDetails() {
           Este imóvel não está mais disponível.
         </h1>
         <p className="mt-3 max-w-md text-slate">Ele pode ter sido vendido ou o endereço está incorreto.</p>
-        <ButtonLink to="/imoveis" size="lg" className="mt-8">
+        <ButtonLink to={catalogHref()} size="lg" className="mt-8">
           Ver imóveis disponíveis
         </ButtonLink>
       </div>
@@ -138,11 +141,11 @@ export default function PropertyDetails() {
       <div className="bg-sand">
         <div className="container-page pb-5 sm:py-6 lg:py-8">
           <nav aria-label="Trilha" className="hidden items-center gap-1.5 text-[13px] text-slate sm:mb-5 sm:flex">
-            <Link to="/" className="inline-flex min-h-10 items-center hover:text-navy-950">
-              Início
+            <Link to={homeHref()} className="inline-flex min-h-10 items-center hover:text-navy-950">
+              {tenant.broker ? tenant.broker.name : 'Início'}
             </Link>
             <ChevronRight className="size-3.5" aria-hidden="true" />
-            <Link to={`/imoveis?finalidade=${property.purpose}`} className="inline-flex min-h-10 items-center hover:text-navy-950">
+            <Link to={catalogHref(property.purpose)} className="inline-flex min-h-10 items-center hover:text-navy-950">
               Imóveis
             </Link>
             <ChevronRight className="size-3.5" aria-hidden="true" />
@@ -259,7 +262,7 @@ export default function PropertyDetails() {
                   track('property_tour_cta_clicked', { property_id: property.id, placement: source ?? 'property_section' })
                   launcher.open(sceneId, source)
                 }}
-                eyebrow={`${tenant.name} 3D Experience`}
+                eyebrow={experienceLabel(tenant)}
                 headline="Faça uma visita agora"
                 description="Percorra os ambientes, toque nos destaques e navegue pela planta."
                 className="h-[480px] rounded-2xl"
@@ -272,7 +275,11 @@ export default function PropertyDetails() {
             <div className="flex items-start gap-3">
               <ShieldCheck className="size-7 shrink-0 text-gold-400" strokeWidth={1.5} />
               <h2 className="font-display text-[19px] leading-snug font-bold tracking-[-0.02em] sm:text-xl">
-                {property.documentationVerified ? `Documentação verificada pela ${tenant.name}` : 'Análise documental em andamento'}
+                {property.documentationVerified
+                  ? tenant.broker
+                    ? 'Documentação verificada'
+                    : `Documentação verificada pela ${tenant.name}`
+                  : 'Análise documental em andamento'}
               </h2>
             </div>
             <ul className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -296,12 +303,17 @@ export default function PropertyDetails() {
         {/* 8. CONTATO / AGENDAMENTO */}
         <aside className="lg:sticky lg:top-24 lg:self-start" aria-label="Contato">
           <div className="rounded-2xl border border-navy-950/8 bg-white p-5 shadow-[var(--shadow-float)] sm:p-6">
+            {tenant.broker && <BrokerContactCard broker={tenant.broker} className="mb-5 border-b border-navy-950/8 pb-5" />}
             <p className="hidden text-[13px] text-slate lg:block">{property.purpose === 'aluguel' ? 'Aluguel' : 'Valor de venda'}</p>
             <p className="hidden font-display text-[32px] font-extrabold tracking-[-0.04em] text-navy-950 lg:block">
               {formatPropertyPrice(property)}
             </p>
-            <p className="font-display text-[19px] font-bold tracking-[-0.02em] text-navy-950 lg:hidden">Gostou deste imóvel?</p>
-            <p className="mt-1 text-[14px] text-slate lg:hidden">Fale com um especialista ou agende sua visita.</p>
+            {!tenant.broker && (
+              <>
+                <p className="font-display text-[19px] font-bold tracking-[-0.02em] text-navy-950 lg:hidden">Gostou deste imóvel?</p>
+                <p className="mt-1 text-[14px] text-slate lg:hidden">Fale com um especialista ou agende sua visita.</p>
+              </>
+            )}
             <ButtonAnchor
               href={whatsappLink(messages.interest)}
               target="_blank"
@@ -311,7 +323,7 @@ export default function PropertyDetails() {
               onClick={trackWhatsApp('property_contact_card')}
             >
               <WhatsAppIcon className="size-5" />
-              Falar com um especialista
+              {tenant.broker ? `Falar com ${tenant.broker.name.split(' ')[0]} no WhatsApp` : 'Falar com um especialista'}
             </ButtonAnchor>
             <ButtonAnchor
               href={whatsappLink(messages.schedule)}
@@ -336,11 +348,11 @@ export default function PropertyDetails() {
                 Fazer o tour 3D antes
               </button>
             )}
-            <p className="mt-4 text-center text-[12px] text-slate">Atendimento em até 15 minutos em horário comercial.</p>
+            {!tenant.broker && <p className="mt-4 text-center text-[12px] text-slate">Atendimento em até 15 minutos em horário comercial.</p>}
           </div>
-          <Link to="/imoveis" className="mt-4 inline-flex h-11 items-center gap-2 text-[14px] font-medium text-navy-800">
+          <Link to={catalogHref()} className="mt-4 inline-flex h-11 items-center gap-2 text-[14px] font-medium text-navy-800">
             <ArrowLeft className="size-4" />
-            Voltar para os imóveis
+            {tenant.broker ? `Ver todos os imóveis de ${tenant.broker.name.split(' ')[0]}` : 'Voltar para os imóveis'}
           </Link>
         </aside>
       </div>

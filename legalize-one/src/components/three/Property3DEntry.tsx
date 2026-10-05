@@ -4,6 +4,7 @@ import { SmartImage } from '@/components/ui/SmartImage'
 import { track } from '@/lib/analytics'
 import { cn } from '@/utils/cn'
 import { prefetchViewer } from './webgl'
+import { experienceLabel } from '@/tenant/labels'
 import { useTenant } from '@/tenant/store'
 
 interface Property3DEntryProps {
@@ -66,7 +67,7 @@ export function Property3DEntry({ poster, posterAlt, sizeBytes, onStart, classNa
       </span>
 
       <div className="p-5 sm:p-7">
-        <p className="eyebrow text-[10.5px] tracking-[0.3em] text-gold-400 sm:text-[11px]">{tenant.name} 3D Experience</p>
+        <p className="eyebrow text-[10.5px] tracking-[0.3em] text-gold-400 sm:text-[11px]">{experienceLabel(tenant)}</p>
         <h2 className="mt-2.5 font-display text-[28px] leading-[1.04] font-extrabold tracking-[-0.035em] text-balance sm:text-[36px]">
           Explore este imóvel
           <br />

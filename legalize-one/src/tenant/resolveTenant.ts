@@ -1,6 +1,8 @@
 import { integrations } from '@/config/site'
 import { getSupabase } from '@/lib/supabase'
 import { defaultTenant } from './defaultTenant'
+import { brokerSlugFromPath, brokerTenant } from '@/broker/profile'
+import type { BrokerProfile } from '@/broker/types'
 import { mapTenantProfile } from './mapProfile'
 import { clearPreview, previewSlug } from './preview'
 import type { PublicTenantProfileRow, TenantConfig } from './types'
@@ -22,6 +24,15 @@ export async function resolveTenant(hostname: string = window.location.hostname)
   const client = getSupabase()
   if (!client) return defaultTenant
   const supabase = await client
+
+  // Página de corretor: o site representa o corretor (e a conta dele), em qualquer domínio.
+  const brokerSlug = brokerSlugFromPath()
+  if (brokerSlug) {
+    const { data, error } = await supabase.rpc('get_broker_profile', { p_slug: brokerSlug })
+    if (error) throw error
+    if (!data) throw new TenantNotFoundError(`corretor:${brokerSlug}`)
+    return brokerTenant(data as BrokerProfile)
+  }
 
   type Match = { tenant_id: string; slug: string }
   let match: Match | undefined

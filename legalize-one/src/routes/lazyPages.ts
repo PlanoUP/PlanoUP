@@ -6,6 +6,10 @@ export const PropertyDetails = lazy(() => import('@/pages/PropertyDetails'))
 export const Sell = lazy(() => import('@/pages/Sell'))
 export const Privacy = lazy(() => import('@/pages/Privacy'))
 
+// Página profissional do corretor (/corretor/:slug).
+export const BrokerLayout = lazy(() => import('@/pages/broker/BrokerLayout'))
+export const BrokerProfile = lazy(() => import('@/pages/broker/BrokerProfile'))
+
 // Área logada (painel): nada disso é baixado por quem só navega no site.
 export const AuthRoot = lazy(() => import('@/pages/auth/AuthRoot'))
 export const Login = lazy(() => import('@/pages/auth/Login'))

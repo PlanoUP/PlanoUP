@@ -7,7 +7,8 @@ import { useOverlayCount, useStickyActions, useStickySuppressed, type StickyActi
 import { whatsappLink } from '@/lib/whatsapp'
 import { cn } from '@/utils/cn'
 
-const defaultActions: StickyAction[] = [
+// Função (e não constante): o número do WhatsApp só é conhecido depois de identificar a imobiliária.
+const defaultActions = (): StickyAction[] => [
   {
     kind: 'whatsapp',
     label: 'WhatsApp',
@@ -50,7 +51,7 @@ export function MobileStickyCTA() {
   const keyboardOpen = useKeyboardOpen()
   const suppressed = useStickySuppressed()
   const hidden = overlays > 0 || keyboardOpen || suppressed
-  const actions = custom ?? defaultActions
+  const actions = custom ?? defaultActions()
 
   return (
     <div

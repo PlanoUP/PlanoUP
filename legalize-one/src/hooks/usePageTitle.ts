@@ -7,8 +7,10 @@ import { useTenant } from '@/tenant/store'
 export function usePageTitle(title?: string) {
   const tenant = useTenant()
   // Imobiliária padrão mantém o título da V1 ("Legalize One · Do documento à chave").
-  const brand = isDefaultBrand(tenant) ? site.name : tenant.name
-  const tagline = isDefaultBrand(tenant) ? 'Do documento à chave' : tenant.tagline
+  // Página de corretor: o nome dele, mesmo quando a conta é a imobiliária padrão.
+  const v1 = isDefaultBrand(tenant) && !tenant.broker
+  const brand = v1 ? site.name : tenant.name
+  const tagline = v1 ? 'Do documento à chave' : tenant.tagline
   useEffect(() => {
     document.title = title ? `${title} · ${brand}` : [brand, tagline].filter(Boolean).join(' · ')
   }, [title, brand, tagline])
