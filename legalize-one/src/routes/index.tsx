@@ -4,18 +4,23 @@ import { SiteLayout } from '@/components/layout/SiteLayout'
 import Home from '@/pages/Home'
 import NotFound from '@/pages/NotFound'
 import {
+  Account,
   AuthRoot,
   DashboardHome,
   DashboardLayout,
   LeadDetail,
   LeadList,
   Login,
+  More,
   Properties,
   PropertyDetails,
   PropertyEditor,
+  Privacy,
   PropertyList,
   Results,
   Sell,
+  Team,
+  TenantSettingsPage,
 } from './lazyPages'
 
 function withSuspense(node: ReactNode) {
@@ -31,6 +36,7 @@ export const router = createBrowserRouter([
       { path: 'imoveis', element: withSuspense(<Properties />) },
       { path: 'imovel/:slug', element: withSuspense(<PropertyDetails />) },
       { path: 'vender', element: withSuspense(<Sell />) },
+      { path: 'privacidade', element: withSuspense(<Privacy />) },
       { path: '*', element: <NotFound /> },
     ],
   },
@@ -52,6 +58,10 @@ export const router = createBrowserRouter([
           { path: 'contatos/novo', element: withSuspense(<LeadDetail />) },
           { path: 'contatos/:id', element: withSuspense(<LeadDetail />) },
           { path: 'resultados', element: withSuspense(<Results />) },
+          { path: 'equipe', element: withSuspense(<Team />) },
+          { path: 'conta', element: withSuspense(<Account />) },
+          { path: 'imobiliaria', element: withSuspense(<TenantSettingsPage />) },
+          { path: 'mais', element: withSuspense(<More />) },
           { path: '*', element: withSuspense(<DashboardHome />) },
         ],
       },

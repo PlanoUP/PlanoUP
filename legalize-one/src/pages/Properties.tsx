@@ -10,8 +10,10 @@ import { usePageTitle } from '@/hooks/usePageTitle'
 import { listProperties } from '@/services/propertyService'
 import type { PropertyFilters, SortOption } from '@/types/filters'
 import { filtersFromSearchParams, filtersToSearchParams } from '@/utils/filterProperties'
+import { useTenant } from '@/tenant/store'
 
 export default function Properties() {
+  const tenant = useTenant()
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = useMemo(() => filtersFromSearchParams(searchParams), [searchParams])
   const filtersKey = searchParams.toString()
@@ -43,7 +45,7 @@ export default function Properties() {
     <>
       <section className="bg-navy-950 pt-7 pb-20 text-white sm:pt-14 sm:pb-24">
         <div className="container-page">
-          <p className="eyebrow text-[11px] text-gold-400">Imóveis Legalize</p>
+          <p className="eyebrow text-[11px] text-gold-400">Imóveis {tenant.name}</p>
           <h1 className="mt-3 font-display text-[30px] leading-[1.02] font-extrabold tracking-[-0.045em] sm:text-[48px]">
             Imóveis {purposeLabel}
           </h1>

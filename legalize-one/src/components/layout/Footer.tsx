@@ -17,7 +17,7 @@ const columns = [
     ],
   },
   {
-    title: 'Legalize',
+    title: '',
     links: [
       { label: 'Vender meu imóvel', to: '/vender' },
       { label: 'Tour 3D', to: '/#tour-3d' },
@@ -45,9 +45,9 @@ export function Footer() {
           </p>
         </div>
 
-        {columns.map((col) => (
-          <div key={col.title}>
-            <p className="eyebrow text-gold-400">{col.title}</p>
+        {columns.map((col, i) => (
+          <div key={i}>
+            <p className="eyebrow text-gold-400">{col.title || tenant.name}</p>
             <ul className="mt-3 md:mt-4 md:space-y-0.5">
               {col.links.map((link) => (
                 <li key={link.label}>
@@ -99,7 +99,12 @@ export function Footer() {
           <p>
             © {YEAR} {tenant.legalName}.{tenant.creci && ` ${tenant.creci}.`}
           </p>
-          <p>Legalize One · Plataforma imobiliária</p>
+          <p className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link to="/privacidade" className="hover:text-white/80">
+              Política de privacidade
+            </Link>
+            <span>Legalize One · Plataforma imobiliária</span>
+          </p>
         </div>
       </div>
     </footer>

@@ -75,6 +75,13 @@ export default function Login() {
                 <LockKeyhole className="size-4" aria-hidden="true" />
                 {busy ? 'Entrando…' : 'Entrar'}
               </button>
+              <details className="text-[13.5px] text-slate">
+                <summary className="cursor-pointer text-center font-semibold text-navy-800">Esqueci minha senha</summary>
+                <p className="mt-2 leading-relaxed">
+                  Peça ao gerente da sua imobiliária para gerar uma nova senha em <strong className="text-navy-950">Equipe</strong>. Você
+                  entra com ela e cria uma senha pessoal no primeiro acesso.
+                </p>
+              </details>
             </form>
           )}
         </div>

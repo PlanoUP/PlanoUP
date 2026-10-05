@@ -11,6 +11,7 @@ import { track } from '@/lib/analytics'
 import { resizeImage } from '@/lib/images'
 import { getTourById } from '@/services/propertyService'
 import { cn } from '@/utils/cn'
+import { useTenant } from '@/tenant/store'
 
 const TOUR_PROPERTY_SLUG = 'casa-condominio-nova-parnamirim'
 /** Imóvel demonstrativo do modelo 3D (a Home mostra só a capa — o GLB nunca carrega aqui). */
@@ -20,6 +21,7 @@ const MODEL_POSTER = '/models/casa-mobiliada/poster.webp'
 const MODEL_ALT = 'casa de três pavimentos em Capim Macio, com garagem e piscina'
 
 export function Experience3D() {
+  const tenant = useTenant()
   const { data: tour } = useAsyncData(() => getTourById(), 'default-tour')
   const launcher = useTourLauncher(tour, {
     placement: 'home_section',
@@ -75,7 +77,7 @@ export function Experience3D() {
       <div className="pointer-events-none absolute -top-40 -left-40 size-[480px] rounded-full bg-navy-800/50 blur-3xl" />
       <div className="relative grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,40%)_minmax(0,60%)]">
         <div className="flex flex-col justify-center px-4 py-14 sm:px-6 sm:py-16 lg:py-20 lg:pr-12 lg:pl-[max(2.5rem,calc((100vw-1280px)/2+2.5rem))]">
-          <p className="eyebrow text-[11.5px] tracking-[0.3em] text-white/80">Legalize 3D Experience</p>
+          <p className="eyebrow text-[11.5px] tracking-[0.3em] text-white/80">{tenant.name} 3D Experience</p>
           <h2
             id="tour-title"
             className="mt-4 font-display text-[44px] leading-[0.95] font-extrabold tracking-[-0.04em] [word-spacing:0.08em] sm:text-[56px]"

@@ -1,11 +1,19 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { getSupabase } from '@/lib/supabase'
-import { AuthContext, friendlyAuthError, type AuthState, type Membership } from './context'
+import { AuthContext, friendlyAuthError, friendlyPasswordError, type AuthState, type Membership } from './context'
 
-type Snapshot = Pick<AuthState, 'status' | 'userId' | 'email' | 'fullName' | 'isPlatformAdmin' | 'memberships'>
+type Snapshot = Pick<AuthState, 'status' | 'userId' | 'email' | 'fullName' | 'isPlatformAdmin' | 'memberships' | 'mustChangePassword'>
 
-const SIGNED_OUT: Snapshot = { status: 'signed_out', userId: null, email: null, fullName: null, isPlatformAdmin: false, memberships: [] }
+const SIGNED_OUT: Snapshot = {
+  status: 'signed_out',
+  userId: null,
+  email: null,
+  fullName: null,
+  isPlatformAdmin: false,
+  memberships: [],
+  mustChangePassword: false,
+}
 
 async function loadUser(supabase: SupabaseClient, user: User): Promise<Snapshot> {
   const [{ data: profile }, { data: members }] = await Promise.all([
@@ -23,6 +31,7 @@ async function loadUser(supabase: SupabaseClient, user: User): Promise<Snapshot>
     fullName: (profile?.full_name as string | null) ?? null,
     isPlatformAdmin: Boolean(profile?.is_platform_admin),
     memberships,
+    mustChangePassword: Boolean(user.user_metadata?.must_change_password),
   }
 }
 
@@ -66,6 +75,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (client) await (await client).auth.signOut()
   }, [client])
 
-  const value = useMemo<AuthState>(() => ({ ...snapshot, signIn, signOut }), [snapshot, signIn, signOut])
+  const changePassword = useCallback(
+    async (password: string) => {
+      if (!client) return { error: 'O painel ainda não está ativado neste ambiente.' }
+      const supabase = await client
+      const { error } = await supabase.auth.updateUser({ password, data: { must_change_password: false } })
+      if (error) return { error: friendlyPasswordError(error.message) }
+      setSnapshot((s) => ({ ...s, mustChangePassword: false }))
+      return {}
+    },
+    [client],
+  )
+
+  const updateName = useCallback(
+    async (name: string) => {
+      if (!client || !snapshot.userId) return { error: 'Sessão não encontrada.' }
+      const supabase = await client
+      const { error } = await supabase.from('profiles').update({ full_name: name }).eq('id', snapshot.userId)
+      if (error) return { error: 'Não foi possível salvar o nome agora.' }
+      setSnapshot((s) => ({ ...s, fullName: name }))
+      return {}
+    },
+    [client, snapshot.userId],
+  )
+
+  const value = useMemo<AuthState>(
+    () => ({ ...snapshot, signIn, signOut, changePassword, updateName }),
+    [snapshot, signIn, signOut, changePassword, updateName],
+  )
   return <AuthContext value={value}>{children}</AuthContext>
 }

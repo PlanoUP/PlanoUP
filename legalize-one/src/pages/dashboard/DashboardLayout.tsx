@@ -1,30 +1,15 @@
-import { BarChart3, Building2, Home, Inbox, LayoutDashboard, LogOut, type LucideIcon } from 'lucide-react'
-import { NavLink, Outlet, useLocation } from 'react-router'
+import { Building2, CircleUser, LogOut, Menu } from 'lucide-react'
+import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { RequireAuth } from '@/auth/RequireAuth'
 import { Logo } from '@/components/ui/Logo'
 import { WorkspaceProvider } from '@/dashboard/WorkspaceProvider'
 import { countNewLeads } from '@/dashboard/leadsApi'
+import { NAV, type NavItem } from '@/dashboard/nav'
 import { useWorkspaceState } from '@/dashboard/workspace'
 import { useAsyncData } from '@/hooks/useAsyncData'
-import { hasPermission, ROLE_LABELS, type Permission } from '@/lib/permissions'
+import { hasPermission, ROLE_LABELS } from '@/lib/permissions'
 import { cn } from '@/utils/cn'
-
-interface NavItem {
-  to: string
-  label: string
-  icon: LucideIcon
-  end?: boolean
-  badge?: boolean
-  permission?: Permission
-}
-
-const NAV: NavItem[] = [
-  { to: '/dashboard', label: 'Visão geral', icon: LayoutDashboard, end: true },
-  { to: '/dashboard/imoveis', label: 'Imóveis', icon: Home },
-  { to: '/dashboard/contatos', label: 'Contatos', icon: Inbox, badge: true },
-  { to: '/dashboard/resultados', label: 'Resultados', icon: BarChart3, permission: 'analytics.view' },
-]
 
 function NewBadge({ count, className }: { count: number; className?: string }) {
   if (!count) return null
@@ -67,6 +52,8 @@ function Shell() {
   const { current } = useWorkspaceState()
   const location = useLocation()
   const nav = NAV.filter((item) => !item.permission || (current && hasPermission(current.role, item.permission)))
+  const mobileNav: NavItem[] = [...nav.filter((i) => !i.secondary), { to: '/dashboard/mais', label: 'Mais', icon: Menu }]
+  const mustChange = auth.mustChangePassword && location.pathname !== '/dashboard/conta'
   // Recalcula ao navegar (ex.: depois de atender um contato novo).
   const { data: newLeads } = useAsyncData(
     () => (current ? countNewLeads(current.tenantId) : Promise.resolve(0)),
@@ -83,6 +70,14 @@ function Shell() {
               <TenantSwitcher />
               {current && <span className="text-[12px] text-slate">{ROLE_LABELS[current.role]}</span>}
             </div>
+            <Link
+              to="/dashboard/conta"
+              aria-label="Minha conta"
+              title="Minha conta"
+              className="inline-flex size-10 items-center justify-center rounded-full text-navy-950 hover:bg-sand"
+            >
+              <CircleUser className="size-5" aria-hidden="true" />
+            </Link>
             <button
               type="button"
               onClick={() => void auth.signOut()}
@@ -124,7 +119,9 @@ function Shell() {
         </nav>
 
         <main className="min-w-0 flex-1 py-6 sm:py-8">
-          {current ? (
+          {mustChange ? (
+            <Navigate to="/dashboard/conta" replace />
+          ) : current || location.pathname === '/dashboard/conta' ? (
             <Outlet />
           ) : (
             <div className="mx-auto max-w-lg rounded-3xl bg-white p-8 text-center shadow-card">
@@ -145,7 +142,7 @@ function Shell() {
         className="fixed inset-x-0 bottom-0 z-30 border-t border-navy-950/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <ul className="grid auto-cols-fr grid-flow-col">
-          {nav.map((item) => (
+          {mobileNav.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}

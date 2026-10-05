@@ -9,9 +9,11 @@ import { propertyTypeOptions } from '@/data/filters'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { track } from '@/lib/analytics'
 import { whatsappLink } from '@/lib/whatsapp'
+import { Link } from 'react-router'
 import { submitLead } from '@/services/leadService'
 import { cn } from '@/utils/cn'
 import { unsplash } from '@/lib/images'
+import { useTenant } from '@/tenant/store'
 
 interface SellLead {
   name: string
@@ -31,6 +33,7 @@ function formatPhone(value: string) {
 }
 
 export default function Sell() {
+  const tenant = useTenant()
   usePageTitle('Vender meu imóvel')
   const [lead, setLead] = useState<SellLead>(initialLead)
   const [errors, setErrors] = useState<Partial<Record<keyof SellLead, string>>>({})
@@ -82,7 +85,7 @@ export default function Sell() {
         {/* Mobile: título → formulário → etapas. Desktop: texto e etapas à esquerda, formulário à direita. */}
         <div className="container-page grid gap-8 py-10 sm:py-20 lg:grid-cols-[1fr_440px] lg:grid-rows-[auto_1fr] lg:gap-x-12 lg:gap-y-10">
           <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
-            <p className="eyebrow text-[11px] text-gold-400">Vender com a Legalize</p>
+            <p className="eyebrow text-[11px] text-gold-400">Vender com a {tenant.name}</p>
             <h1 className="mt-3 font-display text-[clamp(34px,10vw,40px)] leading-[0.98] font-extrabold tracking-[-0.05em] sm:mt-4 sm:text-[58px]">
               Venda seu imóvel
               <span className="block text-gold-400">com segurança jurídica.</span>
@@ -210,7 +213,10 @@ export default function Sell() {
                   <ArrowRight className="size-4" />
                 </Button>
                 <p className="mt-3 text-center text-[11.5px] text-slate">
-                  Seus dados são usados apenas para contato sobre a avaliação.
+                  Seus dados são usados apenas para contato sobre a avaliação.{' '}
+                  <Link to="/privacidade" className="underline underline-offset-2">
+                    Política de privacidade
+                  </Link>
                 </p>
               </form>
             )}

@@ -1,9 +1,11 @@
 import { IconCircle } from '@/components/ui/IconCircle'
 import { benefits } from '@/data/content'
+import { useTenant } from '@/tenant/store'
 
 export function Benefits() {
+  const tenant = useTenant()
   return (
-    <section id="sobre" aria-label="Diferenciais Legalize" className="bg-sand pt-12 pb-14 sm:pt-14">
+    <section id="sobre" aria-label={`Diferenciais ${tenant.name}`} className="bg-sand pt-12 pb-14 sm:pt-14">
       <div className="container-page">
         <ul className="grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 lg:grid-cols-5 lg:gap-0">
           {benefits.map((benefit, i) => (

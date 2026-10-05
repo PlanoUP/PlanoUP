@@ -1,5 +1,6 @@
 import { SmartImage } from '@/components/ui/SmartImage'
 import { cn } from '@/utils/cn'
+import { useTenant } from '@/tenant/store'
 
 interface Property3DLoaderProps {
   poster?: string
@@ -17,6 +18,7 @@ const mb = (bytes: number) => (bytes / 1_000_000).toLocaleString('pt-BR', { maxi
  * etapa de montagem e a capa do imóvel ao fundo — nunca uma tela branca.
  */
 export function Property3DLoader({ poster, ratio, loadedBytes, totalBytes, stage }: Property3DLoaderProps) {
+  const tenant = useTenant()
   const percent = ratio === null ? null : Math.round(ratio * 100)
   const label = stage === 'processing' ? 'Montando os ambientes…' : 'Preparando sua visita…'
   const detail =
@@ -41,7 +43,7 @@ export function Property3DLoader({ poster, ratio, loadedBytes, totalBytes, stage
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-950/40" />
       <div className="relative w-full max-w-sm px-6 text-center" role="status" aria-live="polite">
-        <p className="eyebrow text-[10.5px] tracking-[0.3em] text-gold-400">Legalize 3D Experience</p>
+        <p className="eyebrow text-[10.5px] tracking-[0.3em] text-gold-400">{tenant.name} 3D Experience</p>
         <p className="mt-3 font-display text-[22px] font-bold tracking-[-0.02em]">{label}</p>
         <div
           className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/12"

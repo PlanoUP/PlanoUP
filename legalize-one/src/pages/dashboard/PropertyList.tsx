@@ -1,7 +1,8 @@
-import { ImageOff, Plus, Search } from 'lucide-react'
+import { Download, ImageOff, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { ButtonLink } from '@/components/ui/Button'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { downloadCsv, toCsv, today } from '@/dashboard/exportCsv'
 import { StatusBadge } from '@/dashboard/StatusBadge'
 import {
   listProperties,
@@ -37,18 +38,39 @@ export default function PropertyList() {
 
   const all = data ?? []
   const visible = all.filter((p) => (status === 'all' || p.status === status) && matches(p, query))
+  function exportProperties() {
+    const csv = toCsv(all, [
+      { header: 'Código', value: (p) => p.code },
+      { header: 'Título', value: (p) => p.title },
+      { header: 'Tipo', value: (p) => TYPE_LABELS[p.type] },
+      { header: 'Finalidade', value: (p) => PURPOSE_LABELS[p.purpose] },
+      { header: 'Status', value: (p) => STATUS_LABELS[p.status] },
+      { header: 'Preço (R$)', value: (p) => p.price },
+      { header: 'Bairro', value: (p) => p.neighborhood },
+      { header: 'Cidade', value: (p) => p.city },
+      { header: 'Link no site', value: (p) => (p.status === 'published' ? `${window.location.origin}/imovel/${p.slug}` : '') },
+      { header: 'Atualizado em', value: (p) => new Date(p.updated_at).toLocaleString('pt-BR') },
+    ])
+    downloadCsv(`imoveis-${ws.tenantSlug}-${today()}.csv`, csv)
+  }
   const countOf = (s: PropertyStatus | 'all') => (s === 'all' ? all.length : all.filter((p) => p.status === s).length)
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">Imóveis</h1>
-        {ws.can('properties.create') && (
-          <ButtonLink to="/dashboard/imoveis/novo">
-            <Plus className="size-4" aria-hidden="true" />
-            Cadastrar imóvel
-          </ButtonLink>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" disabled={!all.length} onClick={exportProperties}>
+            <Download className="size-4" aria-hidden="true" />
+            Exportar planilha
+          </Button>
+          {ws.can('properties.create') && (
+            <ButtonLink to="/dashboard/imoveis/novo">
+              <Plus className="size-4" aria-hidden="true" />
+              Cadastrar imóvel
+            </ButtonLink>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 space-y-3">

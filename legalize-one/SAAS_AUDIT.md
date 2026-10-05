@@ -243,6 +243,14 @@ RPCs: `resolve_tenant`, `get_tenant_profile`, `get_published_properties`, `get_p
 - Painel: indicadores com variação, gráfico diário com dica e tabela equivalente, funil, origens, ranking com dica
   por imóvel. Corretor não vê o menu nem os dados.
 
+### Etapa 5 — Operação sem o desenvolvedor
+- Edge Function `team` (criar acesso, nova senha temporária, papel, remover; limites do plano) + primeiro acesso
+  com troca obrigatória de senha + "Minha conta".
+- "Minha imobiliária" (tenant_settings + logo no Storage); nome da marca no site vem da configuração.
+- Captação na página do imóvel ("Prefiro que me liguem"), política de privacidade (LGPD) e aviso nos formulários.
+- Exportação CSV de imóveis e contatos; keep-alive diário (Vercel Cron) contra a pausa do Supabase gratuito.
+- Validado: site público idêntico ao anterior fora dos acréscimos (16 comparações), 53 verificações das novas telas.
+
 ### Ainda mock/hardcoded (próximas etapas)
 - Catálogo, tours 360 e config 3D: já importados para o banco; `src/data` continua como fonte do modo V1 (sem
   backend). O GLB e o poster seguem servidos pelo próprio site (`/models/…`), referenciados no `model3d` do imóvel.

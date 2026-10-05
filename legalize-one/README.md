@@ -174,6 +174,19 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
     com comparação ao período anterior (7/30/90 dias); visitantes por dia; funil do clique ao contato; origem dos
     visitantes; **Potencial de Conversão** por imóvel — regra explícita em `src/dashboard/conversion.ts`, explicada
     na tela. Números agregados no banco por `tenant_metrics` (migration 0005), sem expor eventos brutos.
+  - **Equipe** (gerentes): criar acesso de gerente/corretor com senha temporária (mensagem pronta para WhatsApp),
+    gerar nova senha, trocar papel, remover. Feito pela Edge Function `supabase/functions/team` (a chave de serviço
+    fica só no servidor; regras em `core.ts`, testadas em `team.test.ts`). No primeiro acesso o painel exige a
+    criação da senha pessoal (**Minha conta**). "Esqueci minha senha" orienta a pedir nova senha ao gerente.
+  - **Minha imobiliária** (gerentes): nome, razão social, CRECI, logo (bucket `tenant-assets`), cores, WhatsApp,
+    telefone, e-mail, endereço, horário e redes. O site inteiro usa esses dados (nome da marca nos textos, cores,
+    logo, botões de WhatsApp) — outra imobiliária = outra configuração.
+  - **Exportar planilha** (CSV para Excel) em Imóveis e Contatos: os dados são da imobiliária e servem de backup.
+  - Celular: barra inferior com Visão geral, Imóveis, Contatos e **Mais** (demais telas).
+- **Site:** "Prefiro que me liguem" na página do imóvel (vira contato ligado ao imóvel), página
+  `/privacidade` (LGPD, com os dados da imobiliária) e aviso nos formulários.
+- **Plano gratuito (medidas anti-quebra):** `api/keepalive.js` + `crons` no `vercel.json` consultam o banco 1x/dia
+  para o Supabase não pausar por inatividade; exportação em planilha como cópia de segurança dos dados.
   - Sem backend, `/entrar` informa que o painel ainda não está ativo.
 
 ## Rotas

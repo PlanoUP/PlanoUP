@@ -1,6 +1,7 @@
 import { ArrowLeft, Box, CalendarCheck, Check, ChevronRight, MapPin, Rotate3d, Share2, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
+import { ContactRequest } from '@/components/properties/ContactRequest'
 import { FavoriteButton } from '@/components/properties/FavoriteButton'
 import { PropertyCard } from '@/components/properties/PropertyCard'
 import { PropertyGallery } from '@/components/properties/PropertyGallery'
@@ -24,6 +25,7 @@ import { getPropertyBySlug, listRelatedProperties } from '@/services/propertySer
 import type { PropertyWithTour } from '@/types/property'
 import { cn } from '@/utils/cn'
 import { formatLocation, formatPropertyPrice } from '@/utils/format'
+import { useTenant } from '@/tenant/store'
 
 function contactMessages(property: PropertyWithTour) {
   const ref = `"${property.title}" em ${formatLocation(property.location)} (${formatPropertyPrice(property)})`
@@ -34,6 +36,7 @@ function contactMessages(property: PropertyWithTour) {
 }
 
 export default function PropertyDetails() {
+  const tenant = useTenant()
   const { slug = '' } = useParams()
   const { data: property, loading } = useAsyncData(() => getPropertyBySlug(slug), slug)
   const { data: related } = useAsyncData(
@@ -256,7 +259,7 @@ export default function PropertyDetails() {
                   track('property_tour_cta_clicked', { property_id: property.id, placement: source ?? 'property_section' })
                   launcher.open(sceneId, source)
                 }}
-                eyebrow="Legalize 3D Experience"
+                eyebrow={`${tenant.name} 3D Experience`}
                 headline="Faça uma visita agora"
                 description="Percorra os ambientes, toque nos destaques e navegue pela planta."
                 className="h-[480px] rounded-2xl"
@@ -269,7 +272,7 @@ export default function PropertyDetails() {
             <div className="flex items-start gap-3">
               <ShieldCheck className="size-7 shrink-0 text-gold-400" strokeWidth={1.5} />
               <h2 className="font-display text-[19px] leading-snug font-bold tracking-[-0.02em] sm:text-xl">
-                {property.documentationVerified ? 'Documentação verificada pela Legalize' : 'Análise documental em andamento'}
+                {property.documentationVerified ? `Documentação verificada pela ${tenant.name}` : 'Análise documental em andamento'}
               </h2>
             </div>
             <ul className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -322,6 +325,7 @@ export default function PropertyDetails() {
               <CalendarCheck className="size-5" />
               Agendar visita
             </ButtonAnchor>
+            <ContactRequest propertyId={property.id} propertyTitle={property.title} whatsappMessage={messages.interest} />
             {tour && (
               <button
                 type="button"

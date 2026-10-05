@@ -43,6 +43,7 @@ export type AnalyticsEvent =
   | 'property_whatsapp_clicked'
   | 'property_schedule_clicked'
   | 'property_tour_cta_clicked'
+  | 'property_contact_request_opened'
 
 type EventPayload = Record<string, string | number | boolean | undefined>
 

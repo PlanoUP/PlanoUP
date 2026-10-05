@@ -1,13 +1,15 @@
-import { Plus, Search } from 'lucide-react'
+import { Download, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { ButtonLink } from '@/components/ui/Button'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { downloadCsv, toCsv, today } from '@/dashboard/exportCsv'
 import { LeadStatusBadge } from '@/dashboard/LeadStatusBadge'
 import {
   LEAD_CHANNEL_LABELS,
   LEAD_STATUS_LABELS,
   formatWhen,
   listLeads,
+  sourceLabel,
   type Lead,
   type LeadStatus,
 } from '@/dashboard/leadsApi'
@@ -50,6 +52,22 @@ export default function LeadList() {
   const inFilter = (l: Lead, f: Filter) => (f === 'all' ? true : f === 'open' ? isOpen(l.status) : l.status === f)
   const visible = leads.filter((l) => inFilter(l, filter) && matches(l))
 
+  function exportLeads() {
+    const csv = toCsv(leads, [
+      { header: 'Recebido em', value: (l) => new Date(l.created_at).toLocaleString('pt-BR') },
+      { header: 'Nome', value: (l) => l.name },
+      { header: 'Telefone', value: (l) => l.phone },
+      { header: 'E-mail', value: (l) => l.email },
+      { header: 'Situação', value: (l) => LEAD_STATUS_LABELS[l.status] },
+      { header: 'Canal', value: (l) => LEAD_CHANNEL_LABELS[l.channel] },
+      { header: 'Origem', value: (l) => sourceLabel(l.source) },
+      { header: 'Imóvel', value: (l) => { const p = propertyOf(l); return p ? `${p.code ? `${p.code} — ` : ''}${p.title}` : '' } },
+      { header: 'Mensagem', value: (l) => l.message },
+      { header: 'Campanha', value: (l) => [l.utm_source, l.utm_medium, l.utm_campaign].filter(Boolean).join(' / ') },
+    ])
+    downloadCsv(`contatos-${ws.tenantSlug}-${today()}.csv`, csv)
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -59,10 +77,16 @@ export default function LeadList() {
             {ws.can('leads.view_all') ? 'Todos os contatos da imobiliária.' : 'Contatos sob sua responsabilidade.'}
           </p>
         </div>
-        <ButtonLink to="/dashboard/contatos/novo">
-          <Plus className="size-4" aria-hidden="true" />
-          Registrar contato
-        </ButtonLink>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" disabled={!leads.length} onClick={exportLeads}>
+            <Download className="size-4" aria-hidden="true" />
+            Exportar planilha
+          </Button>
+          <ButtonLink to="/dashboard/contatos/novo">
+            <Plus className="size-4" aria-hidden="true" />
+            Registrar contato
+          </ButtonLink>
+        </div>
       </div>
 
       <div className="mt-6 space-y-3">
