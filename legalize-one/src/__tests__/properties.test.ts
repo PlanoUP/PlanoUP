@@ -71,3 +71,15 @@ describe('imóveis', () => {
     expect(p.type).toBe('casa')
   })
 })
+
+describe('painel: payload de imóvel', () => {
+  it('envia só colunas editáveis (nada de campos de exibição nem capa antiga)', async () => {
+    const { onlyInputColumns, EMPTY_PROPERTY } = await import('@/dashboard/propertiesApi')
+    const record = { ...EMPTY_PROPERTY, title: 'Casa', id: 'x', tenant_id: 't', slug: 'casa', cover_image_url: 'antiga.webp', has3d: true, hasTour: false, published_at: null, updated_at: '2026-01-01' }
+    const payload = onlyInputColumns(record)
+    expect(Object.keys(payload).sort()).toEqual(Object.keys(EMPTY_PROPERTY).sort())
+    expect(payload).not.toHaveProperty('has3d')
+    expect(payload).not.toHaveProperty('cover_image_url')
+    expect(payload.title).toBe('Casa')
+  })
+})

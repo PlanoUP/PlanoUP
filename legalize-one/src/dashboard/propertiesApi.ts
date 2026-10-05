@@ -158,7 +158,9 @@ export function friendlyDbError(error: { code?: string; message?: string } | nul
     return 'Você não tem permissão para esta alteração. Fale com o gerente da imobiliária.'
   if (error?.code === '23505' && /code/.test(message)) return 'Já existe um imóvel com este código.'
   if (error?.code === '23514') return 'Algum campo está fora do formato esperado. Revise os dados e tente de novo.'
-  return 'Não foi possível salvar agora. Verifique sua conexão e tente novamente.'
+  // Falha de rede de verdade não traz código do banco; com código, mostramos para o suporte identificar.
+  if (!error?.code) return 'Não foi possível salvar agora. Verifique sua conexão e tente novamente.'
+  return `Não foi possível salvar (código ${error.code}). Tente de novo; se continuar, avise o suporte.`
 }
 
 export class PanelError extends Error {}
@@ -213,6 +215,16 @@ export async function getProperty(tenantId: string, id: string): Promise<Propert
   }
 }
 
+/**
+ * Envia ao banco só as colunas editáveis do formulário. O registro carregado traz campos de exibição
+ * (has3d, hasTour, capa, datas…) que não podem ir no insert/update: o banco recusaria colunas
+ * inexistentes, e a capa antiga desfaria a troca feita na seção de fotos.
+ */
+export function onlyInputColumns(input: PropertyInput): Record<string, unknown> {
+  const source = input as unknown as Record<string, unknown>
+  return Object.fromEntries(INPUT_COLUMNS.map((key) => [key, source[key]]))
+}
+
 /** Corretor: só os campos que ele pode alterar (o banco recusaria os demais). */
 const MANAGER_ONLY: (keyof PropertyInput)[] = ['status', 'featured', 'documentation_verified', 'broker_id']
 
@@ -222,7 +234,7 @@ export async function createProperty(
   opts: { asBroker: string | null; userId: string | null },
 ): Promise<string> {
   const supabase = await requireSupabase()
-  const payload: Record<string, unknown> = { ...input, tenant_id: tenantId, created_by: opts.userId }
+  const payload: Record<string, unknown> = { ...onlyInputColumns(input), tenant_id: tenantId, created_by: opts.userId }
   if (opts.asBroker) {
     Object.assign(payload, { status: 'draft', featured: false, documentation_verified: false, broker_id: opts.asBroker })
   }
@@ -238,7 +250,7 @@ export async function updateProperty(
   opts: { asBroker: boolean },
 ): Promise<void> {
   const supabase = await requireSupabase()
-  const payload: Record<string, unknown> = { ...input }
+  const payload: Record<string, unknown> = onlyInputColumns(input)
   if (opts.asBroker) for (const key of MANAGER_ONLY) delete payload[key]
   const { data, error } = await supabase.from('properties').update(payload).eq('tenant_id', tenantId).eq('id', id).select('id')
   if (error) fail(error)
