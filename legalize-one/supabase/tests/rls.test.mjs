@@ -380,6 +380,37 @@ describe('analytics', () => {
     const rows = await as('brokerA', () => q(`select id from public.analytics_events`))
     assert.equal(rows.length, 0)
   })
+
+  test('resultados: resumo do período só para gestores, com números corretos', async () => {
+    const prop = (await as('server', () => q(`select id from public.properties where tenant_id = $1 and status = 'published' limit 1`, [tenantA])))[0].id
+    const ev = (type, session, property = null) =>
+      as('anon', () => q(`select public.track_event($1, $2, $3, $4, '/x', 'https://www.google.com/search', '{}', '{}')`, [tenantA, type, property, session]))
+    for (const sess of ['m-1', 'm-2', 'm-3']) await ev('page_view', sess)
+    await ev('page_view', 'm-1')
+    await ev('property_view', 'm-1', prop)
+    await ev('property_view', 'm-2', prop)
+    await ev('3d_open', 'm-1', prop)
+    await ev('whatsapp_click', 'm-1', prop)
+    // Evento antigo (fora do período) entra só no "período anterior".
+    await as('server', () => q(`insert into public.analytics_events (tenant_id, event_type, session_id, occurred_at) values ($1, 'page_view', 'old', now() - interval '40 days')`, [tenantA]))
+
+    const m = (await as('ownerA', () => q(`select public.tenant_metrics($1, 30) as m`, [tenantA])))[0].m
+    assert.ok(m.totals.visitors >= 3)
+    assert.equal(m.previous.visitors, 1)
+    const p = m.properties.find((x) => x.id === prop)
+    assert.equal(p.views, 2)
+    assert.equal(p.viewers, 2)
+    assert.equal(p.immersive_sessions, 1)
+    assert.equal(p.intent_sessions, 1)
+    assert.equal(m.daily.length, 31)
+    assert.ok(m.sources.some((s) => s.source === 'google.com'))
+
+    await as('brokerA', () => rejects(q(`select public.tenant_metrics($1)`, [tenantA]), /not allowed/))
+    await as('ownerB', () => rejects(q(`select public.tenant_metrics($1)`, [tenantA]), /not allowed/))
+    await as('anon', () => rejects(q(`select public.tenant_metrics($1)`, [tenantA]), /permission denied/))
+    const viaAdmin = (await as('platform', () => q(`select public.tenant_metrics($1, 7) as m`, [tenantA])))[0].m
+    assert.equal(viaAdmin.period.days, 7)
+  })
 })
 
 describe('planos e limites', () => {
@@ -469,6 +500,7 @@ describe('salvaguardas do schema', () => {
       { proname: 'resolve_tenant', anon: true },
       { proname: 'submit_lead', anon: true },
       { proname: 'tenant_entitlements', anon: false },
+      { proname: 'tenant_metrics', anon: false },
       { proname: 'track_event', anon: true },
     ])
   })

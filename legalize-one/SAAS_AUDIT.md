@@ -235,6 +235,14 @@ RPCs: `resolve_tenant`, `get_tenant_profile`, `get_published_properties`, `get_p
   detalhe com atendimento (WhatsApp/ligar/e-mail), situação, responsável, dados editáveis, anotações e origem.
 - Production ligada ao banco desde a etapa 2 (site idêntico ao anterior, verificado em 16 comparações de tela).
 
+### Etapa 4 — Painel: Resultados
+- `migrations/0005_tenant_metrics.sql` — `tenant_metrics(tenant, dias)`: totais do período e do anterior, série
+  diária (fuso de São Paulo), números por imóvel e origens; só gerente/admin da plataforma. 37 testes de RLS.
+- Potencial de Conversão (`src/dashboard/conversion.ts`): 70% taxa de contato (meta 8%) + 30% taxa de imersão
+  3D/tour (meta 35%); sem 3D/tour só contato; mínimo de 10 visitantes. Testado em `conversion.test.ts`.
+- Painel: indicadores com variação, gráfico diário com dica e tabela equivalente, funil, origens, ranking com dica
+  por imóvel. Corretor não vê o menu nem os dados.
+
 ### Ainda mock/hardcoded (próximas etapas)
 - Catálogo, tours 360 e config 3D: já importados para o banco; `src/data` continua como fonte do modo V1 (sem
   backend). O GLB e o poster seguem servidos pelo próprio site (`/models/…`), referenciados no `model3d` do imóvel.

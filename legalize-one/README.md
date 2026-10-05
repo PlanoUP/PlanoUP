@@ -170,6 +170,10 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
     (novo → em atendimento → visita agendada → em negociação → fechado/perdido), atendimento com 1 toque
     (WhatsApp com saudação, ligar, e-mail; contato novo vira "em atendimento"), corretor responsável, anotações
     da equipe, origem/campanha (UTM). Corretor vê e registra só os próprios contatos (migration 0004).
+  - **Resultados** (só gerentes): visitantes, imóveis vistos, aberturas de 3D/tour, cliques para contato e contatos,
+    com comparação ao período anterior (7/30/90 dias); visitantes por dia; funil do clique ao contato; origem dos
+    visitantes; **Potencial de Conversão** por imóvel — regra explícita em `src/dashboard/conversion.ts`, explicada
+    na tela. Números agregados no banco por `tenant_metrics` (migration 0005), sem expor eventos brutos.
   - Sem backend, `/entrar` informa que o painel ainda não está ativo.
 
 ## Rotas
@@ -205,7 +209,7 @@ src/
   lib/              analytics + eventSink, attribution, backend/supabase, entitlements, permissions, images
   hooks/ utils/ types/ routes/ pages/
 supabase/
-  migrations/       Schema + RLS (0001), superfície da API (0002), painel de imóveis (0003), contatos (0004)
+  migrations/       Schema + RLS (0001), superfície da API (0002), painel de imóveis (0003), contatos (0004), resultados (0005)
   seed.sql          Planos e tenant inicial
   seed_catalog.sql  Catálogo da Legalize (gerado por scripts/export-catalog.ts)
   tests/            Isolamento entre imobiliárias (PGlite)

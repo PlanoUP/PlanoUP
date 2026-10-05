@@ -14,6 +14,7 @@ import {
   PropertyDetails,
   PropertyEditor,
   PropertyList,
+  Results,
   Sell,
 } from './lazyPages'
 
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
           { path: 'contatos', element: withSuspense(<LeadList />) },
           { path: 'contatos/novo', element: withSuspense(<LeadDetail />) },
           { path: 'contatos/:id', element: withSuspense(<LeadDetail />) },
+          { path: 'resultados', element: withSuspense(<Results />) },
           { path: '*', element: withSuspense(<DashboardHome />) },
         ],
       },

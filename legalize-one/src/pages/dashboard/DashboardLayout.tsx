@@ -1,4 +1,4 @@
-import { Building2, Home, Inbox, LayoutDashboard, LogOut, type LucideIcon } from 'lucide-react'
+import { BarChart3, Building2, Home, Inbox, LayoutDashboard, LogOut, type LucideIcon } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { RequireAuth } from '@/auth/RequireAuth'
@@ -7,7 +7,7 @@ import { WorkspaceProvider } from '@/dashboard/WorkspaceProvider'
 import { countNewLeads } from '@/dashboard/leadsApi'
 import { useWorkspaceState } from '@/dashboard/workspace'
 import { useAsyncData } from '@/hooks/useAsyncData'
-import { ROLE_LABELS } from '@/lib/permissions'
+import { hasPermission, ROLE_LABELS, type Permission } from '@/lib/permissions'
 import { cn } from '@/utils/cn'
 
 interface NavItem {
@@ -16,12 +16,14 @@ interface NavItem {
   icon: LucideIcon
   end?: boolean
   badge?: boolean
+  permission?: Permission
 }
 
 const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Visão geral', icon: LayoutDashboard, end: true },
   { to: '/dashboard/imoveis', label: 'Imóveis', icon: Home },
   { to: '/dashboard/contatos', label: 'Contatos', icon: Inbox, badge: true },
+  { to: '/dashboard/resultados', label: 'Resultados', icon: BarChart3, permission: 'analytics.view' },
 ]
 
 function NewBadge({ count, className }: { count: number; className?: string }) {
@@ -64,6 +66,7 @@ function Shell() {
   const auth = useAuth()
   const { current } = useWorkspaceState()
   const location = useLocation()
+  const nav = NAV.filter((item) => !item.permission || (current && hasPermission(current.role, item.permission)))
   // Recalcula ao navegar (ex.: depois de atender um contato novo).
   const { data: newLeads } = useAsyncData(
     () => (current ? countNewLeads(current.tenantId) : Promise.resolve(0)),
@@ -99,7 +102,7 @@ function Shell() {
       <div className="mx-auto flex max-w-[1280px] gap-8 px-4 sm:px-6">
         <nav aria-label="Painel" className="sticky top-24 hidden h-fit w-56 shrink-0 py-8 lg:block">
           <ul className="space-y-1">
-            {NAV.map((item) => (
+            {nav.map((item) => (
               <li key={item.to}>
                 <NavLink
                   to={item.to}
@@ -141,8 +144,8 @@ function Shell() {
         aria-label="Painel"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-navy-950/10 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
-        <ul className="grid grid-cols-3">
-          {NAV.map((item) => (
+        <ul className="grid auto-cols-fr grid-flow-col">
+          {nav.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
