@@ -14,6 +14,13 @@ export const site = {
   creci: 'CRECI-RN 0000-J',
 } as const
 
+/** A plataforma (SaaS) por trás dos sites e painéis das imobiliárias. */
+export const platform = {
+  name: 'Impulsigo',
+  /** Sigla (evitar "IG", associado ao Instagram). */
+  short: 'IPG',
+} as const
+
 export const integrations = {
   supabase: {
     url: import.meta.env.VITE_SUPABASE_URL ?? '',

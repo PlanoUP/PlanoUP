@@ -1,6 +1,7 @@
 import { Mail, MapPin, Phone } from 'lucide-react'
 import { Link } from 'react-router'
 import { Logo } from '@/components/ui/Logo'
+import { PlatformMark } from '@/components/ui/PlatformMark'
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon'
 import { whatsappLink } from '@/lib/whatsapp'
 import { isDefaultBrand } from '@/tenant/defaultTenant'
@@ -103,7 +104,7 @@ export function Footer() {
             <Link to="/privacidade" className="hover:text-white/80">
               Política de privacidade
             </Link>
-            <span>Legalize One · Plataforma imobiliária</span>
+            <PlatformMark tone="light" />
           </p>
         </div>
       </div>

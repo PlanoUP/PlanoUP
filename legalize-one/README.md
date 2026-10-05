@@ -140,6 +140,10 @@ Variáveis `VITE_*` são públicas e embutidas no build (refaça o deploy após 
 
 ## Plataforma SaaS (fundação multiempresa)
 
+Nome da plataforma: **Impulsigo** (sigla IPG; `platform` em `src/config/site.ts`). Aparece no painel ("Administrador
+Impulsigo", assinatura "Tecnologia Impulsigo"), no login, no aplicativo autenticador e no rodapé dos sites; cada
+imobiliária mantém a própria marca no site.
+
 Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.md).
 
 - **Banco:** `supabase/migrations/0001_saas_foundation.sql` (tabelas por `tenant_id`, RLS em todas, RPCs

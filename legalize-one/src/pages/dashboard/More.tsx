@@ -1,6 +1,7 @@
 import { ChevronRight, CircleUser, LogOut } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuth } from '@/auth/context'
+import { PlatformMark } from '@/components/ui/PlatformMark'
 import { visibleNav } from '@/dashboard/nav'
 import { useWorkspace } from '@/dashboard/workspace'
 import { usePageTitle } from '@/hooks/usePageTitle'
@@ -38,6 +39,9 @@ export default function More() {
           </button>
         </li>
       </ul>
+      <p className="text-center">
+        <PlatformMark />
+      </p>
     </div>
   )
 }

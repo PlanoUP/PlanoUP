@@ -51,7 +51,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
 
 /** Rótulos para a interface (linguagem simples, sem termos técnicos). */
 export const ROLE_LABELS: Record<Role, string> = {
-  platform_admin: 'Administrador Legalize One',
+  platform_admin: 'Administrador Impulsigo',
   owner: 'Gerente responsável',
   admin: 'Gerente',
   broker: 'Corretor',

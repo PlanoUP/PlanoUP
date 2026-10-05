@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { Logo } from '@/components/ui/Logo'
+import { PlatformMark } from '@/components/ui/PlatformMark'
 import { usePageTitle } from '@/hooks/usePageTitle'
 
 const field =
@@ -87,6 +88,9 @@ export default function Login() {
             </form>
           )}
         </div>
+        <p className="mt-6 text-center">
+          <PlatformMark />
+        </p>
       </div>
     </main>
   )

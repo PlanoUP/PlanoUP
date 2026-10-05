@@ -3,6 +3,7 @@ import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { RequireAuth } from '@/auth/RequireAuth'
 import { Logo } from '@/components/ui/Logo'
+import { PlatformMark } from '@/components/ui/PlatformMark'
 import { WorkspaceProvider } from '@/dashboard/WorkspaceProvider'
 import { countNewLeads } from '@/dashboard/leadsApi'
 import { visibleNav, type NavItem } from '@/dashboard/nav'
@@ -118,6 +119,7 @@ function Shell() {
               </li>
             ))}
           </ul>
+          <PlatformMark className="mt-8 px-3" />
         </nav>
 
         <main className="min-w-0 flex-1 py-6 sm:py-8">

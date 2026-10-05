@@ -1,4 +1,5 @@
 import type { Factor, SupabaseClient } from '@supabase/supabase-js'
+import { platform } from '@/config/site'
 import { requireSupabase } from '@/lib/supabase'
 
 /**
@@ -11,7 +12,7 @@ import { requireSupabase } from '@/lib/supabase'
 export type MfaStatus = 'ok' | 'challenge' | 'enroll_required'
 
 /** Nome que aparece no aplicativo autenticador. */
-const ISSUER = 'Painel Legalize One'
+const ISSUER = platform.name
 
 export async function mfaStatusOf(supabase: SupabaseClient, isPlatformAdmin: boolean): Promise<MfaStatus> {
   const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
