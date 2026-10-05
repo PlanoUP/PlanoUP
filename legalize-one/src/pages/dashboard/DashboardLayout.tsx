@@ -3,6 +3,7 @@ import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { RequireAuth } from '@/auth/RequireAuth'
 import { Logo } from '@/components/ui/Logo'
+import { ImpulsigoLogo } from '@/components/ui/ImpulsigoLogo'
 import { PlatformMark } from '@/components/ui/PlatformMark'
 import { WorkspaceProvider } from '@/dashboard/WorkspaceProvider'
 import { countNewLeads } from '@/dashboard/leadsApi'
@@ -53,6 +54,15 @@ function Shell() {
   const { current } = useWorkspaceState()
   const location = useLocation()
   const nav = visibleNav(current?.role, auth.isPlatformAdmin)
+  // Administrador da plataforma: ambiente próprio (azul, marca Impulsigo, menu separado em plataforma × imobiliária).
+  const platformView = auth.isPlatformAdmin
+  const groups = platformView
+    ? [
+        { title: 'Plataforma', items: nav.filter((i) => i.end || i.platformOnly) },
+        { title: current ? `Em foco: ${current.tenantName}` : 'Imobiliária', items: nav.filter((i) => !i.end && !i.platformOnly) },
+      ]
+    : [{ title: null, items: nav }]
+  const roleLabel = platformView ? ROLE_LABELS.platform_admin : current ? ROLE_LABELS[current.role] : null
   const mobileNav: NavItem[] = [...nav.filter((i) => !i.secondary), { to: '/dashboard/mais', label: 'Mais', icon: Menu }]
   // Senha temporária ou (admin da plataforma) verificação em duas etapas pendente: só "Minha conta".
   const mustChange = (auth.mustChangePassword || auth.mfa === 'enroll_required') && location.pathname !== '/dashboard/conta'
@@ -63,14 +73,14 @@ function Shell() {
   )
 
   return (
-    <div className="min-h-dvh bg-sand pb-20 lg:pb-0">
-      <header className="sticky top-0 z-30 border-b border-navy-950/8 bg-white/95 backdrop-blur">
+    <div className={cn('min-h-dvh bg-sand pb-20 lg:pb-0', platformView && 'theme-platform')}>
+      <header className={cn('sticky top-0 z-30 border-b border-navy-950/8 bg-white/95 backdrop-blur', platformView && 'border-t-4 border-t-navy-700')}>
         <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-4 px-4 sm:px-6">
-          <Logo />
+          {platformView ? <ImpulsigoLogo /> : <Logo />}
           <div className="ml-auto flex min-w-0 items-center gap-3">
             <div className="hidden min-w-0 flex-col items-end sm:flex">
               <TenantSwitcher />
-              {current && <span className="text-[12px] text-slate">{ROLE_LABELS[current.role]}</span>}
+              {roleLabel && <span className="text-[12px] text-slate">{roleLabel}</span>}
             </div>
             <Link
               to="/dashboard/conta"
@@ -93,33 +103,40 @@ function Shell() {
         </div>
         <div className="flex items-center justify-between gap-3 border-t border-navy-950/6 px-4 py-2 sm:hidden">
           <TenantSwitcher />
-          {current && <span className="shrink-0 text-[12px] text-slate">{ROLE_LABELS[current.role]}</span>}
+          {roleLabel && <span className="shrink-0 text-[12px] text-slate">{roleLabel}</span>}
         </div>
       </header>
 
       <div className="mx-auto flex max-w-[1280px] gap-8 px-4 sm:px-6">
         <nav aria-label="Painel" className="sticky top-24 hidden h-fit w-56 shrink-0 py-8 lg:block">
-          <ul className="space-y-1">
-            {nav.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors',
-                      isActive ? 'bg-navy-950 text-white' : 'text-navy-950 hover:bg-white',
-                    )
-                  }
-                >
-                  <item.icon className="size-[18px]" aria-hidden="true" />
-                  {item.label}
-                  {item.badge && <NewBadge count={newLeads ?? 0} className="ml-auto" />}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-          <PlatformMark className="mt-8 px-3" />
+          {groups.map((group) => (
+            <div key={group.title ?? 'menu'} className="mb-5 last:mb-0">
+              {group.title && (
+                <p className="mb-1.5 truncate px-3 text-[11.5px] font-semibold tracking-[0.14em] text-slate uppercase">{group.title}</p>
+              )}
+              <ul className="space-y-1">
+                {group.items.map((item) => (
+                  <li key={item.to}>
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      className={({ isActive }) =>
+                        cn(
+                          'flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors',
+                          isActive ? 'bg-navy-950 text-white' : 'text-navy-950 hover:bg-white',
+                        )
+                      }
+                    >
+                      <item.icon className="size-[18px]" aria-hidden="true" />
+                      {item.label}
+                      {item.badge && <NewBadge count={newLeads ?? 0} className="ml-auto" />}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          {!platformView && <PlatformMark className="mt-8 px-3" />}
         </nav>
 
         <main className="min-w-0 flex-1 py-6 sm:py-8">

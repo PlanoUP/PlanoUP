@@ -1,8 +1,9 @@
-import { ArrowRight, Inbox, Plus, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Inbox, Plus } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { ButtonLink } from '@/components/ui/Button'
 import { listLeads } from '@/dashboard/leadsApi'
+import { PlatformOverview } from '@/dashboard/PlatformOverview'
 import { listProperties, STATUS_LABELS, type PropertyStatus } from '@/dashboard/propertiesApi'
 import { useWorkspace } from '@/dashboard/workspace'
 import { useAsyncData } from '@/hooks/useAsyncData'
@@ -35,17 +36,38 @@ export default function DashboardHome() {
   const mine = ws.brokerId ? (properties ?? []).filter((p) => p.broker_id === ws.brokerId).length : null
   const active = (properties ?? []).filter((p) => p.status !== 'archived').length
   const limit = entitlements ? limitOf(entitlements, 'max_properties') : null
+  const platformView = auth.isPlatformAdmin
 
   return (
     <div className="space-y-8">
+      {platformView && (
+        <>
+          <div>
+            <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">
+              Olá{auth.fullName ? `, ${auth.fullName.split(' ')[0]}` : ''}!
+            </h1>
+            <p className="mt-1 text-[15px] text-slate">{ROLE_LABELS.platform_admin}</p>
+          </div>
+          <PlatformOverview />
+        </>
+      )}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">
-            Olá{auth.fullName ? `, ${auth.fullName.split(' ')[0]}` : ''}!
-          </h1>
-          <p className="mt-1 text-[15px] text-slate">
-            {ws.tenantName} · {ROLE_LABELS[ws.role]}
-          </p>
+          {platformView ? (
+            <>
+              <p className="text-[12px] font-semibold tracking-[0.16em] text-navy-700 uppercase">Imobiliária em foco</p>
+              <h2 className="mt-1 font-display text-[24px] font-bold tracking-[-0.02em] text-navy-950">{ws.tenantName}</h2>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">
+                Olá{auth.fullName ? `, ${auth.fullName.split(' ')[0]}` : ''}!
+              </h1>
+              <p className="mt-1 text-[15px] text-slate">
+                {ws.tenantName} · {ROLE_LABELS[ws.role]}
+              </p>
+            </>
+          )}
         </div>
         {ws.can('properties.create') && (
           <ButtonLink to="/dashboard/imoveis/novo" size="md">
@@ -54,13 +76,6 @@ export default function DashboardHome() {
           </ButtonLink>
         )}
       </div>
-
-      {auth.isPlatformAdmin && (
-        <p className="inline-flex items-center gap-2 rounded-full bg-navy-950 px-4 py-2 text-[13px] font-semibold text-gold-400">
-          <ShieldCheck className="size-4" aria-hidden="true" />
-          {ROLE_LABELS.platform_admin}
-        </p>
-      )}
 
       <Link
         to="/dashboard/contatos"

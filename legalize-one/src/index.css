@@ -125,6 +125,23 @@
   }
 }
 
+/* Painel do administrador da plataforma (Impulsigo): azul predominante, para não se confundir com o
+   painel de uma imobiliária. Sobrescreve os mesmos tokens que as telas já usam. */
+.theme-platform {
+  --color-navy-950: #0b1f4d;
+  --color-navy-900: #102a66;
+  --color-navy-800: #1d4ed8;
+  --color-navy-700: #2563eb;
+  --color-gold-500: #38bdf8;
+  --color-gold-400: #7dd3fc;
+  --color-gold-600: #0ea5e9;
+  --color-sand: #eef3ff;
+  --color-sand-200: #e0e8fb;
+  --color-sand-300: #c9d6f5;
+  --shadow-card: 0 1px 2px rgb(11 31 77 / 0.05), 0 8px 24px -12px rgb(29 78 216 / 0.25);
+  --shadow-float: 0 24px 60px -24px rgb(29 78 216 / 0.4);
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
