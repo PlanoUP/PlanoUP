@@ -20,7 +20,7 @@ export const platform = {
   /** Sigla (evitar "IG", associado ao Instagram). */
   short: 'IPG',
   /** Imobiliárias internas (demonstração e pedidos de demonstração): fora dos totais da plataforma. */
-  internalSlugs: ['demo', 'impulsigo'] as readonly string[],
+  internalSlugs: ['demo', 'impulsigo', 'corretor-demo'] as readonly string[],
 } as const
 
 export const integrations = {

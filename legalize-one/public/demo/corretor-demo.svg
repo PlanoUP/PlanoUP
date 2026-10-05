@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Foto ilustrativa (demonstração)">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8eef8"/><stop offset="1" stop-color="#c9d6ea"/></linearGradient>
+    <linearGradient id="suit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2f4a"/><stop offset="1" stop-color="#0b1a2e"/></linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg)"/>
+  <!-- Ilustração neutra de um profissional (sem rosto real): demonstração -->
+  <path d="M70 400c8-78 60-118 130-118s122 40 130 118z" fill="url(#suit)"/>
+  <path d="M172 286l28 46 28-46" fill="#f5f7fb"/>
+  <path d="M196 300l4 6 4-6-4 46z" fill="#d9b47a"/>
+  <circle cx="200" cy="178" r="74" fill="#d8b8a0"/>
+  <path d="M126 170c0-50 32-82 76-82s74 30 72 80c-12-26-40-40-74-40s-60 14-74 42z" fill="#2b2420"/>
+</svg>

@@ -497,6 +497,10 @@ describe('salvaguardas do schema', () => {
       order by p.proname`)
     assert.deepEqual(rows, [
       { proname: 'create_tenant_with_owner', anon: false },
+      { proname: 'get_broker_media', anon: true },
+      { proname: 'get_broker_profile', anon: true },
+      { proname: 'get_broker_properties', anon: true },
+      { proname: 'get_broker_testimonials', anon: true },
       { proname: 'get_published_media', anon: true },
       { proname: 'get_published_properties', anon: true },
       { proname: 'get_tenant_profile', anon: true },
@@ -505,6 +509,7 @@ describe('salvaguardas do schema', () => {
       { proname: 'platform_list_tenants', anon: false },
       { proname: 'platform_update_tenant', anon: false },
       { proname: 'resolve_tenant', anon: true },
+      { proname: 'submit_broker_lead', anon: true },
       { proname: 'submit_lead', anon: true },
       { proname: 'tenant_entitlements', anon: false },
       { proname: 'tenant_metrics', anon: false },
@@ -599,5 +604,95 @@ describe('verificação em duas etapas (exigida no banco)', () => {
   test('fator ainda não confirmado não bloqueia (cadastro em andamento)', async () => {
     const tenants = await as('ownerA', () => q(`select id from public.tenants`), 'aal1')
     assert.equal(tenants.length, 1)
+  })
+})
+
+describe('modalidade corretor (perfil público, imóveis, depoimentos)', () => {
+  const SOLO = '66666666-6666-4666-8666-666666666666'
+  let soloBroker
+  let agencyBroker
+  let soloPublished
+
+  before(async () => {
+    await as('server', async () => {
+      await q(`insert into public.tenants (id, slug, name, plan_code, kind) values ($1, 'joao-corretor', 'João Corretor', 'corretor', 'solo')`, [SOLO])
+      await q(`insert into public.tenant_settings (tenant_id, display_name) values ($1, 'João Corretor')`, [SOLO])
+      await q(`insert into public.tenant_members (tenant_id, user_id, role) values ($1, $2, 'owner')`, [SOLO, U.outsider])
+      soloBroker = (await q(
+        `insert into public.brokers (tenant_id, user_id, name, creci, whatsapp, profile_slug, public_profile, headline)
+         values ($1, $2, 'João Silva', 'CRECI 1234', '5584999990000', 'joao-silva', true, 'Especialista em condomínios') returning id`,
+        [SOLO, U.outsider],
+      ))[0].id
+      soloPublished = (await q(`insert into public.properties (tenant_id, title, type, status, city) values ($1, 'Casa do João', 'casa', 'published', 'Natal') returning id`, [SOLO]))[0].id
+      await q(`insert into public.properties (tenant_id, title, type, status) values ($1, 'Rascunho do João', 'casa', 'draft')`, [SOLO])
+      // Corretor da imobiliária A com página própria.
+      agencyBroker = (await q(`select id from public.brokers where tenant_id = $1 and user_id = $2`, [tenantA, U.brokerA]))[0].id
+      await q(`update public.brokers set profile_slug = 'corretor-a', public_profile = true where id = $1`, [agencyBroker])
+    })
+  })
+
+  test('contas existentes continuam como imobiliária', async () => {
+    const rows = await as('server', () => q(`select kind from public.tenants where id = any($1)`, [[tenantA, tenantB]]))
+    assert.deepEqual(rows.map((r) => r.kind), ['agency', 'agency'])
+  })
+
+  test('perfil público: só publicado, ativo e sem dados internos', async () => {
+    const [{ p }] = await as('anon', () => q(`select public.get_broker_profile('JOAO-SILVA') as p`))
+    assert.equal(p.name, 'João Silva')
+    assert.equal(p.account.kind, 'solo')
+    assert.equal(p.whatsapp, '5584999990000')
+    assert.equal(p.user_id, undefined)
+    assert.equal(p.userId, undefined)
+    await as('server', () => q(`update public.brokers set public_profile = false where id = $1`, [soloBroker]))
+    assert.equal((await as('anon', () => q(`select public.get_broker_profile('joao-silva') as p`)))[0].p, null)
+    await as('server', () => q(`update public.brokers set public_profile = true where id = $1`, [soloBroker]))
+    await as('server', () => q(`update public.tenants set status = 'suspended' where id = $1`, [SOLO]))
+    assert.equal((await as('anon', () => q(`select public.get_broker_profile('joao-silva') as p`)))[0].p, null)
+    await as('server', () => q(`update public.tenants set status = 'active' where id = $1`, [SOLO]))
+  })
+
+  test('imóveis: autônomo = publicados da conta; de imobiliária = só os que ele atende', async () => {
+    const solo = await as('anon', () => q(`select id from public.get_broker_properties('joao-silva')`))
+    assert.deepEqual(solo.map((r) => r.id), [soloPublished])
+    const agency = await as('anon', () => q(`select id, broker_name from public.get_broker_properties('corretor-a')`))
+    assert.ok(agency.length >= 1)
+    const owners = await as('server', () => q(`select distinct broker_id from public.properties where id = any($1)`, [agency.map((r) => r.id)]))
+    assert.deepEqual(owners.map((r) => r.broker_id), [agencyBroker])
+  })
+
+  test('endereço do perfil: único, formato válido e palavras reservadas recusadas', async () => {
+    await as('server', () => rejects(q(`update public.brokers set profile_slug = 'joao-silva' where id = $1`, [agencyBroker]), /duplicate key|unique/))
+    await as('server', () => rejects(q(`update public.brokers set profile_slug = 'entrar' where id = $1`, [agencyBroker]), /check constraint/))
+    await as('server', () => rejects(q(`update public.brokers set profile_slug = 'Com Espaço' where id = $1`, [agencyBroker]), /check constraint/))
+  })
+
+  test('corretor edita o próprio perfil, mas não se marca como demonstração', async () => {
+    const ok = await as('brokerA', () => q(`update public.brokers set headline = 'Apartamentos no Tirol' where id = $1 returning id`, [agencyBroker]))
+    assert.equal(ok.length, 1)
+    await as('brokerA', () => rejects(q(`update public.brokers set is_demo = true where id = $1`, [agencyBroker]), /demo flag/))
+  })
+
+  test('depoimentos: dono cadastra manual; origem verificada é da plataforma; isolados entre contas', async () => {
+    await as('outsider', () => q(`insert into public.broker_testimonials (tenant_id, broker_id, author_name, rating, comment) values ($1, $2, 'Maria', 5, 'Ótimo atendimento')`, [SOLO, soloBroker]))
+    await as('outsider', () => q(`insert into public.broker_testimonials (tenant_id, broker_id, author_name, rating, comment, status) values ($1, $2, 'Oculto', 4, 'Não aparece', 'hidden')`, [SOLO, soloBroker]))
+    await as('outsider', () =>
+      rejects(q(`insert into public.broker_testimonials (tenant_id, broker_id, author_name, rating, comment, source) values ($1, $2, 'Falso', 5, 'Verificado?', 'verified')`, [SOLO, soloBroker]), /managed by the platform/),
+    )
+    await as('ownerA', () =>
+      rejects(q(`insert into public.broker_testimonials (tenant_id, broker_id, author_name, rating, comment) values ($1, $2, 'Intruso', 5, 'Outra conta')`, [SOLO, soloBroker]), /row-level security/),
+    )
+    assert.equal((await as('ownerA', () => q(`select id from public.broker_testimonials where tenant_id = $1`, [SOLO]))).length, 0)
+    await as('anon', () => rejects(q(`select id from public.broker_testimonials`), /permission denied/))
+    const pub = await as('anon', () => q(`select author_name, source from public.get_broker_testimonials('joao-silva')`))
+    assert.deepEqual(pub, [{ author_name: 'Maria', source: 'manual' }])
+  })
+
+  test('contato pela página do corretor chega a ele', async () => {
+    const [{ id }] = await as('anon', () =>
+      q(`select public.submit_broker_lead('joao-silva', 'form', null, 'Cliente', '84988887777', null, 'Quero ver casas') as id`),
+    )
+    const [lead] = await as('server', () => q(`select tenant_id, broker_id, source from public.leads where id = $1`, [id]))
+    assert.deepEqual(lead, { tenant_id: SOLO, broker_id: soloBroker, source: 'broker_page' })
+    await as('anon', () => rejects(q(`select public.submit_broker_lead('nao-existe', 'form', null, 'X', '84988887777')`), /invalid broker/))
   })
 })
