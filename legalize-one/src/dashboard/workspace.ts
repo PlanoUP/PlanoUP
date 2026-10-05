@@ -15,6 +15,8 @@ export interface WorkspaceState {
   current: Workspace | null
   options: Pick<Workspace, 'tenantId' | 'tenantName'>[]
   select: (tenantId: string) => void
+  /** Recarrega a lista de imobiliárias (ex.: depois de criar uma nova). */
+  refresh: () => void
 }
 
 export const WorkspaceContext = createContext<WorkspaceState | null>(null)

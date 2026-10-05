@@ -107,6 +107,17 @@ describe('equipe (Edge Function team)', () => {
     expect((await call({ role: 'owner' })).body.error).toBe('invalid_role')
   })
 
+  it('admin da plataforma cria o responsável (owner) de uma imobiliária nova', async () => {
+    const { port, members, brokers } = makePort()
+    members.clear()
+    brokers.clear()
+    const r = await handleTeam(port, 'platform', { action: 'create', tenantId: T, name: 'Dona Nova', email: 'dona@nova.com', role: 'owner' }, random)
+    expect(r.status).toBe(200)
+    expect(r.body.temporaryPassword).toMatch(/^[A-Za-z2-9]{4}-/)
+    expect(members.get(r.body.userId as string)).toBe('owner')
+    expect(brokers.size).toBe(0)
+  })
+
   it('limites do plano', async () => {
     expect((await handleTeam(makePort(3).port, 'admin', { action: 'create', tenantId: T, name: 'X Y', email: 'n@x.com', role: 'admin' }, random)).body.error).toBe('plan_limit_users')
     expect((await handleTeam(makePort(null, 1).port, 'admin', { action: 'create', tenantId: T, name: 'X Y', email: 'n@x.com', role: 'broker' }, random)).body.error).toBe('plan_limit_brokers')

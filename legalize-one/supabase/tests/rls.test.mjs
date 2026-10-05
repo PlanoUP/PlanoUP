@@ -497,11 +497,70 @@ describe('salvaguardas do schema', () => {
       { proname: 'get_published_media', anon: true },
       { proname: 'get_published_properties', anon: true },
       { proname: 'get_tenant_profile', anon: true },
+      { proname: 'platform_add_domain', anon: false },
+      { proname: 'platform_create_tenant', anon: false },
+      { proname: 'platform_list_tenants', anon: false },
+      { proname: 'platform_update_tenant', anon: false },
       { proname: 'resolve_tenant', anon: true },
       { proname: 'submit_lead', anon: true },
       { proname: 'tenant_entitlements', anon: false },
       { proname: 'tenant_metrics', anon: false },
       { proname: 'track_event', anon: true },
     ])
+  })
+})
+
+describe('painel da plataforma (novas imobiliárias)', () => {
+  let created
+
+  test('só o admin da plataforma cria, lista e altera imobiliárias', async () => {
+    for (const who of ['ownerA', 'outsider', 'brokerA']) {
+      await as(who, () => rejects(q(`select public.platform_create_tenant('Imob Z', 'imob-z', 'start')`), /not_allowed/))
+      await as(who, () => rejects(q(`select public.platform_list_tenants()`), /not_allowed/))
+      await as(who, () => rejects(q(`select public.platform_update_tenant($1, 'premium')`, [tenantA]), /not_allowed/))
+      await as(who, () => rejects(q(`select public.platform_add_domain($1, 'www.exemplo.com.br')`, [tenantA]), /not_allowed/))
+    }
+    await as('anon', () => rejects(q(`select public.platform_list_tenants()`), /permission denied/))
+  })
+
+  test('cria imobiliária com configurações, assinatura e domínio, sem tornar o admin membro', async () => {
+    created = await as('platform', async () =>
+      (await q(`select public.platform_create_tenant('Imobiliária Nova', 'imob-nova', 'pro', 'https://WWW.ImobNova.com.br/') as id`))[0].id,
+    )
+    const [t] = await as('server', () => q(`select name, plan_code, status from public.tenants where id = $1`, [created]))
+    assert.deepEqual(t, { name: 'Imobiliária Nova', plan_code: 'pro', status: 'active' })
+    const [s] = await as('server', () => q(`select display_name from public.tenant_settings where tenant_id = $1`, [created]))
+    assert.equal(s.display_name, 'Imobiliária Nova')
+    const [sub] = await as('server', () => q(`select plan_code, status from public.subscriptions where tenant_id = $1`, [created]))
+    assert.deepEqual(sub, { plan_code: 'pro', status: 'trialing' })
+    const members = await as('server', () => q(`select 1 from public.tenant_members where tenant_id = $1`, [created]))
+    assert.equal(members.length, 0)
+    const resolved = await as('anon', () => q(`select tenant_id from public.resolve_tenant('www.imobnova.com.br', null)`))
+    assert.equal(resolved[0].tenant_id, created)
+  })
+
+  test('valida slug, plano e domínio duplicados', async () => {
+    await as('platform', () => rejects(q(`select public.platform_create_tenant('Outra', 'imob-nova', 'start')`), /slug_taken/))
+    await as('platform', () => rejects(q(`select public.platform_create_tenant('Outra', 'Com Espaço', 'start')`), /invalid_slug/))
+    await as('platform', () => rejects(q(`select public.platform_create_tenant('Outra', 'outra', 'nao-existe')`), /invalid_plan/))
+    await as('platform', () => rejects(q(`select public.platform_add_domain($1, 'www.imobnova.com.br')`, [tenantA]), /domain_taken/))
+    await as('platform', () => rejects(q(`select public.platform_add_domain($1, 'sem-ponto')`, [tenantA]), /invalid_domain/))
+  })
+
+  test('lista com números e muda plano/situação mantendo a assinatura em sincronia', async () => {
+    await as('platform', () => q(`select public.platform_update_tenant($1, 'premium', 'suspended')`, [created]))
+    const [list] = await as('platform', () => q(`select public.platform_list_tenants() as data`))
+    const row = list.data.find((r) => r.id === created)
+    assert.equal(row.plan, 'premium')
+    assert.equal(row.status, 'suspended')
+    assert.deepEqual(row.domains, ['www.imobnova.com.br'])
+    assert.equal(row.owner, null)
+    const a = list.data.find((r) => r.id === tenantA)
+    assert.equal(a.owner.email, 'ownerA@example.com')
+    const [sub] = await as('server', () => q(`select plan_code from public.subscriptions where tenant_id = $1`, [created]))
+    assert.equal(sub.plan_code, 'premium')
+    // Suspensa: o site deixa de resolver.
+    const resolved = await as('anon', () => q(`select tenant_id from public.resolve_tenant('www.imobnova.com.br', null)`))
+    assert.equal(resolved.length, 0)
   })
 })

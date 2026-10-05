@@ -183,6 +183,14 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
     logo, botões de WhatsApp) — outra imobiliária = outra configuração.
   - **Exportar planilha** (CSV para Excel) em Imóveis e Contatos: os dados são da imobiliária e servem de backup.
   - Celular: barra inferior com Visão geral, Imóveis, Contatos e **Mais** (demais telas).
+  - **Imobiliárias clientes** (só admin da plataforma, `/dashboard/plataforma`): cria uma imobiliária nova (nome,
+    endereço curto, plano, domínio opcional) já com o acesso do **gerente responsável** (senha temporária); lista
+    as imobiliárias com responsável, usuários, imóveis e contatos; troca plano, suspende/reativa (tira o site do
+    ar), liga domínios e abre o painel de cada uma. Banco: RPCs `platform_*` (migration 0006). Um domínio novo
+    também precisa ser adicionado no projeto da Vercel (Domains) e apontado no DNS.
+- **Pré-visualização:** `/?previa=<endereço-curto>` abre o site de uma imobiliária que ainda não tem domínio
+  (faixa "Pré-visualização" no topo; `?previa=sair` volta). `/entrar?previa=<endereço-curto>` mostra o login com a
+  marca dela.
 - **Site:** "Prefiro que me liguem" na página do imóvel (vira contato ligado ao imóvel), página
   `/privacidade` (LGPD, com os dados da imobiliária) e aviso nos formulários.
 - **Plano gratuito (medidas anti-quebra):** `api/keepalive.js` + `crons` no `vercel.json` consultam o banco 1x/dia

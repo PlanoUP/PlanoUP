@@ -47,7 +47,7 @@ async function call<T>(body: Record<string, unknown>): Promise<T> {
 export const listTeam = (tenantId: string) =>
   call<{ members: TeamMember[] }>({ action: 'list', tenantId }).then((r) => r.members)
 
-export const addTeamMember = (tenantId: string, input: { name: string; email: string; role: 'admin' | 'broker' }) =>
+export const addTeamMember = (tenantId: string, input: { name: string; email: string; role: 'owner' | 'admin' | 'broker' }) =>
   call<{ userId: string; temporaryPassword: string | null; existingAccount: boolean }>({ action: 'create', tenantId, ...input })
 
 export const resetTeamPassword = (tenantId: string, userId: string) =>
@@ -60,11 +60,11 @@ export const removeTeamMember = (tenantId: string, userId: string) =>
   call<{ ok: true }>({ action: 'remove', tenantId, userId })
 
 /** Mensagem pronta para enviar o acesso por WhatsApp. */
-export function accessMessage(opts: { name: string; email: string; password: string; tenantName: string; origin: string }): string {
+export function accessMessage(opts: { name: string; email: string; password: string; tenantName: string; loginUrl: string }): string {
   const first = opts.name.trim().split(/\s+/)[0]
   return [
     `Olá, ${first}! Seu acesso ao painel da ${opts.tenantName}:`,
-    `Link: ${opts.origin}/entrar`,
+    `Link: ${opts.loginUrl}`,
     `E-mail: ${opts.email}`,
     `Senha temporária: ${opts.password}`,
     'No primeiro acesso, o painel pede para você criar sua senha pessoal.',

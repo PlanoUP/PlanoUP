@@ -27,6 +27,7 @@ interface TenantRow {
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const auth = useAuth()
   const [selected, setSelected] = useState<string | null>(readStored)
+  const [version, setVersion] = useState(0)
 
   const { data: allTenants, loading: loadingTenants } = useAsyncData(async (): Promise<TenantRow[]> => {
     if (!auth.isPlatformAdmin) return []
@@ -34,7 +35,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.from('tenants').select('id, name, slug').order('name')
     if (error) throw error
     return (data ?? []) as TenantRow[]
-  }, `${auth.userId}:${auth.isPlatformAdmin}`)
+  }, `${auth.userId}:${auth.isPlatformAdmin}:${version}`)
 
   const options = useMemo(() => {
     const map = new Map<string, { tenantId: string; tenantName: string; tenantSlug: string }>()
@@ -75,7 +76,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const value = useMemo<WorkspaceState>(() => ({ current, options, select }), [current, options, select])
+  const refresh = useCallback(() => setVersion((v) => v + 1), [])
+  const value = useMemo<WorkspaceState>(() => ({ current, options, select, refresh }), [current, options, select, refresh])
 
   if ((auth.isPlatformAdmin && loadingTenants && !allTenants) || (active && loadingBroker && brokerId === undefined)) {
     return <div className="min-h-dvh bg-sand" aria-busy="true" />

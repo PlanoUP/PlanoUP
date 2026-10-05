@@ -34,6 +34,8 @@ export interface TenantConfig {
     secondaryColor: string
   }
   source: 'default' | 'backend'
+  /** Aberto por `?previa=` (imobiliária sem domínio próprio ainda). */
+  preview?: boolean
 }
 
 /** Linha retornada por `get_tenant_profile` (view privada `public_tenant_profiles`). */

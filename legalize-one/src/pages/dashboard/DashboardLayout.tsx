@@ -5,10 +5,10 @@ import { RequireAuth } from '@/auth/RequireAuth'
 import { Logo } from '@/components/ui/Logo'
 import { WorkspaceProvider } from '@/dashboard/WorkspaceProvider'
 import { countNewLeads } from '@/dashboard/leadsApi'
-import { NAV, type NavItem } from '@/dashboard/nav'
+import { visibleNav, type NavItem } from '@/dashboard/nav'
 import { useWorkspaceState } from '@/dashboard/workspace'
 import { useAsyncData } from '@/hooks/useAsyncData'
-import { hasPermission, ROLE_LABELS } from '@/lib/permissions'
+import { ROLE_LABELS } from '@/lib/permissions'
 import { cn } from '@/utils/cn'
 
 function NewBadge({ count, className }: { count: number; className?: string }) {
@@ -51,7 +51,7 @@ function Shell() {
   const auth = useAuth()
   const { current } = useWorkspaceState()
   const location = useLocation()
-  const nav = NAV.filter((item) => !item.permission || (current && hasPermission(current.role, item.permission)))
+  const nav = visibleNav(current?.role, auth.isPlatformAdmin)
   const mobileNav: NavItem[] = [...nav.filter((i) => !i.secondary), { to: '/dashboard/mais', label: 'Mais', icon: Menu }]
   const mustChange = auth.mustChangePassword && location.pathname !== '/dashboard/conta'
   // Recalcula ao navegar (ex.: depois de atender um contato novo).

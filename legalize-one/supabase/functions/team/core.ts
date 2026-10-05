@@ -86,7 +86,8 @@ export async function handleTeam(
     const role = input.role as TeamRole
     if (name.length < 2 || name.length > 120) return fail(400, 'invalid_name')
     if (!EMAIL.test(email)) return fail(400, 'invalid_email')
-    if (role !== 'admin' && role !== 'broker') return fail(400, 'invalid_role')
+    // O responsável (owner) só é definido pela plataforma, ao implantar uma imobiliária nova.
+    if (role !== 'admin' && role !== 'broker' && !(role === 'owner' && platform)) return fail(400, 'invalid_role')
 
     const { maxUsers, maxBrokers } = await port.limits(tenantId)
     const members = await port.listMembers(tenantId)

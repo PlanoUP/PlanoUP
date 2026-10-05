@@ -1,7 +1,7 @@
 import { ChevronRight, CircleUser, LogOut } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuth } from '@/auth/context'
-import { NAV } from '@/dashboard/nav'
+import { visibleNav } from '@/dashboard/nav'
 import { useWorkspace } from '@/dashboard/workspace'
 import { usePageTitle } from '@/hooks/usePageTitle'
 
@@ -11,7 +11,7 @@ export default function More() {
   const ws = useWorkspace()
   const auth = useAuth()
   const items = [
-    ...NAV.filter((i) => i.secondary && (!i.permission || ws.can(i.permission))),
+    ...visibleNav(ws.role, auth.isPlatformAdmin).filter((i) => i.secondary),
     { to: '/dashboard/conta', label: 'Minha conta', icon: CircleUser },
   ]
   return (
