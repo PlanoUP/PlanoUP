@@ -1,7 +1,7 @@
 // Edge Function `team`: gestão da equipe da imobiliária (criar acesso, nova senha, papel, remover).
 // Regras em ./core.ts. A chave de serviço (SUPABASE_SERVICE_ROLE_KEY) existe só aqui, no servidor.
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { handleTeam, type TeamPort, type TeamRole } from './core.ts'
+import { handleTeam, type CallerSession, type TeamPort, type TeamRole } from './core.ts'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +25,15 @@ Deno.serve(async (req) => {
   const admin = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } })
   const { data: caller, error: callerError } = await admin.auth.getUser(token)
   if (callerError || !caller?.user) return json(401, { error: 'not_signed_in' })
+  // Token já validado acima; o nível de verificação (aal) vem nas claims dele.
+  let aal = 'aal1'
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))
+    aal = String(payload.aal ?? 'aal1')
+  } catch {
+    /* sem claims legíveis: trata como aal1 */
+  }
+  const session: CallerSession = { aal, hasMfa: (caller.user.factors ?? []).some((f) => f.status === 'verified') }
   // Cliente com a sessão de quem chamou (para ler o plano com as mesmas regras do painel).
   const asCaller = createClient(url, anon, {
     global: { headers: { Authorization: `Bearer ${token}` } },
@@ -62,6 +71,7 @@ Deno.serve(async (req) => {
         name: (profile?.full_name as string | null) ?? (u.user_metadata?.full_name as string | undefined) ?? null,
         lastSignInAt: u.last_sign_in_at ?? null,
         mustChangePassword: Boolean(u.user_metadata?.must_change_password),
+        mfaEnabled: (u.factors ?? []).some((f) => f.status === 'verified'),
       }
     },
     async findUserByEmail(email) {
@@ -90,6 +100,14 @@ Deno.serve(async (req) => {
       const meta = { ...(data?.user?.user_metadata ?? {}), must_change_password: true }
       const { error } = await admin.auth.admin.updateUserById(userId, { password, user_metadata: meta })
       if (error) throw error
+    },
+    async resetMfa(userId) {
+      const { data, error } = await admin.auth.admin.mfa.listFactors({ userId })
+      if (error) throw error
+      for (const factor of data.factors) {
+        const { error: deleteError } = await admin.auth.admin.mfa.deleteFactor({ id: factor.id, userId })
+        if (deleteError) throw deleteError
+      }
     },
     async addMember(tenantId, userId, role) {
       const { error } = await admin.from('tenant_members').insert({ tenant_id: tenantId, user_id: userId, role })
@@ -125,7 +143,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const result = await handleTeam(port, caller.user.id, input, (n) => crypto.getRandomValues(new Uint8Array(n)))
+    const result = await handleTeam(port, caller.user.id, input, (n) => crypto.getRandomValues(new Uint8Array(n)), session)
     return json(result.status, result.body)
   } catch (error) {
     console.error('team_error', error)

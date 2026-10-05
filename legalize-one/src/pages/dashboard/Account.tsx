@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { Button } from '@/components/ui/Button'
 import { Field, inputClass, Section } from '@/dashboard/FormParts'
+import { TwoFactorSection } from '@/dashboard/TwoFactorSection'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { cn } from '@/utils/cn'
 
@@ -13,6 +14,7 @@ export default function Account() {
   const auth = useAuth()
   const navigate = useNavigate()
   const firstAccess = auth.mustChangePassword
+  const mfaRequired = !firstAccess && auth.mfa === 'enroll_required'
 
   const [name, setName] = useState(auth.fullName ?? '')
   const [nameMsg, setNameMsg] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
@@ -52,7 +54,9 @@ export default function Account() {
   return (
     <div className="max-w-2xl space-y-5">
       <div>
-        <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">{firstAccess ? 'Crie sua senha' : 'Minha conta'}</h1>
+        <h1 className="font-display text-[28px] font-bold tracking-[-0.02em] text-navy-950">
+          {firstAccess ? 'Crie sua senha' : mfaRequired ? 'Proteja seu acesso' : 'Minha conta'}
+        </h1>
         <p className="mt-1 text-[14.5px] text-slate">{auth.email}</p>
       </div>
 
@@ -62,6 +66,14 @@ export default function Account() {
           Você entrou com uma senha temporária. Crie sua senha pessoal para continuar usando o painel.
         </p>
       )}
+
+      {mfaRequired && (
+        <p className="flex items-start gap-2 rounded-2xl bg-gold-500/15 p-4 text-[14.5px] text-navy-950">
+          <KeyRound className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          Seu acesso administra todas as imobiliárias. Ative a verificação em duas etapas para continuar usando o painel.
+        </p>
+      )}
+      {!firstAccess && <TwoFactorSection />}
 
       <Section title={firstAccess ? 'Nova senha' : 'Trocar senha'}>
         <form onSubmit={(e) => void savePassword(e)} noValidate className="grid gap-4 sm:grid-cols-2">

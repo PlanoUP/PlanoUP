@@ -17,6 +17,18 @@ create function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $$;
 grant execute on function auth.uid() to anon, authenticated, service_role;
+-- Igual ao Supabase: todas as claims do JWT (inclui "aal": aal1 = só senha, aal2 = senha + código).
+create function auth.jwt() returns jsonb language sql stable as $$
+  select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb
+$$;
+grant execute on function auth.jwt() to anon, authenticated, service_role;
+-- Fatores de verificação em duas etapas (TOTP) — subconjunto da tabela real.
+create type auth.factor_status as enum ('unverified', 'verified');
+create table auth.mfa_factors (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  status auth.factor_status not null
+);
 
 create schema storage;
 grant usage on schema storage to anon, authenticated, service_role;

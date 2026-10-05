@@ -12,16 +12,29 @@ export interface TeamMember {
   role: TeamRole
   lastSignInAt: string | null
   mustChangePassword: boolean
+  /** Verificação em duas etapas ativada. */
+  mfaEnabled: boolean
+}
+
+/** Sessão de quem chamou: nível de verificação do token (aal1 = senha, aal2 = senha + código). */
+export interface CallerSession {
+  aal: string
+  /** O usuário tem verificação em duas etapas ativada (então precisa do aal2). */
+  hasMfa: boolean
 }
 
 export interface TeamPort {
   isPlatformAdmin(userId: string): Promise<boolean>
   memberRole(tenantId: string, userId: string): Promise<TeamRole | null>
   listMembers(tenantId: string): Promise<{ userId: string; role: TeamRole }[]>
-  getUser(userId: string): Promise<{ email: string | null; name: string | null; lastSignInAt: string | null; mustChangePassword: boolean } | null>
+  getUser(
+    userId: string,
+  ): Promise<{ email: string | null; name: string | null; lastSignInAt: string | null; mustChangePassword: boolean; mfaEnabled: boolean } | null>
   findUserByEmail(email: string): Promise<string | null>
   createUser(input: { email: string; password: string; name: string }): Promise<string>
   setTemporaryPassword(userId: string, password: string): Promise<void>
+  /** Remove os fatores de verificação em duas etapas (celular perdido). */
+  resetMfa(userId: string): Promise<void>
   addMember(tenantId: string, userId: string, role: TeamRole): Promise<void>
   setRole(tenantId: string, userId: string, role: TeamRole): Promise<void>
   removeMember(tenantId: string, userId: string): Promise<void>
@@ -54,12 +67,16 @@ export async function handleTeam(
   callerId: string,
   input: Record<string, unknown>,
   random: (n: number) => Uint8Array,
+  session: CallerSession,
 ): Promise<TeamResult> {
   const action = String(input.action ?? '')
   const tenantId = String(input.tenantId ?? '')
   if (!tenantId) return fail(400, 'tenant_required')
+  // Mesma regra do banco: quem ativou a verificação precisa da sessão confirmada pelo código,
+  // e poderes de plataforma só existem com o código.
+  if (session.hasMfa && session.aal !== 'aal2') return fail(401, 'mfa_required')
 
-  const platform = await port.isPlatformAdmin(callerId)
+  const platform = session.aal === 'aal2' && (await port.isPlatformAdmin(callerId))
   const callerRole = await port.memberRole(tenantId, callerId)
   if (!platform && !isManagerRole(callerRole)) return fail(403, 'not_allowed')
 
@@ -75,6 +92,7 @@ export async function handleTeam(
         email: u?.email ?? null,
         lastSignInAt: u?.lastSignInAt ?? null,
         mustChangePassword: u?.mustChangePassword ?? false,
+        mfaEnabled: u?.mfaEnabled ?? false,
       })
     }
     return { status: 200, body: { members: out } }
@@ -123,6 +141,11 @@ export async function handleTeam(
     const password = temporaryPassword(random)
     await port.setTemporaryPassword(userId, password)
     return { status: 200, body: { temporaryPassword: password } }
+  }
+
+  if (action === 'reset_mfa') {
+    await port.resetMfa(userId)
+    return { status: 200, body: { ok: true } }
   }
 
   if (action === 'set_role') {

@@ -53,7 +53,8 @@ function Shell() {
   const location = useLocation()
   const nav = visibleNav(current?.role, auth.isPlatformAdmin)
   const mobileNav: NavItem[] = [...nav.filter((i) => !i.secondary), { to: '/dashboard/mais', label: 'Mais', icon: Menu }]
-  const mustChange = auth.mustChangePassword && location.pathname !== '/dashboard/conta'
+  // Senha temporária ou (admin da plataforma) verificação em duas etapas pendente: só "Minha conta".
+  const mustChange = (auth.mustChangePassword || auth.mfa === 'enroll_required') && location.pathname !== '/dashboard/conta'
   // Recalcula ao navegar (ex.: depois de atender um contato novo).
   const { data: newLeads } = useAsyncData(
     () => (current ? countNewLeads(current.tenantId) : Promise.resolve(0)),
@@ -81,6 +82,7 @@ function Shell() {
             <button
               type="button"
               onClick={() => void auth.signOut()}
+              aria-label="Sair"
               className="inline-flex h-10 items-center gap-2 rounded-full px-3 text-[14px] font-semibold text-navy-950 hover:bg-sand"
             >
               <LogOut className="size-4" aria-hidden="true" />

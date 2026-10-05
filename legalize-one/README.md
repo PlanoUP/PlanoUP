@@ -188,6 +188,13 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
     as imobiliárias com responsável, usuários, imóveis e contatos; troca plano, suspende/reativa (tira o site do
     ar), liga domínios e abre o painel de cada uma. Banco: RPCs `platform_*` (migration 0006). Um domínio novo
     também precisa ser adicionado no projeto da Vercel (Domains) e apontado no DNS.
+  - **Verificação em duas etapas** (senha + código de 6 números do Google/Microsoft Authenticator): ativada em
+    **Minha conta** (QR code, chave manual ou "Abrir no aplicativo" no celular); a partir daí o login pede o código.
+    **Obrigatória para o admin da plataforma** (sem ela o painel só abre "Minha conta"). Exigida no **banco**
+    (migration 0007: as funções de autorização só liberam com a sessão `aal2` para quem ativou; poderes de
+    plataforma só com `aal2`) e na função `team`, então uma senha vazada sozinha não abre dados. Celular perdido:
+    o gerente usa **Desativar 2 etapas** em Equipe; para o admin da plataforma, remover o fator no Supabase
+    (Authentication → Users → usuário → MFA).
 - **Pré-visualização:** `/?previa=<endereço-curto>` abre o site de uma imobiliária que ainda não tem domínio
   (faixa "Pré-visualização" no topo; `?previa=sair` volta). `/entrar?previa=<endereço-curto>` mostra o login com a
   marca dela.

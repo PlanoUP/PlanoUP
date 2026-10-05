@@ -2,8 +2,9 @@ import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { getSupabase } from '@/lib/supabase'
 import { AuthContext, friendlyAuthError, friendlyPasswordError, type AuthState, type Membership } from './context'
+import { mfaStatusOf, verifyTotp } from './mfa'
 
-type Snapshot = Pick<AuthState, 'status' | 'userId' | 'email' | 'fullName' | 'isPlatformAdmin' | 'memberships' | 'mustChangePassword'>
+type Snapshot = Pick<AuthState, 'status' | 'userId' | 'email' | 'fullName' | 'isPlatformAdmin' | 'memberships' | 'mustChangePassword' | 'mfa'>
 
 const SIGNED_OUT: Snapshot = {
   status: 'signed_out',
@@ -13,6 +14,7 @@ const SIGNED_OUT: Snapshot = {
   isPlatformAdmin: false,
   memberships: [],
   mustChangePassword: false,
+  mfa: 'ok',
 }
 
 async function loadUser(supabase: SupabaseClient, user: User): Promise<Snapshot> {
@@ -24,14 +26,16 @@ async function loadUser(supabase: SupabaseClient, user: User): Promise<Snapshot>
     const tenant = (Array.isArray(m.tenants) ? m.tenants[0] : m.tenants) as { name: string; slug: string } | null
     return { tenantId: m.tenant_id as string, role: m.role as Membership['role'], tenantName: tenant?.name ?? '', tenantSlug: tenant?.slug ?? '' }
   })
+  const isPlatformAdmin = Boolean(profile?.is_platform_admin)
   return {
     status: 'signed_in',
     userId: user.id,
     email: user.email ?? null,
     fullName: (profile?.full_name as string | null) ?? null,
-    isPlatformAdmin: Boolean(profile?.is_platform_admin),
+    isPlatformAdmin,
     memberships,
     mustChangePassword: Boolean(user.user_metadata?.must_change_password),
+    mfa: await mfaStatusOf(supabase, isPlatformAdmin),
   }
 }
 
@@ -87,6 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [client],
   )
 
+  const verifyMfa = useCallback(async (code: string) => {
+    // Sucesso dispara MFA_CHALLENGE_VERIFIED → a sessão (aal2) recarrega os vínculos.
+    return verifyTotp(code)
+  }, [])
+
+  const refresh = useCallback(async () => {
+    if (!client) return
+    const supabase = await client
+    const { data } = await supabase.auth.getUser()
+    if (data.user) setSnapshot(await loadUser(supabase, data.user))
+  }, [client])
+
   const updateName = useCallback(
     async (name: string) => {
       if (!client || !snapshot.userId) return { error: 'Sessão não encontrada.' }
@@ -100,8 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const value = useMemo<AuthState>(
-    () => ({ ...snapshot, signIn, signOut, changePassword, updateName }),
-    [snapshot, signIn, signOut, changePassword, updateName],
+    () => ({ ...snapshot, signIn, signOut, changePassword, updateName, verifyMfa, refresh }),
+    [snapshot, signIn, signOut, changePassword, updateName, verifyMfa, refresh],
   )
   return <AuthContext value={value}>{children}</AuthContext>
 }

@@ -21,13 +21,16 @@ let tenantA
 let tenantB
 
 /** Executa como um papel do Supabase (anon, usuário autenticado ou servidor). */
-async function as(who, fn) {
+// `aal`: aal1 = entrou só com senha; aal2 = senha + código (verificação em duas etapas).
+// O admin da plataforma usa aal2 por padrão (sem isso ele não tem poderes de plataforma).
+async function as(who, fn, aal = who === 'platform' ? 'aal2' : 'aal1') {
   if (who === 'anon') {
-    await db.exec(`select set_config('request.jwt.claim.sub', '', false); set role anon;`)
+    await db.exec(`select set_config('request.jwt.claim.sub', '', false), set_config('request.jwt.claims', '', false); set role anon;`)
   } else if (who === 'server') {
-    await db.exec(`select set_config('request.jwt.claim.sub', '', false); reset role;`)
+    await db.exec(`select set_config('request.jwt.claim.sub', '', false), set_config('request.jwt.claims', '', false); reset role;`)
   } else {
-    await db.exec(`select set_config('request.jwt.claim.sub', '${U[who]}', false); set role authenticated;`)
+    const claims = JSON.stringify({ sub: U[who], aal })
+    await db.exec(`select set_config('request.jwt.claim.sub', '${U[who]}', false), set_config('request.jwt.claims', '${claims}', false); set role authenticated;`)
   }
   try {
     return await fn()
@@ -562,5 +565,39 @@ describe('painel da plataforma (novas imobiliárias)', () => {
     // Suspensa: o site deixa de resolver.
     const resolved = await as('anon', () => q(`select tenant_id from public.resolve_tenant('www.imobnova.com.br', null)`))
     assert.equal(resolved.length, 0)
+  })
+})
+
+describe('verificação em duas etapas (exigida no banco)', () => {
+  test('admin da plataforma sem o código (aal1) não tem poderes de plataforma', async () => {
+    await as('platform', () => rejects(q(`select public.platform_list_tenants()`), /not_allowed/), 'aal1')
+    const seen = await as('platform', () => q(`select slug from public.tenants`), 'aal1')
+    assert.equal(seen.length, 0)
+    const ok = await as('platform', () => q(`select slug from public.tenants`), 'aal2')
+    assert.ok(ok.length >= 3)
+  })
+
+  test('quem ativou a verificação só acessa a imobiliária com o código', async () => {
+    const before = await as('ownerA', () => q(`select id from public.properties where tenant_id = $1`, [tenantA]))
+    await as('server', () => q(`insert into auth.mfa_factors (user_id, status) values ($1, 'verified')`, [U.ownerA]))
+    try {
+      const tenants = await as('ownerA', () => q(`select id from public.tenants`), 'aal1')
+      assert.equal(tenants.length, 0, 'senha sozinha não mostra a imobiliária')
+      const props = await as('ownerA', () => q(`select id from public.properties where tenant_id = $1`, [tenantA]), 'aal1')
+      assert.equal(props.length, 0)
+      await as('ownerA', () =>
+        rejects(q(`insert into public.properties (tenant_id, title, type, purpose, price) values ($1, 'X', 'casa', 'venda', 1)`, [tenantA]), /row-level security/),
+      'aal1')
+      await as('ownerA', () => rejects(q(`select public.tenant_metrics($1, 30)`, [tenantA]), /not allowed|42501|permission/i), 'aal1')
+      const withCode = await as('ownerA', () => q(`select id from public.properties where tenant_id = $1`, [tenantA]), 'aal2')
+      assert.equal(withCode.length, before.length, 'com o código, tudo como antes')
+    } finally {
+      await as('server', () => q(`update auth.mfa_factors set status = 'unverified' where user_id = $1`, [U.ownerA]))
+    }
+  })
+
+  test('fator ainda não confirmado não bloqueia (cadastro em andamento)', async () => {
+    const tenants = await as('ownerA', () => q(`select id from public.tenants`), 'aal1')
+    assert.equal(tenants.length, 1)
   })
 })

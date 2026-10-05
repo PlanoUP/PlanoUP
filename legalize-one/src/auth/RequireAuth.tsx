@@ -7,7 +7,8 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const auth = useAuth()
   const location = useLocation()
   if (auth.status === 'loading') return <div className="min-h-dvh bg-sand" aria-busy="true" />
-  if (auth.status !== 'signed_in') {
+  // Senha certa, mas falta o código da verificação em duas etapas: volta à tela de entrada.
+  if (auth.status !== 'signed_in' || auth.mfa === 'challenge') {
     return <Navigate to="/entrar" replace state={{ from: `${location.pathname}${location.search}` }} />
   }
   return children

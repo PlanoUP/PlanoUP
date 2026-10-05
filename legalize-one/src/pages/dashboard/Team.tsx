@@ -1,4 +1,4 @@
-import { KeyRound, Loader2, Trash2, UserPlus } from 'lucide-react'
+import { KeyRound, Loader2, ShieldCheck, ShieldOff, Trash2, UserPlus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '@/auth/context'
 import { Button } from '@/components/ui/Button'
@@ -9,6 +9,7 @@ import {
   addTeamMember,
   listTeam,
   removeTeamMember,
+  resetTeamMfa,
   resetTeamPassword,
   setTeamRole,
   type TeamMember,
@@ -36,6 +37,7 @@ export default function Team() {
   const [feedback, setFeedback] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const [cred, setCred] = useState<Credential | null>(null)
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
+  const [confirmMfa, setConfirmMfa] = useState<string | null>(null)
 
   if (!allowed) {
     return (
@@ -135,6 +137,12 @@ export default function Team() {
                       {self && <span className="ml-2 text-[12.5px] font-normal text-slate">(você)</span>}
                     </p>
                     <p className="truncate text-[13.5px] text-slate">{m.email}</p>
+                    {m.mfaEnabled && (
+                      <p className="flex items-center gap-1 text-[12.5px] font-semibold text-tour">
+                        <ShieldCheck className="size-3.5" aria-hidden="true" />
+                        Verificação em duas etapas ativa
+                      </p>
+                    )}
                     <p className="text-[12.5px] text-slate">
                       {m.mustChangePassword
                         ? 'Ainda não criou a senha pessoal'
@@ -177,6 +185,33 @@ export default function Team() {
                         Gerar nova senha
                       </Button>
                     )}
+                    {!self && m.mfaEnabled && (!owner || auth.isPlatformAdmin || ws.role === 'owner') &&
+                      (confirmMfa === m.userId ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={busy !== null}
+                            onClick={() => {
+                              setConfirmMfa(null)
+                              void run(`mfa:${m.userId}`, async () => {
+                                await resetTeamMfa(ws.tenantId, m.userId)
+                                setFeedback({ tone: 'ok', text: `Verificação em duas etapas de ${m.name || m.email} desativada. Ela entra só com a senha e pode ativar de novo em Minha conta.` })
+                              })
+                            }}
+                          >
+                            Confirmar: celular perdido
+                          </Button>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => setConfirmMfa(null)}>
+                            Cancelar
+                          </Button>
+                        </span>
+                      ) : (
+                        <Button type="button" variant="outline" size="sm" disabled={busy !== null} onClick={() => setConfirmMfa(m.userId)}>
+                          <ShieldOff className="size-4" aria-hidden="true" />
+                          Desativar 2 etapas
+                        </Button>
+                      ))}
                     {!self && !owner &&
                       (confirmRemove === m.userId ? (
                         <span className="inline-flex items-center gap-1">

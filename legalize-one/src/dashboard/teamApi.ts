@@ -12,11 +12,13 @@ export interface TeamMember {
   role: TeamRole
   lastSignInAt: string | null
   mustChangePassword: boolean
+  mfaEnabled: boolean
 }
 
 const MESSAGES: Record<string, string> = {
   not_allowed: 'Você não tem permissão para esta ação.',
   not_signed_in: 'Sua sessão expirou. Entre novamente.',
+  mfa_required: 'Confirme o código da verificação em duas etapas: saia e entre novamente.',
   invalid_name: 'Informe o nome completo.',
   invalid_email: 'E-mail inválido.',
   invalid_role: 'Papel inválido.',
@@ -52,6 +54,9 @@ export const addTeamMember = (tenantId: string, input: { name: string; email: st
 
 export const resetTeamPassword = (tenantId: string, userId: string) =>
   call<{ temporaryPassword: string }>({ action: 'reset_password', tenantId, userId })
+
+export const resetTeamMfa = (tenantId: string, userId: string) =>
+  call<{ ok: true }>({ action: 'reset_mfa', tenantId, userId })
 
 export const setTeamRole = (tenantId: string, userId: string, role: 'admin' | 'broker') =>
   call<{ ok: true }>({ action: 'set_role', tenantId, userId, role })

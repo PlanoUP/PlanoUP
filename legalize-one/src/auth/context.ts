@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { Role } from '@/lib/permissions'
+import type { MfaStatus } from './mfa'
 
 export interface Membership {
   tenantId: string
@@ -18,11 +19,17 @@ export interface AuthState {
   memberships: Membership[]
   /** Senha temporária (criada pelo gerente): o painel pede uma senha pessoal antes de continuar. */
   mustChangePassword: boolean
+  /** Verificação em duas etapas: pendente de código, obrigatória a ativar, ou ok. */
+  mfa: MfaStatus
   signIn: (email: string, password: string) => Promise<{ error?: string }>
   signOut: () => Promise<void>
   /** Troca a senha de quem está logado (e encerra a pendência de senha temporária). */
   changePassword: (password: string) => Promise<{ error?: string }>
   updateName: (name: string) => Promise<{ error?: string }>
+  /** Confere o código do aplicativo autenticador (segunda etapa do login). */
+  verifyMfa: (code: string) => Promise<{ error?: string }>
+  /** Relê usuário, vínculos e situação da verificação (ex.: depois de ativar/desativar). */
+  refresh: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthState | null>(null)
