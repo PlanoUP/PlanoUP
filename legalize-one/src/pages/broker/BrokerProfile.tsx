@@ -1,6 +1,5 @@
 import { Award, BadgeCheck, Check, Copy, Languages, Loader2, Mail, MapPin, Phone, Quote, Share2, Star } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
-import { BrokerAvatar } from '@/broker/BrokerAvatar'
 import { listTestimonials } from '@/broker/brokerApi'
 import { InstagramIcon } from '@/broker/icons'
 import { copyLink, shareLink, whatsappShareHref } from '@/broker/share'
@@ -21,17 +20,38 @@ import { cn } from '@/utils/cn'
 const firstName = (name: string) => name.trim().split(/\s+/)[0]
 const location = (b: Profile) => [b.city, b.state].filter(Boolean).join('/')
 
+const DEFAULT_TAGLINE = 'Me chama e eu te ajudo a encontrar o imóvel ideal!'
+
+/** "Juliana Silva" → ["Juliana", "Silva"]; nomes longos ficam com o último sobrenome na 2ª linha. */
+function nameLines(name: string): [string, string] {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length < 2) return [name, '']
+  return [parts.slice(0, -1).join(' '), parts[parts.length - 1]]
+}
+
+function phoneLabel(digits: string): string {
+  const d = digits.replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '')
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
+  return digits
+}
+
+/** Topo com a persona do corretor: nome grande, título, frase pessoal e foto em destaque. */
 function Hero({ broker, count }: { broker: Profile; count: number | null }) {
   const [copied, setCopied] = useState(false)
   const url = `${window.location.origin}/corretor/${broker.slug}`
+  const [first, last] = nameLines(broker.name)
+  const title = broker.professionalTitle || 'Corretor de imóveis'
   const facts = [
     location(broker) && { icon: MapPin, text: location(broker) },
     broker.yearsExperience ? { icon: Award, text: `${broker.yearsExperience} anos de experiência` } : null,
     count ? { icon: BadgeCheck, text: `${count} ${count === 1 ? 'imóvel disponível' : 'imóveis disponíveis'}` } : null,
   ].filter(Boolean) as { icon: typeof MapPin; text: string }[]
+  const instagramHandle = broker.instagramUrl?.replace(/\/+$/, '').split('/').pop()
+  const phone = broker.whatsapp || broker.phone
 
   async function share() {
-    const r = await shareLink({ title: `${broker.name} · Corretor de imóveis`, text: broker.headline ?? undefined, url })
+    const r = await shareLink({ title: `${broker.name} · ${title}`, text: broker.tagline ?? broker.headline ?? undefined, url })
     if (r === 'copied') {
       setCopied(true)
       window.setTimeout(() => setCopied(false), 2000)
@@ -42,70 +62,112 @@ function Hero({ broker, count }: { broker: Profile; count: number | null }) {
   return (
     <section aria-labelledby="corretor-nome" className="relative overflow-hidden bg-navy-950 text-white">
       {broker.coverUrl && (
-        <img src={broker.coverUrl} alt="" aria-hidden="true" fetchPriority="high" className="absolute inset-0 size-full object-cover opacity-35" />
+        <img
+          src={broker.coverUrl}
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          className="absolute inset-0 size-full object-cover opacity-30 mix-blend-luminosity"
+        />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-950/40 via-navy-950/75 to-navy-950" aria-hidden="true" />
-      <div className="relative container-page pt-12 pb-12 sm:pt-20 sm:pb-16">
-        <div className="flex flex-col items-center text-center sm:flex-row sm:items-end sm:gap-8 sm:text-left">
-          <BrokerAvatar
-            name={broker.name}
-            photoUrl={broker.photoUrl}
-            className="size-32 shrink-0 text-[40px] ring-4 ring-white/90 shadow-[var(--shadow-float)] sm:size-40"
-          />
-          <div className="mt-5 min-w-0 sm:mt-0">
-            <p className="eyebrow text-[11px] tracking-[0.24em] text-gold-400">Corretor de imóveis{broker.creci ? ` · ${broker.creci}` : ''}</p>
-            <h1 id="corretor-nome" className="mt-2 font-display text-[36px] leading-[1.02] font-extrabold tracking-[-0.035em] sm:text-[52px]">
-              {broker.name}
-            </h1>
-            {broker.headline && <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-white/85 sm:text-[19px]">{broker.headline}</p>}
-            {facts.length > 0 && (
-              <ul className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-2 text-[14px] text-white/75 sm:justify-start">
-                {facts.map((f) => (
-                  <li key={f.text} className="inline-flex items-center gap-1.5">
-                    <f.icon className="size-4 text-gold-400" aria-hidden="true" />
-                    {f.text}
-                  </li>
-                ))}
-              </ul>
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[radial-gradient(70%_80%_at_85%_30%,color-mix(in_oklab,var(--color-gold-500)_38%,transparent),transparent_70%)]"
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-navy-950 via-navy-950/80 to-navy-950/20" />
+
+      <div className="relative container-page grid items-end gap-8 pt-10 lg:grid-cols-[1.15fr_0.85fr] lg:pt-16">
+        {/* Foto: moldura em arco, encostada na base do topo (no celular, vem primeiro) */}
+        <div className="relative mx-auto w-[260px] sm:w-[320px] lg:order-2 lg:mr-0 lg:w-full lg:max-w-[440px]">
+          <div className="aspect-[4/5] overflow-hidden rounded-t-[999px] bg-gradient-to-b from-gold-400/70 to-gold-600/40 ring-1 ring-white/15">
+            {broker.photoUrl ? (
+              <img src={broker.photoUrl} alt={`Foto de ${broker.name}`} fetchPriority="high" className="size-full object-cover object-top" />
+            ) : (
+              <span className="flex size-full items-center justify-center font-display text-[96px] font-extrabold text-white/90">
+                {first.charAt(0)}
+                {last.charAt(0)}
+              </span>
             )}
+          </div>
+          {broker.creci && (
+            <span className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-2 text-[12.5px] font-bold whitespace-nowrap text-navy-950 shadow-[var(--shadow-float)] lg:left-0 lg:-translate-x-6">
+              {broker.creci}
+            </span>
+          )}
+        </div>
+
+        <div className="pb-10 lg:order-1 lg:pb-16">
+          <h1 id="corretor-nome" className="font-display text-[54px] leading-[0.92] font-extrabold tracking-[-0.045em] sm:text-[76px] lg:text-[88px]">
+            <span className="block">{first}</span>
+            {last && <span className="block text-gold-400">{last}</span>}
+          </h1>
+          <p className="mt-6 inline-flex rounded-xl border border-white/45 px-5 py-2.5 text-[13px] font-semibold tracking-[0.2em] uppercase">
+            {title}
+          </p>
+          <p className="mt-6 max-w-md font-display text-[22px] leading-snug font-semibold sm:text-[26px]">{broker.tagline || DEFAULT_TAGLINE}</p>
+          {broker.headline && <p className="mt-3 max-w-xl text-[16px] leading-relaxed text-white/75">{broker.headline}</p>}
+          {facts.length > 0 && (
+            <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[14px] text-white/75">
+              {facts.map((f) => (
+                <li key={f.text} className="inline-flex items-center gap-1.5">
+                  <f.icon className="size-4 text-gold-400" aria-hidden="true" />
+                  {f.text}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a
+              href={whatsappLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track('whatsapp_clicked', { placement: 'broker_hero' })}
+              className="inline-flex h-13 items-center justify-center gap-2.5 rounded-full bg-[#1f8a5b] px-7 text-[15.5px] font-semibold text-white shadow-[var(--shadow-float)] hover:bg-[#19744c]"
+            >
+              <WhatsAppIcon className="size-5" />
+              Falar comigo no WhatsApp
+            </a>
+            <button
+              type="button"
+              onClick={() => void share()}
+              className="inline-flex h-13 items-center justify-center gap-2 rounded-full border border-white/30 px-6 text-[15px] font-semibold text-white hover:bg-white/10"
+            >
+              {copied ? <Check className="size-4" aria-hidden="true" /> : <Share2 className="size-4" aria-hidden="true" />}
+              {copied ? 'Link copiado' : 'Compartilhar perfil'}
+            </button>
           </div>
         </div>
-        <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-          <a
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track('whatsapp_clicked', { placement: 'broker_hero' })}
-            className="inline-flex h-13 items-center justify-center gap-2.5 rounded-full bg-[#1f8a5b] px-7 text-[15.5px] font-semibold text-white shadow-[var(--shadow-float)] hover:bg-[#19744c]"
-          >
-            <WhatsAppIcon className="size-5" />
-            Falar comigo no WhatsApp
+      </div>
+
+      {/* Faixa de contato, como no cartão do corretor */}
+      <div className="relative border-t border-white/10 bg-black/35">
+        <div className="container-page flex flex-wrap items-center gap-x-7 gap-y-3 py-4 text-[15px]">
+          {phone && !broker.isDemo && (
+            <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 font-semibold hover:text-gold-400">
+              <Phone className="size-[18px] text-gold-400" aria-hidden="true" />
+              {phoneLabel(phone)}
+            </a>
+          )}
+          {broker.isDemo && (
+            <span className="inline-flex items-center gap-2 text-white/70">
+              <Phone className="size-[18px] text-gold-400" aria-hidden="true" />
+              (00) 00000-0000 · demonstração
+            </span>
+          )}
+          {broker.instagramUrl && (
+            <a href={broker.instagramUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 font-semibold hover:text-gold-400">
+              <InstagramIcon className="size-[18px] text-gold-400" />@{instagramHandle}
+            </a>
+          )}
+          {broker.email && (
+            <a href={`mailto:${broker.email}`} className="inline-flex items-center gap-2 font-semibold hover:text-gold-400">
+              <Mail className="size-[18px] text-gold-400" aria-hidden="true" />
+              {broker.email}
+            </a>
+          )}
+          <a href="#imoveis" className="ml-auto hidden text-[14px] font-semibold text-white/80 hover:text-white sm:inline">
+            Ver meus imóveis ↓
           </a>
-          <button
-            type="button"
-            onClick={() => void share()}
-            className="inline-flex h-13 items-center justify-center gap-2 rounded-full border border-white/30 px-6 text-[15px] font-semibold text-white hover:bg-white/10"
-          >
-            {copied ? <Check className="size-4" aria-hidden="true" /> : <Share2 className="size-4" aria-hidden="true" />}
-            {copied ? 'Link copiado' : 'Compartilhar perfil'}
-          </button>
-          <div className="flex items-center justify-center gap-2 sm:ml-auto">
-            {broker.instagramUrl && (
-              <a href={broker.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label={`Instagram de ${broker.name}`} className="flex size-12 items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
-                <InstagramIcon className="size-5" />
-              </a>
-            )}
-            {broker.phone && (
-              <a href={`tel:+${broker.phone.replace(/\D/g, '').replace(/^(?!55)/, '55')}`} aria-label={`Ligar para ${broker.name}`} className="flex size-12 items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
-                <Phone className="size-5" aria-hidden="true" />
-              </a>
-            )}
-            {broker.email && (
-              <a href={`mailto:${broker.email}`} aria-label={`E-mail para ${broker.name}`} className="flex size-12 items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
-                <Mail className="size-5" aria-hidden="true" />
-              </a>
-            )}
-          </div>
         </div>
       </div>
     </section>

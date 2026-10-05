@@ -641,6 +641,7 @@ describe('modalidade corretor (perfil público, imóveis, depoimentos)', () => {
     assert.equal(p.name, 'João Silva')
     assert.equal(p.account.kind, 'solo')
     assert.equal(p.whatsapp, '5584999990000')
+    assert.equal(p.professionalTitle, null)
     assert.equal(p.user_id, undefined)
     assert.equal(p.userId, undefined)
     await as('server', () => q(`update public.brokers set public_profile = false where id = $1`, [soloBroker]))

@@ -12,6 +12,10 @@ export interface BrokerProfile {
   photoUrl: string | null
   coverUrl: string | null
   logoUrl: string | null
+  /** Ex.: "Corretora de imóveis" (padrão: "Corretor de imóveis"). */
+  professionalTitle: string | null
+  /** Frase pessoal no topo, em primeira pessoa. */
+  tagline: string | null
   headline: string | null
   bio: string | null
   city: string | null
