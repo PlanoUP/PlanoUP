@@ -2,6 +2,7 @@
 
 import { TankWithDerived } from "@/lib/brava/types";
 import { INSPECTION_CRITICALITY_META, formatDaysToInspection } from "@/lib/brava/inspection";
+import { STATUS_META } from "@/lib/brava/status-meta";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
 
@@ -27,6 +28,7 @@ export default function MapHotspot({
   // unplanned (SEM_PROJETO) — these are the statuses where a progress
   // percentage is actually meaningful to show at a glance on the map.
   const inMaintenance = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status) : false;
+  const statusMeta = tank ? STATUS_META[tank.status] : null;
 
   return (
     <button
@@ -53,10 +55,23 @@ export default function MapHotspot({
         )}
       />
 
-      {tank && inMaintenance && (
-        <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-1.5 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-brava-border bg-brava-white px-1.5 py-0.5 shadow-brava-md">
-          <span className="font-mono text-[9.5px] font-bold text-brava-text">{tag}</span>
-          <span className="text-[9.5px] font-bold text-brava-blue">{tank.derived.progress}%</span>
+      {tank && inMaintenance && statusMeta && (
+        <span
+          className={cn(
+            "pointer-events-none absolute left-1/2 top-full z-20 mt-1.5 flex w-[74px] -translate-x-1/2 flex-col gap-1 whitespace-nowrap rounded-brava-sm border px-1.5 py-1 shadow-brava-md",
+            statusMeta.badgeClass
+          )}
+        >
+          <span className="flex items-center justify-between gap-1">
+            <span className="font-mono text-[9.5px] font-bold text-brava-text">{tag}</span>
+            <span className={cn("text-[9.5px] font-extrabold", statusMeta.textClass)}>{tank.derived.progress}%</span>
+          </span>
+          <span className="h-[3px] w-full overflow-hidden rounded-full bg-brava-border/60">
+            <span
+              className={cn("block h-full rounded-full transition-[width] duration-700 ease-out", statusMeta.dotClass)}
+              style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
+            />
+          </span>
         </span>
       )}
 
@@ -68,9 +83,15 @@ export default function MapHotspot({
             <span className="mt-1 block text-[10.5px] font-semibold text-brava-white">
               {STATUS_LABEL[tank.status] ?? tank.status}
             </span>
-            {inMaintenance && (
-              <span className="mt-1 block text-[10.5px] font-bold text-brava-white">
-                Avanço: {tank.derived.progress}%
+            {inMaintenance && statusMeta && (
+              <span className="mt-1.5 flex items-center gap-1.5">
+                <span className="h-[3px] flex-1 overflow-hidden rounded-full bg-brava-white/20">
+                  <span
+                    className={cn("block h-full rounded-full", statusMeta.dotClass)}
+                    style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
+                  />
+                </span>
+                <span className="text-[10.5px] font-bold text-brava-white">Avanço: {tank.derived.progress}%</span>
               </span>
             )}
             <span className="mt-1 block text-[10px] text-brava-white/70">

@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { INSPECTION_CRITICALITY_META } from "@/lib/brava/inspection";
-import { InspectionCriticality } from "@/lib/brava/types";
+import { STATUS_META } from "@/lib/brava/status-meta";
+import { InspectionCriticality, TankStatus } from "@/lib/brava/types";
 import { cn } from "@/lib/brava/cn";
 
 const ORDER: InspectionCriticality[] = ["CRITICO", "ALTA", "ATENCAO", "PLANEJAR", "NORMAL", "SEM_DATA"];
+const PROGRESS_STATUSES: TankStatus[] = ["EM_EXECUCAO", "ATRASADO", "CRITICO"];
 
 export default function MapLegend() {
   const [collapsed, setCollapsed] = useState(false);
@@ -32,6 +34,21 @@ export default function MapLegend() {
               </div>
             );
           })}
+
+          <div className="mt-2 border-t border-brava-border pt-2">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-brava-text-secondary">
+              Avanço da manutenção
+            </p>
+            {PROGRESS_STATUSES.map((s) => {
+              const meta = STATUS_META[s];
+              return (
+                <div key={s} className="flex items-center gap-2 text-[11px] text-brava-text">
+                  <span className={cn("h-2 w-2 shrink-0 rounded-full", meta.dotClass)} />
+                  {meta.label}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
