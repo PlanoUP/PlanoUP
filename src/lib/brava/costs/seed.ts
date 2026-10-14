@@ -7,10 +7,8 @@ import type { CostEntryInput } from "./types";
 // planilha — normalizadas para "TQ-1222-XX" para casar com o formato já
 // usado no resto do sistema (ver lib/brava/maps/config.ts).
 //
-// TQ-26021 e TQ-26024 (coluna 2030) não correspondem a nenhuma TAG
-// cadastrada no sistema hoje (famílias conhecidas: 410, 6313, 270, 1222) —
-// mantidos aqui como estão na planilha, mas sem vínculo a um tanque
-// existente até confirmação.
+// TQ-26021 e TQ-26024 (coluna 2030) são tanques de ODM (Óleo Diesel
+// Marítimo) — ver TANKS_SEED em lib/brava/data/tanks.ts.
 const SOURCE = "CAPEX 2026-2031 — Tanques";
 
 export const SEED_COST_ENTRIES: CostEntryInput[] = [

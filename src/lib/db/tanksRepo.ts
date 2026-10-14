@@ -25,9 +25,37 @@ async function ensureSeeded(): Promise<void> {
   }
 }
 
+const PLACEHOLDER = "A definir";
+
+/**
+ * Fills in real area/product/tankType for tanks that were seeded before that
+ * data was known (buildNoProject defaults to "A definir"). Only touches a
+ * field that is still the placeholder — a real value set later (seed update
+ * or live edit) is never overwritten. Self-terminating: once a field is
+ * filled in, it stops matching and no further writes happen for it.
+ */
+async function reconcilePlaceholderMetadata(): Promise<void> {
+  const sql = getSql();
+  const rows = await sql.query("SELECT data FROM tanks");
+  const seedById = new Map(TANKS_SEED.map((t) => [t.id, t]));
+  for (const row of rows as Record<string, unknown>[]) {
+    const tank = row.data as Tank;
+    const seed = seedById.get(tank.id);
+    if (!seed) continue;
+    const patch: Partial<Pick<Tank, "area" | "product" | "tankType">> = {};
+    if (tank.area === PLACEHOLDER && seed.area !== PLACEHOLDER) patch.area = seed.area;
+    if (tank.product === PLACEHOLDER && seed.product !== PLACEHOLDER) patch.product = seed.product;
+    if (tank.tankType === PLACEHOLDER && seed.tankType !== PLACEHOLDER) patch.tankType = seed.tankType;
+    if (Object.keys(patch).length > 0) {
+      await saveTank({ ...tank, ...patch });
+    }
+  }
+}
+
 export async function listTanks(): Promise<Tank[]> {
   await ensureSchema();
   await ensureSeeded();
+  await reconcilePlaceholderMetadata();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks ORDER BY id");
   return rows.map((r: Record<string, unknown>) => r.data as Tank);

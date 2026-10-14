@@ -401,7 +401,17 @@ export const TANKS_SEED: Tank[] = [
   buildNoProject({ tag: "TQ-28003", area: "A definir", nextInternalInspection: "2027-07-02" }),
   buildNoProject({ tag: "TQ-28006", area: "A definir", nextInternalInspection: "2031-06-11" }),
   buildNoProject({ tag: "TQ-40001", area: "A definir", nextInternalInspection: "2027-10-19" }),
-  buildNoProject({ tag: "TQ-26021", area: "A definir", nextInternalInspection: "2030-03-13" }),
-  buildNoProject({ tag: "TQ-26024", area: "A definir", nextInternalInspection: "2030-03-28" }),
+  buildNoProject({
+    tag: "TQ-26021",
+    area: "Tancagem de ODM",
+    product: "Óleo Diesel Marítimo (ODM)",
+    nextInternalInspection: "2030-03-13",
+  }),
+  buildNoProject({
+    tag: "TQ-26024",
+    area: "Tancagem de ODM",
+    product: "Óleo Diesel Marítimo (ODM)",
+    nextInternalInspection: "2030-03-28",
+  }),
   buildNoProject({ tag: "TQ-26025", area: "A definir", nextInternalInspection: "2035-03-13" }),
 ];
