@@ -30,7 +30,7 @@ export default function MapHotspot({
   const inMaintenance = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status) : false;
   const statusMeta = tank ? STATUS_META[tank.status] : null;
   const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
-  const callout = getCalloutOffset(x, y);
+  const callout = getCalloutOffset(tag, x, y);
 
   return (
     <button
@@ -146,8 +146,19 @@ const STATUS_LINE_CLASS: Record<string, string> = {
   CRITICO: "stroke-brava-danger",
 };
 
-const CALLOUT_DX = 58;
-const CALLOUT_DY = 44;
+const CALLOUT_DX = 66;
+const CALLOUT_DY = 50;
+// Extra per-tank stagger so two in-maintenance tanks sitting close together
+// (same quadrant → same default direction) don't land their boxes on top of
+// each other — each tag gets a stable "lane" a bit further out than the last.
+const LANE_STEP_X = 16;
+const LANE_STEP_Y = 13;
+
+function hashTag(tag: string): number {
+  let h = 0;
+  for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) >>> 0;
+  return h;
+}
 
 /**
  * Pulls the progress callout away from the dot into open space instead of
@@ -157,9 +168,10 @@ const CALLOUT_DY = 44;
  * dot is close enough to the image border that the default direction would
  * push the box (and its line) off-canvas.
  */
-function getCalloutOffset(xPct: number, yPct: number) {
-  const dx = (xPct > 62 ? -1 : 1) * CALLOUT_DX;
-  const dy = (yPct < 20 ? 1 : -1) * CALLOUT_DY;
+function getCalloutOffset(tag: string, xPct: number, yPct: number) {
+  const lane = hashTag(tag) % 3; // 0, 1 or 2 — staggers distance per tag
+  const dx = (xPct > 62 ? -1 : 1) * (CALLOUT_DX + lane * LANE_STEP_X);
+  const dy = (yPct < 20 ? 1 : -1) * (CALLOUT_DY + lane * LANE_STEP_Y);
   const svgLeft = Math.min(0, dx);
   const svgTop = Math.min(0, dy);
   const svgWidth = Math.max(Math.abs(dx), 1);
