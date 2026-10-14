@@ -22,6 +22,13 @@ export function getSql(): NeonQueryFunction<false, false> {
       "DATABASE_URL não configurada — conecte um banco Postgres ao projeto na Vercel (Storage → Create Database)."
     );
   }
-  if (!client) client = neon(connectionString);
+  // Next.js's App Router patches the global fetch() to cache/memoize by
+  // default, and the Neon HTTP driver sends every query as a fetch() under
+  // the hood — an identical SELECT (same SQL text, no params, like
+  // "SELECT data FROM tanks") was being served a stale cached response
+  // indefinitely instead of re-querying the database. force-dynamic on the
+  // route alone wasn't enough to stop this from happening to fetches made
+  // deeper inside the call stack. cache: "no-store" opts every query out.
+  if (!client) client = neon(connectionString, { fetchOptions: { cache: "no-store" } });
   return client;
 }

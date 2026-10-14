@@ -44,20 +44,13 @@ async function reconcilePlaceholderMetadata(): Promise<void> {
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks");
   const seedById = new Map(TANKS_SEED.map((t) => [t.id, t]));
-  console.error("[reconcile] rows:", rows.length, "seeds:", seedById.size);
   for (const row of rows as Record<string, unknown>[]) {
     const tank = row.data as Tank;
     const seed = seedById.get(tank.id);
     if (!seed) continue;
 
     if (tank.status === "SEM_PROJETO" && seed.status !== "SEM_PROJETO") {
-      console.error("[reconcile] promoting", tank.id, "live status", tank.status, "seed status", seed.status);
-      try {
-        await saveTank({ ...seed, notes: tank.notes ?? seed.notes });
-        console.error("[reconcile] saved", tank.id);
-      } catch (err) {
-        console.error("[reconcile] FAILED saving", tank.id, err);
-      }
+      await saveTank({ ...seed, notes: tank.notes ?? seed.notes });
       continue;
     }
 
@@ -66,13 +59,7 @@ async function reconcilePlaceholderMetadata(): Promise<void> {
     if (tank.product === PLACEHOLDER && seed.product !== PLACEHOLDER) patch.product = seed.product;
     if (tank.tankType === PLACEHOLDER && seed.tankType !== PLACEHOLDER) patch.tankType = seed.tankType;
     if (Object.keys(patch).length > 0) {
-      console.error("[reconcile] patching", tank.id, patch);
-      try {
-        await saveTank({ ...tank, ...patch });
-        console.error("[reconcile] saved", tank.id);
-      } catch (err) {
-        console.error("[reconcile] FAILED saving", tank.id, err);
-      }
+      await saveTank({ ...tank, ...patch });
     }
   }
 }
@@ -94,11 +81,10 @@ async function getTank(id: string): Promise<Tank | null> {
 
 async function saveTank(tank: Tank): Promise<void> {
   const sql = getSql();
-  const result = await sql.query("UPDATE tanks SET data = $2, updated_at = now() WHERE id = $1 RETURNING id, data", [
+  await sql.query("UPDATE tanks SET data = $2, updated_at = now() WHERE id = $1", [
     tank.id,
     JSON.stringify(tank),
   ]);
-  console.error("[saveTank] update result for", tank.id, "rowCount-ish:", (result as unknown[]).length, "returned status:", (result as Record<string, unknown>[])[0]?.data && (((result as Record<string, unknown>[])[0].data as Record<string, unknown>).status));
 }
 
 export async function updateTankMeta(
