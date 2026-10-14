@@ -29,6 +29,8 @@ export default function MapHotspot({
   // percentage is actually meaningful to show at a glance on the map.
   const inMaintenance = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status) : false;
   const statusMeta = tank ? STATUS_META[tank.status] : null;
+  const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
+  const callout = getCalloutOffset(x, y);
 
   return (
     <button
@@ -56,23 +58,38 @@ export default function MapHotspot({
       />
 
       {tank && inMaintenance && statusMeta && (
-        <span
-          className={cn(
-            "pointer-events-none absolute left-1/2 top-full z-20 mt-1.5 flex w-[74px] -translate-x-1/2 flex-col gap-1 whitespace-nowrap rounded-brava-sm border px-1.5 py-1 shadow-brava-md",
-            statusMeta.badgeClass
-          )}
-        >
-          <span className="flex items-center justify-between gap-1">
-            <span className="font-mono text-[9.5px] font-bold text-brava-text">{tag}</span>
-            <span className={cn("text-[9.5px] font-extrabold", statusMeta.textClass)}>{tank.derived.progress}%</span>
-          </span>
-          <span className="h-[3px] w-full overflow-hidden rounded-full bg-brava-border/60">
-            <span
-              className={cn("block h-full rounded-full transition-[width] duration-700 ease-out", statusMeta.dotClass)}
-              style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
+        <>
+          <svg
+            className="pointer-events-none absolute z-10 overflow-visible"
+            style={{ left: callout.svgLeft, top: callout.svgTop, width: callout.svgWidth, height: callout.svgHeight }}
+            viewBox={`0 0 ${callout.svgWidth} ${callout.svgHeight}`}
+          >
+            <path
+              d={`M ${callout.dotLocalX} ${callout.dotLocalY} L ${callout.dotLocalX} ${callout.boxLocalY} L ${callout.boxLocalX} ${callout.boxLocalY}`}
+              fill="none"
+              strokeWidth={1.5}
+              className={lineClass}
             />
+          </svg>
+          <span
+            className={cn(
+              "pointer-events-none absolute z-20 flex w-[90px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1 whitespace-nowrap rounded-brava-sm border px-2 py-1.5 shadow-brava-lg",
+              statusMeta.badgeClass
+            )}
+            style={{ left: callout.dx, top: callout.dy }}
+          >
+            <span className="flex items-center justify-between gap-1.5">
+              <span className="font-mono text-[10px] font-bold text-brava-text">{tag}</span>
+              <span className={cn("text-[10px] font-extrabold", statusMeta.textClass)}>{tank.derived.progress}%</span>
+            </span>
+            <span className="h-[3px] w-full overflow-hidden rounded-full bg-brava-border/60">
+              <span
+                className={cn("block h-full rounded-full transition-[width] duration-700 ease-out", statusMeta.dotClass)}
+                style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
+              />
+            </span>
           </span>
-        </span>
+        </>
       )}
 
       <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2.5 w-max min-w-[160px] max-w-[220px] -translate-x-1/2 rounded-brava-sm bg-brava-blue-dark px-3 py-2 text-left opacity-0 shadow-brava-lg transition-opacity duration-150 group-hover/hotspot:opacity-100">
@@ -120,3 +137,43 @@ const STATUS_LABEL: Record<string, string> = {
   CRITICO: "Crítico",
   SEM_PROJETO: "Sem Projeto de Manutenção",
 };
+
+// Literal class names (not built dynamically) so Tailwind's content scanner
+// keeps them in the production build.
+const STATUS_LINE_CLASS: Record<string, string> = {
+  EM_EXECUCAO: "stroke-brava-blue",
+  ATRASADO: "stroke-brava-warning",
+  CRITICO: "stroke-brava-danger",
+};
+
+const CALLOUT_DX = 58;
+const CALLOUT_DY = 44;
+
+/**
+ * Pulls the progress callout away from the dot into open space instead of
+ * sitting directly on top of it, connected by an elbow leader line — same
+ * convention as the reference satellite maps (label box off to the side,
+ * line running back to the tank). Flips toward the opposite edge when the
+ * dot is close enough to the image border that the default direction would
+ * push the box (and its line) off-canvas.
+ */
+function getCalloutOffset(xPct: number, yPct: number) {
+  const dx = (xPct > 62 ? -1 : 1) * CALLOUT_DX;
+  const dy = (yPct < 20 ? 1 : -1) * CALLOUT_DY;
+  const svgLeft = Math.min(0, dx);
+  const svgTop = Math.min(0, dy);
+  const svgWidth = Math.max(Math.abs(dx), 1);
+  const svgHeight = Math.max(Math.abs(dy), 1);
+  return {
+    dx,
+    dy,
+    svgLeft,
+    svgTop,
+    svgWidth,
+    svgHeight,
+    dotLocalX: -svgLeft,
+    dotLocalY: -svgTop,
+    boxLocalX: dx - svgLeft,
+    boxLocalY: dy - svgTop,
+  };
+}
