@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { List } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
+import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { AssetMapId, MapQuickFilter } from "@/lib/brava/maps/types";
 import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSummary, matchesMapFilter, findTankAcrossMaps } from "@/lib/brava/maps/selectors";
 import { sortByInspectionPriority } from "@/lib/brava/inspection";
@@ -21,6 +22,7 @@ const IS_DEV = process.env.NODE_ENV === "development";
 
 export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
+  const { isEditor } = useEditAuth();
   const [activeMapId, setActiveMapId] = useState<AssetMapId>(() => {
     if (initialTag) return getMapByTank(initialTag)?.id ?? "410-6313";
     return "410-6313";
@@ -156,7 +158,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           />
         )}
 
-        {IS_DEV && (
+        {(IS_DEV || isEditor) && (
           <MapCalibrationPanel
             active={calibrationActive}
             onToggle={() => {

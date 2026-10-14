@@ -4,10 +4,11 @@ import { useState } from "react";
 import { Crosshair, Copy, Check } from "lucide-react";
 
 /**
- * Development-only tool (see AssetMapExplorer's NODE_ENV guard) — click
- * anywhere on the map to capture its %X/%Y, pick which TAG that is, and copy
- * a ready-to-paste coordinate entry for lib/brava/maps/config.ts. Never
- * rendered for end users.
+ * Click anywhere on the map to capture its %X/%Y, pick which TAG that is,
+ * and copy a ready-to-paste coordinate entry for lib/brava/maps/config.ts.
+ * Shown in development, and in production to anyone in edit mode (see
+ * AssetMapExplorer's IS_DEV || isEditor guard) — never to a logged-out
+ * visitor.
  */
 export default function MapCalibrationPanel({
   active,

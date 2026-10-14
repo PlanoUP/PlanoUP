@@ -141,4 +141,65 @@ export const ASSET_MAPS: AssetMapConfig[] = [
       { value: "CARGA", label: "Carga", productMatch: "Carga" },
     ],
   },
+  {
+    // Whole-site aerial photo provided by the user, covering all three areas
+    // above in one shot. Appended LAST (not first) so getMapByTank/
+    // findTankAcrossMaps — which both resolve to the first array match —
+    // keep sending deep links to each tank's calibrated area map instead of
+    // here, since this map has no confirmed coordinates yet: nothing in the
+    // aerial photo is labeled, so positions can't be read off it the way the
+    // other three were (see the file header note). tankIds is the union of
+    // every tank already tracked on the three area maps; coordinates starts
+    // empty and should be filled in with "Modo de Calibração" on this map
+    // (click each visible tank, pick its TAG, paste the generated line here)
+    // by someone who can actually identify the tanks in the photo.
+    id: "geral",
+    name: "Visão Geral",
+    shortLabel: "Visão Geral",
+    image: "/images/brava/maps/geral.webp",
+    imageWidth: 1874,
+    imageHeight: 839,
+    tankIds: [
+      "TQ-41001",
+      "TQ-41002",
+      "TQ-41004",
+      "TQ-41005",
+      "TQ-41007",
+      "TQ-41008",
+      "TQ-6313001",
+      "TQ-6313002",
+      "TQ-6313003",
+      "TQ-6313004",
+      "TQ-6313005",
+      "TQ-6313006",
+      "TQ-6313007",
+      "TQ-27001",
+      "TQ-27002",
+      "TQ-27003",
+      "TQ-27004",
+      "TQ-27009",
+      "TQ-27010",
+      "TQ-27011",
+      "TQ-27015",
+      "TQ-27016",
+      "TQ-1222-21",
+      "TQ-1222-22",
+      "TQ-1222-23",
+      "TQ-1222-24",
+      "TQ-1222-25",
+      "TQ-1222-31",
+      "TQ-1222-32",
+      "TQ-1222-33",
+      "TQ-1222-34",
+      "TQ-1222-35",
+      "TQ-1222-36",
+      "TQ-1222-37",
+      "TQ-1222-41",
+      "TQ-1222-42",
+      "TQ-1222-43",
+      "TQ-1222-44",
+    ],
+    coordinates: [],
+    filters: [],
+  },
 ];

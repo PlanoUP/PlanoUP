@@ -4,7 +4,7 @@
 // by their real TAG; nothing here duplicates status/criticality/dates,
 // which always come from lib/brava/selectors.ts + lib/brava/inspection.ts.
 
-export type AssetMapId = "410-6313" | "270" | "1222";
+export type AssetMapId = "geral" | "410-6313" | "270" | "1222";
 
 export type MapQuickFilter =
   | "TODOS"
