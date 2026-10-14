@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { List } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
@@ -8,6 +8,8 @@ import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { useMapCoordinatesData } from "@/lib/brava/maps/context";
 import { AssetMapId, MapQuickFilter } from "@/lib/brava/maps/types";
 import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSummary, matchesMapFilter, findTankAcrossMaps } from "@/lib/brava/maps/selectors";
+import { computeCalloutLayout } from "@/lib/brava/maps/calloutLayout";
+import { TankStatus } from "@/lib/brava/types";
 import { sortByInspectionPriority } from "@/lib/brava/inspection";
 import MapAreaSelector from "./MapAreaSelector";
 import MapFilterBar from "./MapFilterBar";
@@ -20,6 +22,7 @@ import MapAssetListPanel from "./MapAssetListPanel";
 import MapCalibrationPanel from "./MapCalibrationPanel";
 
 const IS_DEV = process.env.NODE_ENV === "development";
+const MAINTENANCE_STATUSES: TankStatus[] = ["EM_EXECUCAO", "ATRASADO", "CRITICO"];
 
 export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
@@ -47,6 +50,14 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const selectedTank = selectedTag ? entries.find((e) => e.tag === selectedTag)?.tank ?? null : null;
 
   const visibleEntries = entries.filter((e) => e.coordinate && (e.tank ? matchesMapFilter(e.tank, quickFilter, map.filters) : quickFilter === "TODOS"));
+
+  const calloutLayout = useMemo(() => {
+    const points = visibleEntries
+      .filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate)
+      .map((e) => ({ tag: e.tag, xPct: e.coordinate!.x, yPct: e.coordinate!.y }));
+    return computeCalloutLayout(points, map.imageWidth, map.imageHeight);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleEntries, map.imageWidth, map.imageHeight]);
 
   function jumpTo(tag: string) {
     const targetMap = getMapByTank(tag, overrides);
@@ -139,6 +150,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
               y={e.coordinate!.y}
               tank={e.tank}
               highlighted={highlightedTag === e.tag}
+              calloutOffset={calloutLayout[e.tag]}
               onSelect={() => {
                 setSelectedTag(e.tag);
                 setHighlightedTag(e.tag);

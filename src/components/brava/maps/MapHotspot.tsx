@@ -3,6 +3,7 @@
 import { TankWithDerived } from "@/lib/brava/types";
 import { INSPECTION_CRITICALITY_META, formatDaysToInspection } from "@/lib/brava/inspection";
 import { STATUS_META } from "@/lib/brava/status-meta";
+import { CalloutOffset } from "@/lib/brava/maps/calloutLayout";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
 
@@ -12,6 +13,7 @@ export default function MapHotspot({
   y,
   tank,
   highlighted,
+  calloutOffset,
   onSelect,
 }: {
   tag: string;
@@ -19,6 +21,8 @@ export default function MapHotspot({
   y: number;
   tank: TankWithDerived | null;
   highlighted?: boolean;
+  /** Pre-computed by AssetMapExplorer for every in-maintenance tank on the map at once, so boxes don't collide. */
+  calloutOffset?: CalloutOffset;
   onSelect: () => void;
 }) {
   const criticality = tank?.derived.inspectionCriticality ?? "SEM_DATA";
@@ -29,8 +33,9 @@ export default function MapHotspot({
   // percentage is actually meaningful to show at a glance on the map.
   const inMaintenance = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status) : false;
   const statusMeta = tank ? STATUS_META[tank.status] : null;
+  const accentBorderClass = tank ? STATUS_ACCENT_BORDER[tank.status] : undefined;
   const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
-  const callout = getCalloutOffset(tag, x, y);
+  const callout = calloutOffset ? toSvgGeometry(calloutOffset) : null;
 
   return (
     <button
@@ -57,7 +62,7 @@ export default function MapHotspot({
         )}
       />
 
-      {tank && inMaintenance && statusMeta && (
+      {tank && inMaintenance && statusMeta && callout && (
         <>
           <svg
             className="pointer-events-none absolute z-10 overflow-visible"
@@ -73,18 +78,18 @@ export default function MapHotspot({
           </svg>
           <span
             className={cn(
-              "pointer-events-none absolute z-20 flex w-[90px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 whitespace-nowrap rounded-brava-sm px-2 py-1.5 shadow-brava-lg",
-              statusMeta.dotClass
+              "pointer-events-none absolute z-20 flex w-[92px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 whitespace-nowrap rounded-brava-sm border border-brava-border bg-brava-white px-2 py-1.5 shadow-brava-lg",
+              accentBorderClass
             )}
-            style={{ left: callout.dx, top: callout.dy }}
+            style={{ left: callout.dx, top: callout.dy, borderLeftWidth: 3 }}
           >
             <span className="flex items-center justify-between gap-1.5">
-              <span className="font-mono text-[10px] font-bold text-brava-white">{tag}</span>
-              <span className="text-[10px] font-extrabold text-brava-white">{tank.derived.progress}%</span>
+              <span className="font-mono text-[10px] font-bold text-brava-blue-dark">{tag}</span>
+              <span className={cn("text-[10px] font-extrabold", statusMeta.textClass)}>{tank.derived.progress}%</span>
             </span>
-            <span className="h-[4px] w-full overflow-hidden rounded-full bg-brava-white/25">
+            <span className="h-[4px] w-full overflow-hidden rounded-full bg-brava-border/70">
               <span
-                className="block h-full rounded-full bg-brava-white transition-[width] duration-700 ease-out"
+                className={cn("block h-full rounded-full transition-[width] duration-700 ease-out", statusMeta.dotClass)}
                 style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
               />
             </span>
@@ -146,32 +151,15 @@ const STATUS_LINE_CLASS: Record<string, string> = {
   CRITICO: "stroke-brava-danger",
 };
 
-const CALLOUT_DX = 66;
-const CALLOUT_DY = 50;
-// Extra per-tank stagger so two in-maintenance tanks sitting close together
-// (same quadrant → same default direction) don't land their boxes on top of
-// each other — each tag gets a stable "lane" a bit further out than the last.
-const LANE_STEP_X = 16;
-const LANE_STEP_Y = 13;
+const STATUS_ACCENT_BORDER: Record<string, string> = {
+  EM_EXECUCAO: "border-l-brava-blue",
+  ATRASADO: "border-l-brava-warning",
+  CRITICO: "border-l-brava-danger",
+};
 
-function hashTag(tag: string): number {
-  let h = 0;
-  for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-/**
- * Pulls the progress callout away from the dot into open space instead of
- * sitting directly on top of it, connected by an elbow leader line — same
- * convention as the reference satellite maps (label box off to the side,
- * line running back to the tank). Flips toward the opposite edge when the
- * dot is close enough to the image border that the default direction would
- * push the box (and its line) off-canvas.
- */
-function getCalloutOffset(tag: string, xPct: number, yPct: number) {
-  const lane = hashTag(tag) % 3; // 0, 1 or 2 — staggers distance per tag
-  const dx = (xPct > 62 ? -1 : 1) * (CALLOUT_DX + lane * LANE_STEP_X);
-  const dy = (yPct < 20 ? 1 : -1) * (CALLOUT_DY + lane * LANE_STEP_Y);
+/** Converts a pre-computed {dx, dy} offset into the local SVG box/path the elbow leader line is drawn in. */
+function toSvgGeometry(offset: CalloutOffset) {
+  const { dx, dy } = offset;
   const svgLeft = Math.min(0, dx);
   const svgTop = Math.min(0, dy);
   const svgWidth = Math.max(Math.abs(dx), 1);
