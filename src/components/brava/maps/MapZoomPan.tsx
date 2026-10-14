@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Plus, Minus, Maximize, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
 
@@ -18,14 +18,24 @@ export interface MapZoomPanHandle {
  * Owns the single transformable layer for the map — the base image and the
  * hotspot layer are both passed as children and therefore share the exact
  * same transform, so hotspots always track the image through zoom and pan.
+ *
+ * Fullscreen note: the Fullscreen API target (fullscreenRef) is a plain
+ * wrapper, never the aspect-ratio box itself — the browser forces a
+ * fullscreened element to width:100%/height:100% of the viewport, which
+ * would override the box's own aspect-ratio and desync the hotspots'
+ * percentage positions from where the (object-cover'd) image is actually
+ * drawn. The wrapper centers the aspect-ratio box instead, letting it
+ * shrink to fit the screen while keeping its true proportions.
  */
 const MapZoomPan = forwardRef<
   MapZoomPanHandle,
   { aspectRatio: number; children: React.ReactNode; onCalibrationClick?: (xPct: number, yPct: number) => void }
 >(function MapZoomPan({ aspectRatio, children, onCalibrationClick }, ref) {
+    const fullscreenRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [pan, setPan] = useState({ x: 0, y: 0 });
+    const [isFullscreen, setIsFullscreen] = useState(false);
     const dragRef = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null);
     const downPointRef = useRef<{ x: number; y: number } | null>(null);
     const [dragging, setDragging] = useState(false);
@@ -57,8 +67,22 @@ const MapZoomPan = forwardRef<
 
     useImperativeHandle(ref, () => ({ focusOn, reset }));
 
+    // The container's pixel size changes when entering/exiting fullscreen,
+    // which would otherwise leave any existing pan/zoom pointing at the
+    // wrong spot (computed against the old size) — reset so the view
+    // always starts aligned on the new size.
+    useEffect(() => {
+      function onFullscreenChange() {
+        setIsFullscreen(document.fullscreenElement === fullscreenRef.current);
+        reset();
+      }
+      document.addEventListener("fullscreenchange", onFullscreenChange);
+      return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     function toggleFullscreen() {
-      const el = containerRef.current;
+      const el = fullscreenRef.current;
       if (!el) return;
       if (document.fullscreenElement) {
         document.exitFullscreen();
@@ -104,30 +128,39 @@ const MapZoomPan = forwardRef<
 
     return (
       <div
-        ref={containerRef}
-        className="relative w-full overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"
-        style={{ aspectRatio: String(aspectRatio) }}
+        ref={fullscreenRef}
+        className={cn(isFullscreen && "flex h-full w-full items-center justify-center bg-black")}
       >
         <div
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerLeave={onPointerUp}
-          className={cn("absolute inset-0", scale > 1 && (dragging ? "cursor-grabbing" : "cursor-grab"))}
-          style={{
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
-            transformOrigin: "0 0",
-            transition: dragging ? "none" : "transform 300ms ease-out",
-          }}
+          ref={containerRef}
+          className="relative overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"
+          style={
+            isFullscreen
+              ? { aspectRatio: String(aspectRatio), width: "auto", height: "auto", maxWidth: "100%", maxHeight: "100%", minWidth: 0, minHeight: 0 }
+              : { aspectRatio: String(aspectRatio), width: "100%" }
+          }
         >
-          {children}
-        </div>
+          <div
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerLeave={onPointerUp}
+            className={cn("absolute inset-0", scale > 1 && (dragging ? "cursor-grabbing" : "cursor-grab"))}
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+              transformOrigin: "0 0",
+              transition: dragging ? "none" : "transform 300ms ease-out",
+            }}
+          >
+            {children}
+          </div>
 
-        <div className="absolute bottom-3 right-3 z-20 flex flex-col gap-1 rounded-brava-md border border-brava-border bg-brava-white/95 p-1 shadow-brava-md backdrop-blur">
-          <ZoomButton icon={Plus} label="Ampliar" onClick={() => zoomBy(1.4)} />
-          <ZoomButton icon={Minus} label="Reduzir" onClick={() => zoomBy(1 / 1.4)} />
-          <ZoomButton icon={RotateCcw} label="Reset" onClick={reset} />
-          <ZoomButton icon={Maximize} label="Tela cheia" onClick={toggleFullscreen} />
+          <div className="absolute bottom-3 right-3 z-20 flex flex-col gap-1 rounded-brava-md border border-brava-border bg-brava-white/95 p-1 shadow-brava-md backdrop-blur">
+            <ZoomButton icon={Plus} label="Ampliar" onClick={() => zoomBy(1.4)} />
+            <ZoomButton icon={Minus} label="Reduzir" onClick={() => zoomBy(1 / 1.4)} />
+            <ZoomButton icon={RotateCcw} label="Reset" onClick={reset} />
+            <ZoomButton icon={Maximize} label="Tela cheia" onClick={toggleFullscreen} />
+          </div>
         </div>
       </div>
     );
