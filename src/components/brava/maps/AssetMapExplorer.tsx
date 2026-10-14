@@ -26,8 +26,8 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const { isEditor } = useEditAuth();
   const { coordinates: overrides, saveCoordinate, deleteCoordinate } = useMapCoordinatesData();
   const [activeMapId, setActiveMapId] = useState<AssetMapId>(() => {
-    if (initialTag) return getMapByTank(initialTag, overrides)?.id ?? "410-6313";
-    return "410-6313";
+    if (initialTag) return getMapByTank(initialTag, overrides)?.id ?? "geral";
+    return "geral";
   });
   const [search, setSearch] = useState("");
   const [quickFilter, setQuickFilter] = useState<MapQuickFilter>("TODOS");
