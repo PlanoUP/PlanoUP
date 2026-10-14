@@ -78,18 +78,19 @@ export default function MapHotspot({
           </svg>
           <span
             className={cn(
-              "pointer-events-none absolute z-20 flex w-[92px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 whitespace-nowrap rounded-brava-sm border border-brava-border bg-brava-white px-2 py-1.5 shadow-brava-lg",
+              "pointer-events-none absolute z-20 flex w-[126px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-2.5 py-1.5 shadow-brava-lg",
               accentBorderClass
             )}
             style={{ left: callout.dx, top: callout.dy, borderLeftWidth: 3 }}
           >
-            <span className="flex items-center justify-between gap-1.5">
+            <span className="flex items-center justify-between gap-1.5 whitespace-nowrap">
               <span className="font-mono text-[10px] font-bold text-brava-blue-dark">{tag}</span>
               <span className={cn("text-[10px] font-extrabold", statusMeta.textClass)}>{tank.derived.progress}%</span>
             </span>
-            <span className="h-[4px] w-full overflow-hidden rounded-full bg-brava-border/70">
+            {/* Track (the "end of progress" reference, full width) with the fill overlaid on top. */}
+            <span className="relative h-[5px] w-full overflow-hidden rounded-full bg-[#98A2B3]">
               <span
-                className={cn("block h-full rounded-full transition-[width] duration-700 ease-out", statusMeta.dotClass)}
+                className="absolute inset-y-0 left-0 rounded-full bg-brava-accent transition-[width] duration-700 ease-out"
                 style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
               />
             </span>
@@ -107,9 +108,9 @@ export default function MapHotspot({
             </span>
             {inMaintenance && statusMeta && (
               <span className="mt-1.5 flex items-center gap-1.5">
-                <span className="h-[3px] flex-1 overflow-hidden rounded-full bg-brava-white/20">
+                <span className="relative h-[4px] flex-1 overflow-hidden rounded-full bg-brava-white/25">
                   <span
-                    className={cn("block h-full rounded-full", statusMeta.dotClass)}
+                    className="absolute inset-y-0 left-0 rounded-full bg-brava-accent"
                     style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
                   />
                 </span>

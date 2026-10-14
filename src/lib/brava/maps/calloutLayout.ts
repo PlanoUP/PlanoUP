@@ -17,8 +17,8 @@ export interface CalloutOffset {
   dy: number;
 }
 
-const BOX_WIDTH = 92;
-const BOX_HEIGHT = 48;
+const BOX_WIDTH = 126;
+const BOX_HEIGHT = 50;
 const BOX_MARGIN = 14; // minimum gap enforced between two boxes
 const BASE_DX = 60;
 const BASE_DY = 46;
