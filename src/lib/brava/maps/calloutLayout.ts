@@ -27,7 +27,7 @@ const LANE_STEP_Y = 11;
 const RELAX_ITERATIONS = 48;
 const MAX_OFFSET = 260; // clamp so a dense cluster can't fling a box far off-image
 
-function hashTag(tag: string): number {
+export function hashTag(tag: string): number {
   let h = 0;
   for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) >>> 0;
   return h;

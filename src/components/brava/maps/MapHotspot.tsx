@@ -3,7 +3,7 @@
 import { TankWithDerived } from "@/lib/brava/types";
 import { INSPECTION_CRITICALITY_META, formatDaysToInspection } from "@/lib/brava/inspection";
 import { STATUS_META } from "@/lib/brava/status-meta";
-import { CalloutOffset } from "@/lib/brava/maps/calloutLayout";
+import { CalloutOffset, hashTag } from "@/lib/brava/maps/calloutLayout";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
 
@@ -36,6 +36,9 @@ export default function MapHotspot({
   const accentBorderClass = tank ? STATUS_ACCENT_BORDER[tank.status] : undefined;
   const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
   const callout = calloutOffset ? toSvgGeometry(calloutOffset) : null;
+  // Staggered so dozens of dots don't all blink in lockstep — a cheap,
+  // stable per-tag offset keeps the map feeling alive instead of static.
+  const pulseDelay = (hashTag(tag) % 24) / 10;
 
   return (
     <button
@@ -45,8 +48,13 @@ export default function MapHotspot({
       style={{ left: `${x}%`, top: `${y}%` }}
       aria-label={tag}
     >
-      {highlighted && (
+      {highlighted ? (
         <span className={cn("absolute inset-0 -m-3 animate-ping rounded-full opacity-50", meta.dotClass)} />
+      ) : (
+        <span
+          className={cn("absolute inset-0 -m-1.5 rounded-full animate-radar-pulse", meta.dotClass)}
+          style={{ animationDelay: `${pulseDelay}s` }}
+        />
       )}
       <span
         className={cn(
