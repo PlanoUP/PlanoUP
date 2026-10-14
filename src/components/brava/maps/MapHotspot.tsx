@@ -22,6 +22,11 @@ export default function MapHotspot({
 }) {
   const criticality = tank?.derived.inspectionCriticality ?? "SEM_DATA";
   const meta = INSPECTION_CRITICALITY_META[criticality];
+  // "Em manutenção" = actively being worked (or overdue while being worked),
+  // as opposed to not yet started (PROGRAMADO), done (CONCLUIDO) or
+  // unplanned (SEM_PROJETO) — these are the statuses where a progress
+  // percentage is actually meaningful to show at a glance on the map.
+  const inMaintenance = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status) : false;
 
   return (
     <button
@@ -48,6 +53,13 @@ export default function MapHotspot({
         )}
       />
 
+      {tank && inMaintenance && (
+        <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-1.5 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-brava-border bg-brava-white px-1.5 py-0.5 shadow-brava-md">
+          <span className="font-mono text-[9.5px] font-bold text-brava-text">{tag}</span>
+          <span className="text-[9.5px] font-bold text-brava-blue">{tank.derived.progress}%</span>
+        </span>
+      )}
+
       <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2.5 w-max min-w-[160px] max-w-[220px] -translate-x-1/2 rounded-brava-sm bg-brava-blue-dark px-3 py-2 text-left opacity-0 shadow-brava-lg transition-opacity duration-150 group-hover/hotspot:opacity-100">
         <span className="block font-mono text-[12px] font-bold text-brava-white">{tag}</span>
         {tank ? (
@@ -56,6 +68,11 @@ export default function MapHotspot({
             <span className="mt-1 block text-[10.5px] font-semibold text-brava-white">
               {STATUS_LABEL[tank.status] ?? tank.status}
             </span>
+            {inMaintenance && (
+              <span className="mt-1 block text-[10.5px] font-bold text-brava-white">
+                Avanço: {tank.derived.progress}%
+              </span>
+            )}
             <span className="mt-1 block text-[10px] text-brava-white/70">
               Próxima inspeção: {tank.nextInternalInspection ? formatShort(tank.nextInternalInspection) : "A definir"}
               {tank.nextInternalInspection && ` · ${formatDaysToInspection(tank.derived.daysToInternalInspection)}`}

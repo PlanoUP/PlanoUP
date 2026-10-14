@@ -8,10 +8,19 @@ export function getAssetMap(mapId: AssetMapId): AssetMapConfig {
   return map;
 }
 
-/** Which map a given TAG belongs to, or null if it isn't on any map's roster yet. */
+/**
+ * Which map a given TAG belongs to, or null if it isn't on any map's
+ * roster yet. Prefers a map where the tag already has a calibrated
+ * coordinate over one where it doesn't (e.g. "Visão Geral" before its
+ * tanks are calibrated) — deep links and the search auto-jump should land
+ * somewhere the tank's hotspot actually renders, regardless of array order.
+ */
 export function getMapByTank(tag: string): AssetMapConfig | null {
   const upper = tag.toUpperCase();
-  return ASSET_MAPS.find((m) => m.tankIds.some((t) => t.toUpperCase() === upper)) ?? null;
+  const candidates = ASSET_MAPS.filter((m) => m.tankIds.some((t) => t.toUpperCase() === upper));
+  if (candidates.length === 0) return null;
+  const calibrated = candidates.find((m) => m.coordinates.some((c) => c.tag.toUpperCase() === upper));
+  return calibrated ?? candidates[0];
 }
 
 /** The confirmed hotspot position for a TAG on a given map, or null if not yet calibrated. */
@@ -97,6 +106,9 @@ export function getMapSummary(mapId: AssetMapId, tanks: TankWithDerived[]): MapS
 /**
  * Locates a tank by partial TAG match (digits only, e.g. "41005" or "6313005")
  * across every map — used by the search box's "asset locator" behavior.
+ * Same calibrated-first preference as getMapByTank, so a match on an
+ * uncalibrated map (like "Visão Geral" before it's filled in) never wins
+ * over one where the hotspot actually shows.
  */
 export function findTankAcrossMaps(
   query: string,
@@ -105,14 +117,21 @@ export function findTankAcrossMaps(
   const digits = query.replace(/\D/g, "");
   if (digits.length === 0) return null;
 
-  for (const map of ASSET_MAPS) {
-    for (const tag of map.tankIds) {
-      const tankDigits = tag.replace(/\D/g, "");
-      if (tankDigits.endsWith(digits) || tankDigits === digits) {
-        const tank = tanks.find((t) => t.tag.toUpperCase() === tag.toUpperCase());
-        if (tank) return { tank, mapId: map.id };
+  function search(requireCalibrated: boolean) {
+    for (const map of ASSET_MAPS) {
+      for (const tag of map.tankIds) {
+        const tankDigits = tag.replace(/\D/g, "");
+        if (tankDigits.endsWith(digits) || tankDigits === digits) {
+          if (requireCalibrated && !map.coordinates.some((c) => c.tag.toUpperCase() === tag.toUpperCase())) {
+            continue;
+          }
+          const tank = tanks.find((t) => t.tag.toUpperCase() === tag.toUpperCase());
+          if (tank) return { tank, mapId: map.id };
+        }
       }
     }
+    return null;
   }
-  return null;
+
+  return search(true) ?? search(false);
 }
