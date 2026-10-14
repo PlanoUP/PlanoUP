@@ -140,6 +140,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           ref={zoomPanRef}
           aspectRatio={map.imageWidth / map.imageHeight}
           onCalibrationClick={calibrationActive ? (x, y) => setCalibrationPoint({ x, y }) : undefined}
+          backgroundSrc={map.image}
         >
           <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />
           {visibleEntries.map((e) => (

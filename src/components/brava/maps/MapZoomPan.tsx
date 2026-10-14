@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import Image from "next/image";
 import { Plus, Minus, Maximize, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
 
@@ -28,12 +29,21 @@ export interface MapZoomPanHandle {
  * explicit min(vw, vh*ratio)/min(vh, vw/ratio) calc (see below) rather than
  * width/height:auto — the box's only normal-flow child is itself
  * position:absolute, so auto sizing has no content to size against and
- * collapses to zero.
+ * collapses to zero. When fullscreen leaves black letterbox bars (the
+ * screen's aspect ratio rarely matches the map image's), backgroundSrc — a
+ * blurred, cover-cropped copy of the same image — fills them in behind the
+ * precise foreground instead of leaving them black, without touching the
+ * foreground's alignment.
  */
 const MapZoomPan = forwardRef<
   MapZoomPanHandle,
-  { aspectRatio: number; children: React.ReactNode; onCalibrationClick?: (xPct: number, yPct: number) => void }
->(function MapZoomPan({ aspectRatio, children, onCalibrationClick }, ref) {
+  {
+    aspectRatio: number;
+    children: React.ReactNode;
+    onCalibrationClick?: (xPct: number, yPct: number) => void;
+    backgroundSrc?: string;
+  }
+>(function MapZoomPan({ aspectRatio, children, onCalibrationClick, backgroundSrc }, ref) {
     const fullscreenRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
@@ -132,8 +142,18 @@ const MapZoomPan = forwardRef<
     return (
       <div
         ref={fullscreenRef}
-        className={cn(isFullscreen && "flex h-full w-full items-center justify-center bg-black")}
+        className={cn(isFullscreen && "relative flex h-full w-full items-center justify-center bg-black")}
       >
+        {isFullscreen && backgroundSrc && (
+          <Image
+            src={backgroundSrc}
+            alt=""
+            fill
+            sizes="100vw"
+            aria-hidden
+            className="scale-110 object-cover opacity-50 blur-2xl"
+          />
+        )}
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"
