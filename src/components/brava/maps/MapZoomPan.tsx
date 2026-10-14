@@ -24,8 +24,11 @@ export interface MapZoomPanHandle {
  * fullscreened element to width:100%/height:100% of the viewport, which
  * would override the box's own aspect-ratio and desync the hotspots'
  * percentage positions from where the (object-cover'd) image is actually
- * drawn. The wrapper centers the aspect-ratio box instead, letting it
- * shrink to fit the screen while keeping its true proportions.
+ * drawn. The wrapper centers the aspect-ratio box instead, sized via an
+ * explicit min(vw, vh*ratio)/min(vh, vw/ratio) calc (see below) rather than
+ * width/height:auto — the box's only normal-flow child is itself
+ * position:absolute, so auto sizing has no content to size against and
+ * collapses to zero.
  */
 const MapZoomPan = forwardRef<
   MapZoomPanHandle,
@@ -136,7 +139,16 @@ const MapZoomPan = forwardRef<
           className="relative overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"
           style={
             isFullscreen
-              ? { aspectRatio: String(aspectRatio), width: "auto", height: "auto", maxWidth: "100%", maxHeight: "100%", minWidth: 0, minHeight: 0 }
+              ? {
+                  // containerRef's only normal-flow child is position:absolute
+                  // (the transform layer below), which contributes nothing to
+                  // an auto-sized box — width/height:auto here would collapse
+                  // to 0. Compute the exact "contain" size explicitly instead:
+                  // whichever of these two is smaller is the true fit, and the
+                  // other works out to match (see MapZoomPan's own math).
+                  width: `min(100vw, calc(100vh * ${aspectRatio}))`,
+                  height: `min(100vh, calc(100vw / ${aspectRatio}))`,
+                }
               : { aspectRatio: String(aspectRatio), width: "100%" }
           }
         >
