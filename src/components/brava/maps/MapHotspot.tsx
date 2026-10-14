@@ -73,18 +73,18 @@ export default function MapHotspot({
           </svg>
           <span
             className={cn(
-              "pointer-events-none absolute z-20 flex w-[90px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1 whitespace-nowrap rounded-brava-sm border px-2 py-1.5 shadow-brava-lg",
-              statusMeta.badgeClass
+              "pointer-events-none absolute z-20 flex w-[90px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 whitespace-nowrap rounded-brava-sm px-2 py-1.5 shadow-brava-lg",
+              statusMeta.dotClass
             )}
             style={{ left: callout.dx, top: callout.dy }}
           >
             <span className="flex items-center justify-between gap-1.5">
-              <span className="font-mono text-[10px] font-bold text-brava-text">{tag}</span>
-              <span className={cn("text-[10px] font-extrabold", statusMeta.textClass)}>{tank.derived.progress}%</span>
+              <span className="font-mono text-[10px] font-bold text-brava-white">{tag}</span>
+              <span className="text-[10px] font-extrabold text-brava-white">{tank.derived.progress}%</span>
             </span>
-            <span className="h-[3px] w-full overflow-hidden rounded-full bg-brava-border/60">
+            <span className="h-[4px] w-full overflow-hidden rounded-full bg-brava-white/25">
               <span
-                className={cn("block h-full rounded-full transition-[width] duration-700 ease-out", statusMeta.dotClass)}
+                className="block h-full rounded-full bg-brava-white transition-[width] duration-700 ease-out"
                 style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
               />
             </span>
