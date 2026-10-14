@@ -1,25 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { Crosshair, Copy, Check } from "lucide-react";
+import { Crosshair, Copy, Check, Save, Trash2 } from "lucide-react";
+import { MapCoordinateOverride } from "@/lib/brava/maps/types";
 
 /**
  * Click anywhere on the map to capture its %X/%Y, pick which TAG that is,
- * and copy a ready-to-paste coordinate entry for lib/brava/maps/config.ts.
- * Shown in development, and in production to anyone in edit mode (see
- * AssetMapExplorer's IS_DEV || isEditor guard) — never to a logged-out
- * visitor.
+ * then "Salvar" to persist it to the database — it shows up for everyone
+ * immediately, no code change or redeploy needed. Shown in development,
+ * and in production to anyone in edit mode (see AssetMapExplorer's
+ * IS_DEV || isEditor guard) — never to a logged-out visitor.
+ *
+ * "Copiar configuração" stays as a secondary action for baking a value
+ * into lib/brava/maps/config.ts permanently once it's been confirmed live.
  */
 export default function MapCalibrationPanel({
   active,
   onToggle,
   point,
   tankIds,
+  savedCoordinates,
+  onSave,
+  onRemove,
 }: {
   active: boolean;
   onToggle: () => void;
   point: { x: number; y: number } | null;
   tankIds: string[];
+  savedCoordinates: MapCoordinateOverride[];
+  onSave: (tag: string, point: { x: number; y: number }) => void;
+  onRemove: (id: string) => void;
 }) {
   const [tag, setTag] = useState(tankIds[0] ?? "");
   const [copied, setCopied] = useState(false);
@@ -40,7 +50,7 @@ export default function MapCalibrationPanel({
   }
 
   return (
-    <div className="absolute left-3 top-3 z-30 w-max max-w-[280px]">
+    <div className="absolute left-3 top-3 z-30 w-max max-w-[300px]">
       <button
         type="button"
         onClick={onToggle}
@@ -75,14 +85,49 @@ export default function MapCalibrationPanel({
           </select>
           <button
             type="button"
-            onClick={copy}
+            onClick={() => point && onSave(tag, point)}
             disabled={!point}
             className="flex w-full items-center justify-center gap-1.5 rounded-brava-sm bg-brava-blue px-3 py-1.5 text-[12px] font-semibold text-brava-white disabled:opacity-40"
           >
+            <Save className="h-3.5 w-3.5" />
+            Salvar no mapa
+          </button>
+          <button
+            type="button"
+            onClick={copy}
+            disabled={!point}
+            className="flex w-full items-center justify-center gap-1.5 rounded-brava-sm border border-brava-border px-3 py-1.5 text-[11.5px] font-medium text-brava-text-secondary disabled:opacity-40"
+          >
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-            {copied ? "Copiado" : "Copiar configuração"}
+            {copied ? "Copiado" : "Copiar configuração (avançado)"}
           </button>
           {snippet && <code className="block break-all text-[10px] text-brava-text-secondary">{snippet}</code>}
+
+          {savedCoordinates.length > 0 && (
+            <div className="border-t border-brava-border pt-2">
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-brava-text-secondary">
+                Calibrados neste mapa ({savedCoordinates.length})
+              </p>
+              <ul className="max-h-40 space-y-1 overflow-y-auto">
+                {savedCoordinates
+                  .slice()
+                  .sort((a, b) => a.tag.localeCompare(b.tag))
+                  .map((c) => (
+                    <li key={c.id} className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="truncate font-mono text-brava-text">{c.tag}</span>
+                      <button
+                        type="button"
+                        onClick={() => onRemove(c.id)}
+                        className="shrink-0 rounded-brava-sm p-1 text-brava-text-secondary transition-colors hover:bg-brava-danger-bg hover:text-brava-danger"
+                        title="Remover"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>

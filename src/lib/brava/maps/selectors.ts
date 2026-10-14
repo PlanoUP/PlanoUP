@@ -1,6 +1,6 @@
 import { TankWithDerived } from "../types";
 import { ASSET_MAPS } from "./config";
-import { AssetMapConfig, AssetMapId, MapFilterOption, MapHotspotCoordinate, MapQuickFilter } from "./types";
+import { AssetMapConfig, AssetMapId, MapCoordinateOverride, MapFilterOption, MapHotspotCoordinate, MapQuickFilter } from "./types";
 
 export function getAssetMap(mapId: AssetMapId): AssetMapConfig {
   const map = ASSET_MAPS.find((m) => m.id === mapId);
@@ -15,18 +15,29 @@ export function getAssetMap(mapId: AssetMapId): AssetMapConfig {
  * tanks are calibrated) — deep links and the search auto-jump should land
  * somewhere the tank's hotspot actually renders, regardless of array order.
  */
-export function getMapByTank(tag: string): AssetMapConfig | null {
+export function getMapByTank(tag: string, overrides: MapCoordinateOverride[] = []): AssetMapConfig | null {
   const upper = tag.toUpperCase();
   const candidates = ASSET_MAPS.filter((m) => m.tankIds.some((t) => t.toUpperCase() === upper));
   if (candidates.length === 0) return null;
-  const calibrated = candidates.find((m) => m.coordinates.some((c) => c.tag.toUpperCase() === upper));
+  const calibrated = candidates.find((m) => getTankCoordinates(m.id, tag, overrides) !== null);
   return calibrated ?? candidates[0];
 }
 
-/** The confirmed hotspot position for a TAG on a given map, or null if not yet calibrated. */
-export function getTankCoordinates(mapId: AssetMapId, tag: string): MapHotspotCoordinate | null {
-  const map = getAssetMap(mapId);
+/**
+ * The confirmed hotspot position for a TAG on a given map, or null if not
+ * yet calibrated. A live-calibrated override (saved via Modo de Calibração,
+ * persisted to the database) always wins over a hardcoded config entry for
+ * the same map+tag, so a recalibration takes effect immediately.
+ */
+export function getTankCoordinates(
+  mapId: AssetMapId,
+  tag: string,
+  overrides: MapCoordinateOverride[] = []
+): MapHotspotCoordinate | null {
   const upper = tag.toUpperCase();
+  const override = overrides.find((o) => o.mapId === mapId && o.tag.toUpperCase() === upper);
+  if (override) return { tag: override.tag, x: override.x, y: override.y };
+  const map = getAssetMap(mapId);
   return map.coordinates.find((c) => c.tag.toUpperCase() === upper) ?? null;
 }
 
@@ -37,13 +48,17 @@ export interface MapTankEntry {
 }
 
 /** Every tank on this map's roster, joined with live tank data and its coordinate (if calibrated). */
-export function getTanksByMap(mapId: AssetMapId, tanks: TankWithDerived[]): MapTankEntry[] {
+export function getTanksByMap(
+  mapId: AssetMapId,
+  tanks: TankWithDerived[],
+  overrides: MapCoordinateOverride[] = []
+): MapTankEntry[] {
   const map = getAssetMap(mapId);
   const byTag = new Map(tanks.map((t) => [t.tag.toUpperCase(), t]));
   return map.tankIds.map((tag) => ({
     tag,
     tank: byTag.get(tag.toUpperCase()) ?? null,
-    coordinate: getTankCoordinates(mapId, tag),
+    coordinate: getTankCoordinates(mapId, tag, overrides),
   }));
 }
 
@@ -112,7 +127,8 @@ export function getMapSummary(mapId: AssetMapId, tanks: TankWithDerived[]): MapS
  */
 export function findTankAcrossMaps(
   query: string,
-  tanks: TankWithDerived[]
+  tanks: TankWithDerived[],
+  overrides: MapCoordinateOverride[] = []
 ): { tank: TankWithDerived; mapId: AssetMapId } | null {
   const digits = query.replace(/\D/g, "");
   if (digits.length === 0) return null;
@@ -122,7 +138,7 @@ export function findTankAcrossMaps(
       for (const tag of map.tankIds) {
         const tankDigits = tag.replace(/\D/g, "");
         if (tankDigits.endsWith(digits) || tankDigits === digits) {
-          if (requireCalibrated && !map.coordinates.some((c) => c.tag.toUpperCase() === tag.toUpperCase())) {
+          if (requireCalibrated && getTankCoordinates(map.id, tag, overrides) === null) {
             continue;
           }
           const tank = tanks.find((t) => t.tag.toUpperCase() === tag.toUpperCase());

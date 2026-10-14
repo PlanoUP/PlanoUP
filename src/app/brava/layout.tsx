@@ -4,6 +4,7 @@ import "@/styles/brava-tokens.css";
 import { BravaDataProvider } from "@/lib/brava/context";
 import { MaterialsDataProvider } from "@/lib/brava/materials/context";
 import { CostsDataProvider } from "@/lib/brava/costs/context";
+import { MapCoordinatesProvider } from "@/lib/brava/maps/context";
 import { EditAuthProvider } from "@/lib/brava/editAuthContext";
 import Sidebar from "@/components/brava/Sidebar";
 import MobileTopBar from "@/components/brava/MobileTopBar";
@@ -31,9 +32,11 @@ export default function BravaLayout({ children }: { children: React.ReactNode })
           <DataStatusGate>
             <MaterialsDataProvider>
               <CostsDataProvider>
-                <Sidebar />
-                <MobileTopBar />
-                <div className="lg:pl-64">{children}</div>
+                <MapCoordinatesProvider>
+                  <Sidebar />
+                  <MobileTopBar />
+                  <div className="lg:pl-64">{children}</div>
+                </MapCoordinatesProvider>
               </CostsDataProvider>
             </MaterialsDataProvider>
           </DataStatusGate>

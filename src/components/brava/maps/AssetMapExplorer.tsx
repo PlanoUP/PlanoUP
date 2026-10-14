@@ -5,6 +5,7 @@ import { List } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
+import { useMapCoordinatesData } from "@/lib/brava/maps/context";
 import { AssetMapId, MapQuickFilter } from "@/lib/brava/maps/types";
 import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSummary, matchesMapFilter, findTankAcrossMaps } from "@/lib/brava/maps/selectors";
 import { sortByInspectionPriority } from "@/lib/brava/inspection";
@@ -23,8 +24,9 @@ const IS_DEV = process.env.NODE_ENV === "development";
 export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
   const { isEditor } = useEditAuth();
+  const { coordinates: overrides, saveCoordinate, deleteCoordinate } = useMapCoordinatesData();
   const [activeMapId, setActiveMapId] = useState<AssetMapId>(() => {
-    if (initialTag) return getMapByTank(initialTag)?.id ?? "410-6313";
+    if (initialTag) return getMapByTank(initialTag, overrides)?.id ?? "410-6313";
     return "410-6313";
   });
   const [search, setSearch] = useState("");
@@ -40,19 +42,19 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const didInitialFocusRef = useRef(false);
 
   const map = getAssetMap(activeMapId);
-  const entries = getTanksByMap(activeMapId, tanks);
+  const entries = getTanksByMap(activeMapId, tanks, overrides);
   const summary = getMapSummary(activeMapId, tanks);
   const selectedTank = selectedTag ? entries.find((e) => e.tag === selectedTag)?.tank ?? null : null;
 
   const visibleEntries = entries.filter((e) => e.coordinate && (e.tank ? matchesMapFilter(e.tank, quickFilter, map.filters) : quickFilter === "TODOS"));
 
   function jumpTo(tag: string) {
-    const targetMap = getMapByTank(tag);
+    const targetMap = getMapByTank(tag, overrides);
     if (!targetMap) return;
     if (targetMap.id !== activeMapId) setActiveMapId(targetMap.id);
     setSelectedTag(tag);
     setHighlightedTag(tag);
-    const coord = getTankCoordinates(targetMap.id, tag);
+    const coord = getTankCoordinates(targetMap.id, tag, overrides);
     if (coord) {
       // wait a tick for the map switch to render before focusing
       requestAnimationFrame(() => zoomPanRef.current?.focusOn(coord.x, coord.y));
@@ -77,13 +79,13 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
       lastAutoJumpRef.current = null;
       return;
     }
-    const match = findTankAcrossMaps(search, tanks);
+    const match = findTankAcrossMaps(search, tanks, overrides);
     if (match && match.tank.tag !== lastAutoJumpRef.current) {
       lastAutoJumpRef.current = match.tank.tag;
       jumpTo(match.tank.tag);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, tanks]);
+  }, [search, tanks, overrides]);
 
   function handleAreaChange(id: AssetMapId) {
     setActiveMapId(id);
@@ -97,7 +99,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const sortedListEntries = sortByInspectionPriority(datedTanks).map((t) => ({
     tag: t.tag,
     tank: t,
-    hasCoordinate: !!getTankCoordinates(activeMapId, t.tag),
+    hasCoordinate: !!getTankCoordinates(activeMapId, t.tag, overrides),
   }));
   const undatedListEntries = entries
     .filter((e) => e.tank === null)
@@ -167,6 +169,12 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
             }}
             point={calibrationPoint}
             tankIds={map.tankIds}
+            savedCoordinates={overrides.filter((o) => o.mapId === activeMapId)}
+            onSave={(tag, point) => {
+              saveCoordinate({ mapId: activeMapId, tag, x: point.x, y: point.y });
+              setCalibrationPoint(null);
+            }}
+            onRemove={(id) => deleteCoordinate(id)}
           />
         )}
       </div>

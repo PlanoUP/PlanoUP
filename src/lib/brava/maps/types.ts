@@ -29,6 +29,24 @@ export interface MapHotspotCoordinate {
   y: number; // 0-100, % of the map image height
 }
 
+/**
+ * A coordinate calibrated live, in production, via the Modo de Calibração
+ * panel — persisted to the database so it takes effect immediately for
+ * everyone, with no code change or redeploy. Takes priority over a
+ * hardcoded entry in AssetMapConfig.coordinates for the same map+tag.
+ */
+export interface MapCoordinateOverride {
+  id: string; // `${mapId}:${TAG}`
+  mapId: AssetMapId;
+  tag: string;
+  x: number;
+  y: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type MapCoordinateOverrideInput = Pick<MapCoordinateOverride, "mapId" | "tag" | "x" | "y">;
+
 export interface AssetMapConfig {
   id: AssetMapId;
   name: string;
