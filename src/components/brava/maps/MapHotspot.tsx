@@ -27,11 +27,11 @@ export default function MapHotspot({
 }) {
   const criticality = tank?.derived.inspectionCriticality ?? "SEM_DATA";
   const meta = INSPECTION_CRITICALITY_META[criticality];
-  // "Em manutenção" = actively being worked (or overdue while being worked),
-  // as opposed to not yet started (PROGRAMADO), done (CONCLUIDO) or
-  // unplanned (SEM_PROJETO) — these are the statuses where a progress
-  // percentage is actually meaningful to show at a glance on the map.
-  const inMaintenance = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status) : false;
+  // Statuses with a real maintenance record and a meaningful progress
+  // number to show at a glance — actively worked, overdue while worked, or
+  // finished. Excludes PROGRAMADO (nothing has actually started yet) and
+  // SEM_PROJETO (no project at all).
+  const showsProgress = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"].includes(tank.status) : false;
   const statusMeta = tank ? STATUS_META[tank.status] : null;
   const accentBorderClass = tank ? STATUS_ACCENT_BORDER[tank.status] : undefined;
   const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
@@ -70,7 +70,7 @@ export default function MapHotspot({
         )}
       />
 
-      {tank && inMaintenance && statusMeta && callout && (
+      {tank && showsProgress && statusMeta && callout && (
         <>
           <svg
             className="pointer-events-none absolute z-10 overflow-visible"
@@ -114,7 +114,7 @@ export default function MapHotspot({
             <span className="mt-1 block text-[10.5px] font-semibold text-brava-white">
               {STATUS_LABEL[tank.status] ?? tank.status}
             </span>
-            {inMaintenance && statusMeta && (
+            {showsProgress && statusMeta && (
               <span className="mt-1.5 flex items-center gap-1.5">
                 <span className="relative h-[4px] flex-1 overflow-hidden rounded-full bg-brava-white/25">
                   <span
@@ -158,12 +158,14 @@ const STATUS_LINE_CLASS: Record<string, string> = {
   EM_EXECUCAO: "stroke-brava-blue",
   ATRASADO: "stroke-brava-warning",
   CRITICO: "stroke-brava-danger",
+  CONCLUIDO: "stroke-brava-success",
 };
 
 const STATUS_ACCENT_BORDER: Record<string, string> = {
   EM_EXECUCAO: "border-l-brava-blue",
   ATRASADO: "border-l-brava-warning",
   CRITICO: "border-l-brava-danger",
+  CONCLUIDO: "border-l-brava-success",
 };
 
 /** Converts a pre-computed {dx, dy} offset into the local SVG box/path the elbow leader line is drawn in. */

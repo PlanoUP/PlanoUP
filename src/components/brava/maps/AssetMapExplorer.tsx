@@ -22,7 +22,7 @@ import MapAssetListPanel from "./MapAssetListPanel";
 import MapCalibrationPanel from "./MapCalibrationPanel";
 
 const IS_DEV = process.env.NODE_ENV === "development";
-const MAINTENANCE_STATUSES: TankStatus[] = ["EM_EXECUCAO", "ATRASADO", "CRITICO"];
+const MAINTENANCE_STATUSES: TankStatus[] = ["EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"];
 
 export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
