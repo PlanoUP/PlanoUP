@@ -29,10 +29,16 @@ const PLACEHOLDER = "A definir";
 
 /**
  * Fills in real area/product/tankType for tanks that were seeded before that
- * data was known (buildNoProject defaults to "A definir"). Only touches a
- * field that is still the placeholder — a real value set later (seed update
- * or live edit) is never overwritten. Self-terminating: once a field is
- * filled in, it stops matching and no further writes happen for it.
+ * data was known (buildNoProject defaults to "A definir"), and promotes a
+ * tank out of "Sem Projeto" once TANKS_SEED gives it a real maintenance
+ * project (launched via a code update, same as every other seed change).
+ *
+ * Both only touch a row still at its original placeholder baseline — a real
+ * value set later (seed update or live edit) is never overwritten — and are
+ * self-terminating: once promoted/filled in, the row no longer matches and
+ * this never fires for it again. A promoted tank has no activities or
+ * progress of its own yet to lose, so adopting the seed's record wholesale
+ * (keeping only its own notes, in case someone already added any) is safe.
  */
 async function reconcilePlaceholderMetadata(): Promise<void> {
   const sql = getSql();
@@ -42,6 +48,12 @@ async function reconcilePlaceholderMetadata(): Promise<void> {
     const tank = row.data as Tank;
     const seed = seedById.get(tank.id);
     if (!seed) continue;
+
+    if (tank.status === "SEM_PROJETO" && seed.status !== "SEM_PROJETO") {
+      await saveTank({ ...seed, notes: tank.notes ?? seed.notes });
+      continue;
+    }
+
     const patch: Partial<Pick<Tank, "area" | "product" | "tankType">> = {};
     if (tank.area === PLACEHOLDER && seed.area !== PLACEHOLDER) patch.area = seed.area;
     if (tank.product === PLACEHOLDER && seed.product !== PLACEHOLDER) patch.product = seed.product;
