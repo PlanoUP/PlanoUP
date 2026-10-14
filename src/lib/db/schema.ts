@@ -27,4 +27,11 @@ export async function ensureSchema(): Promise<void> {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `);
+  await sql.query(`
+    CREATE TABLE IF NOT EXISTS cost_entries (
+      id TEXT PRIMARY KEY,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    )
+  `);
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FolderOpen } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/brava/PageHeader";
 import ExecutiveHeader from "@/components/brava/ExecutiveHeader";
 import ExecutiveTimeline from "@/components/brava/ExecutiveTimeline";
@@ -11,26 +11,41 @@ import PlanningEditor from "@/components/brava/PlanningEditor";
 import TankNotes from "@/components/brava/TankNotes";
 import TankMaterialsSection from "@/components/brava/materials/TankMaterialsSection";
 import TankHistorySection from "@/components/brava/materials/TankHistorySection";
+import TankCostsSection from "@/components/brava/costs/TankCostsSection";
 import { useBravaData } from "@/lib/brava/context";
 import { useMaterialsData } from "@/lib/brava/materials/context";
+import { useCostsData } from "@/lib/brava/costs/context";
 import { getMaterialsByTank, calculateMaterialReadiness, calculateMaterialRisk } from "@/lib/brava/materials/calculations";
+import { getCostsByTag } from "@/lib/brava/costs/calculations";
 import { cn } from "@/lib/brava/cn";
 
-type TabKey = "VISAO_GERAL" | "PLANEJAMENTO" | "MATERIAIS" | "HISTORICO";
+type TabKey = "VISAO_GERAL" | "PLANEJAMENTO" | "MATERIAIS" | "CUSTOS" | "HISTORICO";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "VISAO_GERAL", label: "Visão Geral" },
   { key: "PLANEJAMENTO", label: "Planejamento" },
   { key: "MATERIAIS", label: "Materiais" },
+  { key: "CUSTOS", label: "Custos" },
   { key: "HISTORICO", label: "Histórico" },
 ];
 
+const TAB_KEYS = TABS.map((t) => t.key);
+
 export default function TankDetailPage() {
   const params = useParams<{ tag: string }>();
+  const searchParams = useSearchParams();
   const { getTank, today } = useBravaData();
   const { materials } = useMaterialsData();
+  const { costs } = useCostsData();
   const [tab, setTab] = useState<TabKey>("VISAO_GERAL");
   const tank = getTank(decodeURIComponent(params.tag));
+
+  useEffect(() => {
+    const requested = searchParams.get("tab")?.toUpperCase();
+    if (requested && TAB_KEYS.includes(requested as TabKey)) {
+      setTab(requested as TabKey);
+    }
+  }, [searchParams]);
 
   if (!tank) {
     return (
@@ -51,6 +66,8 @@ export default function TankDetailPage() {
       const level = calculateMaterialRisk(m, today).level;
       return level === "RISCO_CRONOGRAMA" || level === "ALTO_RISCO";
     });
+
+  const tankCosts = getCostsByTag(costs, tank.tag);
 
   return (
     <>
@@ -75,6 +92,9 @@ export default function TankDetailPage() {
               {t.label}
               {t.key === "MATERIAIS" && materialsAlert && (
                 <span className="h-1.5 w-1.5 rounded-full bg-brava-danger" />
+              )}
+              {t.key === "CUSTOS" && tankCosts.length > 0 && (
+                <span className="h-1.5 w-1.5 rounded-full bg-brava-accent" />
               )}
               {tab === t.key && <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-brava-blue" />}
             </button>
@@ -106,6 +126,8 @@ export default function TankDetailPage() {
           ))}
 
         {tab === "MATERIAIS" && <TankMaterialsSection tank={tank} />}
+
+        {tab === "CUSTOS" && <TankCostsSection tank={tank} />}
 
         {tab === "HISTORICO" && <TankHistorySection tankId={tank.id} />}
       </div>
