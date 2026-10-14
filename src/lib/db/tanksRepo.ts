@@ -94,10 +94,11 @@ async function getTank(id: string): Promise<Tank | null> {
 
 async function saveTank(tank: Tank): Promise<void> {
   const sql = getSql();
-  await sql.query("UPDATE tanks SET data = $2, updated_at = now() WHERE id = $1", [
+  const result = await sql.query("UPDATE tanks SET data = $2, updated_at = now() WHERE id = $1 RETURNING id, data", [
     tank.id,
     JSON.stringify(tank),
   ]);
+  console.error("[saveTank] update result for", tank.id, "rowCount-ish:", (result as unknown[]).length, "returned status:", (result as Record<string, unknown>[])[0]?.data && (((result as Record<string, unknown>[])[0].data as Record<string, unknown>).status));
 }
 
 export async function updateTankMeta(
