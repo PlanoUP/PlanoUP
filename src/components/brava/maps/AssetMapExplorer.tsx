@@ -11,6 +11,7 @@ import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSum
 import { computeCalloutLayout } from "@/lib/brava/maps/calloutLayout";
 import { TankStatus } from "@/lib/brava/types";
 import { sortByInspectionPriority } from "@/lib/brava/inspection";
+import { STATUS_META } from "@/lib/brava/status-meta";
 import MapAreaSelector from "./MapAreaSelector";
 import MapFilterBar from "./MapFilterBar";
 import MapLegend from "./MapLegend";
@@ -62,10 +63,20 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   // Independent of the quick-filter chips/search — the fullscreen video
   // carousel always cycles every tank in maintenance on this area, not just
   // whatever's currently filtered into view.
-  const maintenanceVideoTags = entries
-    .filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate)
-    .map((e) => e.tag)
-    .sort();
+  const maintenanceEntries = entries.filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate);
+  const maintenanceVideoTags = maintenanceEntries.map((e) => e.tag).sort();
+
+  // Fullscreen control-bar KPIs and ticker — also independent of the
+  // quick-filter chips, same reasoning as the video carousel above.
+  const fullscreenSummary = {
+    emExecucao: maintenanceEntries.filter((e) => e.tank!.status === "EM_EXECUCAO").length,
+    atrasado: maintenanceEntries.filter((e) => e.tank!.status === "ATRASADO").length,
+    critico: maintenanceEntries.filter((e) => e.tank!.status === "CRITICO").length,
+    concluido: maintenanceEntries.filter((e) => e.tank!.status === "CONCLUIDO").length,
+  };
+  const fullscreenTickerItems = maintenanceEntries.map(
+    (e) => `${e.tag} · ${e.tank!.derived.progress}% · ${STATUS_META[e.tank!.status].label}`
+  );
 
   function jumpTo(tag: string) {
     const targetMap = getMapByTank(tag, overrides);
@@ -150,6 +161,8 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           onCalibrationClick={calibrationActive ? (x, y) => setCalibrationPoint({ x, y }) : undefined}
           backgroundSrc={map.image}
           fullscreenLabel="Paradas de Manutenção - Tanques"
+          fullscreenSummary={fullscreenSummary}
+          fullscreenTickerItems={fullscreenTickerItems}
           maintenanceVideoTags={maintenanceVideoTags}
         >
           <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, VideoOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, VideoOff, VolumeX } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
 
 // Weekly video updates: each clip lives at a fixed path keyed only by TAG
@@ -25,6 +25,7 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
   // tank's clip is being swapped in underneath, hidden from view.
   const [collapsed, setCollapsed] = useState(true);
   const [missing, setMissing] = useState(false);
+  const [clipProgress, setClipProgress] = useState(0);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -92,9 +93,21 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
     };
   }, []);
 
+  // Reset the clip progress bar whenever the displayed tank changes (the
+  // <video> element itself remounts via key={tag}, but this is our own
+  // piece of state and wouldn't otherwise reset).
+  useEffect(() => {
+    setClipProgress(0);
+  }, [displayedIndex]);
+
   if (tags.length === 0) return null;
   const tag = tags[displayedIndex];
   if (!tag) return null;
+
+  function handleTimeUpdate(e: React.SyntheticEvent<HTMLVideoElement>) {
+    const el = e.currentTarget;
+    if (el.duration > 0) setClipProgress((el.currentTime / el.duration) * 100);
+  }
 
   function handleEnded() {
     if (tags.length <= 1) return; // nothing else to advance to — let it loop in place
@@ -129,17 +142,32 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
             <p className="text-[10.5px] font-medium">Vídeo não disponível</p>
           </div>
         ) : (
-          <video
-            key={tag}
-            src={videoSrcForTag(tag)}
-            autoPlay
-            muted
-            loop={tags.length <= 1}
-            playsInline
-            onEnded={handleEnded}
-            onError={handleError}
-            className="h-full w-full object-cover animate-video-fade-in"
-          />
+          <>
+            <video
+              key={tag}
+              src={videoSrcForTag(tag)}
+              autoPlay
+              muted
+              loop={tags.length <= 1}
+              playsInline
+              onEnded={handleEnded}
+              onError={handleError}
+              onTimeUpdate={handleTimeUpdate}
+              className="h-full w-full object-cover animate-video-fade-in"
+            />
+            <span
+              title="Áudio desativado"
+              className="pointer-events-none absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white/80"
+            >
+              <VolumeX className="h-3 w-3" strokeWidth={2} />
+            </span>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-white/15">
+              <div
+                className="h-full bg-brava-accent transition-[width] duration-150 ease-linear"
+                style={{ width: `${Math.max(0, Math.min(100, clipProgress))}%` }}
+              />
+            </div>
+          </>
         )}
       </div>
 

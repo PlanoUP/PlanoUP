@@ -5,6 +5,10 @@ import Image from "next/image";
 import { Plus, Minus, Maximize, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
 import MaintenanceVideoCarousel from "./MaintenanceVideoCarousel";
+import FullscreenControlBar, { FullscreenSummary } from "./FullscreenControlBar";
+import MaintenanceEventTicker from "./MaintenanceEventTicker";
+import HudCorners from "./HudCorners";
+import BlueprintGrid from "../BlueprintGrid";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -43,13 +47,25 @@ const MapZoomPan = forwardRef<
     children: React.ReactNode;
     onCalibrationClick?: (xPct: number, yPct: number) => void;
     backgroundSrc?: string;
-    /** Shown as a top-centered banner only while in fullscreen — e.g. "PARADAS DE MANUTENÇÃO - TANQUES". */
+    /** Shown as a top-centered control bar only while in fullscreen — e.g. "PARADAS DE MANUTENÇÃO - TANQUES". Requires fullscreenSummary too. */
     fullscreenLabel?: string;
+    fullscreenSummary?: FullscreenSummary;
+    /** Scrolling ticker strip under the control bar, only while in fullscreen. */
+    fullscreenTickerItems?: string[];
     /** TAGs cycled through the bottom-right maintenance video carousel, only while in fullscreen. */
     maintenanceVideoTags?: string[];
   }
 >(function MapZoomPan(
-  { aspectRatio, children, onCalibrationClick, backgroundSrc, fullscreenLabel, maintenanceVideoTags },
+  {
+    aspectRatio,
+    children,
+    onCalibrationClick,
+    backgroundSrc,
+    fullscreenLabel,
+    fullscreenSummary,
+    fullscreenTickerItems,
+    maintenanceVideoTags,
+  },
   ref
 ) {
     const fullscreenRef = useRef<HTMLDivElement>(null);
@@ -162,11 +178,11 @@ const MapZoomPan = forwardRef<
             className="scale-110 object-cover opacity-50 blur-2xl"
           />
         )}
-        {isFullscreen && fullscreenLabel && (
-          <div className="pointer-events-none absolute left-1/2 top-10 z-30 -translate-x-1/2 rounded-brava-sm border border-white/15 bg-black/60 px-4 py-2 text-center text-[13px] font-bold uppercase tracking-[0.12em] text-white shadow-brava-lg backdrop-blur-sm">
-            {fullscreenLabel}
-          </div>
+        {isFullscreen && <HudCorners />}
+        {isFullscreen && fullscreenLabel && fullscreenSummary && (
+          <FullscreenControlBar title={fullscreenLabel} summary={fullscreenSummary} />
         )}
+        {isFullscreen && fullscreenTickerItems && <MaintenanceEventTicker items={fullscreenTickerItems} />}
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"
@@ -199,6 +215,10 @@ const MapZoomPan = forwardRef<
           >
             {children}
           </div>
+
+          {isFullscreen && (
+            <BlueprintGrid className="pointer-events-none absolute inset-0 h-full w-full text-white opacity-[0.07]" />
+          )}
 
           <div className="absolute bottom-3 right-3 z-20 flex flex-col gap-1 rounded-brava-md border border-brava-border bg-brava-white/95 p-1 shadow-brava-md backdrop-blur">
             <ZoomButton icon={Plus} label="Ampliar" onClick={() => zoomBy(1.4)} />
