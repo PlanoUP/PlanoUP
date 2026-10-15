@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Check, RotateCcw } from "lucide-react";
+import { Pencil, Check, RotateCcw, Eraser } from "lucide-react";
 import { ActivityStatus, Tank, TankStatus } from "@/lib/brava/types";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
@@ -18,8 +18,6 @@ const STATUS_OPTIONS: TankStatus[] = [
   "CONCLUIDO",
 ];
 
-const ACTIVITY_STATUS_OPTIONS: ActivityStatus[] = ["FUTURO", "ATUAL", "ATRASADO", "CONCLUIDO"];
-
 const ACTIVITY_STATUS_LABEL: Record<ActivityStatus, string> = {
   CONCLUIDO: "Concluído",
   ATUAL: "Em andamento",
@@ -35,7 +33,7 @@ const ACTIVITY_STATUS_COLOR: Record<ActivityStatus, string> = {
 };
 
 export default function PlanningEditor({ tank }: { tank: Tank }) {
-  const { updateActivity, updateTankMeta } = useBravaData();
+  const { updateActivity, updateTankMeta, resetTankExecution } = useBravaData();
   const { requireEditor } = useEditAuth();
   const [editing, setEditing] = useState(false);
   const [savedPulse, setSavedPulse] = useState(false);
@@ -44,6 +42,15 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
   function flashSaved() {
     setSavedPulse(true);
     window.setTimeout(() => setSavedPulse(false), 1200);
+  }
+
+  function handleResetExecution() {
+    const ok = window.confirm(
+      "Limpar início/término real e avanço de TODAS as atividades deste tanque, voltando o status para Programado? Essa ação não afeta as datas planejadas."
+    );
+    if (!ok) return;
+    resetTankExecution(tank.id);
+    flashSaved();
   }
 
   return (
@@ -56,7 +63,7 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
           </h2>
           <p className="mt-1 text-[13px] text-brava-text-secondary">
             {editing
-              ? "Altere datas, durações ou avanço — o cronograma é recalculado automaticamente."
+              ? "Altere datas, durações, datas reais ou avanço — cronograma e status (da etapa e do tanque) são recalculados automaticamente."
               : "Sequência de atividades e dependências do tanque."}
           </p>
         </div>
@@ -111,7 +118,7 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
               <th className="px-3 py-2.5 font-medium">Início Real</th>
               <th className="px-3 py-2.5 font-medium">Término Real</th>
               <th className="px-3 py-2.5 font-medium">Avanço</th>
-              <th className="px-3 py-2.5 font-medium">Status</th>
+              <th className="px-3 py-2.5 font-medium">Status (automático)</th>
             </tr>
           </thead>
           <tbody>
@@ -210,24 +217,7 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
                   )}
                 </td>
                 <td className="px-3 py-2.5">
-                  {editing ? (
-                    <select
-                      value={activity.status}
-                      onChange={(e) => {
-                        updateActivity(tank.id, activity.id, { status: e.target.value as ActivityStatus });
-                        flashSaved();
-                      }}
-                      className="rounded-brava-sm border border-brava-border bg-brava-white px-1.5 py-1 text-[12px] focus:border-brava-blue focus:outline-none"
-                    >
-                      {ACTIVITY_STATUS_OPTIONS.map((s) => (
-                        <option key={s} value={s}>
-                          {ACTIVITY_STATUS_LABEL[s]}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <ActivityStatusTag status={activity.status} />
-                  )}
+                  <ActivityStatusTag status={activity.status} />
                 </td>
               </tr>
             ))}
@@ -236,11 +226,19 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
       </div>
 
       {editing && (
-        <div className="flex items-center justify-between border-t border-brava-border px-6 py-3 text-[11px] text-brava-text-secondary">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-brava-border px-6 py-3 text-[11px] text-brava-text-secondary">
           <span className="flex items-center gap-1.5">
             <RotateCcw className="h-3 w-3" />
             As dependências entre atividades recalculam automaticamente as datas seguintes.
           </span>
+          <button
+            type="button"
+            onClick={handleResetExecution}
+            className="flex items-center gap-1.5 rounded-brava-sm border border-brava-border px-2.5 py-1.5 text-[11px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-danger/40 hover:text-brava-danger"
+          >
+            <Eraser className="h-3.5 w-3.5" />
+            Resetar Execução (voltar para Programado)
+          </button>
         </div>
       )}
     </div>

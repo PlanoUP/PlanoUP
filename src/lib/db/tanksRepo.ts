@@ -1,8 +1,9 @@
 import { getSql } from "./client";
 import { ensureSchema } from "./schema";
-import { ActivityStatus, Tank } from "../brava/types";
+import { Activity, Tank } from "../brava/types";
 import { TANKS_SEED } from "../brava/data/tanks";
-import { recalculateSchedule } from "../brava/schedule-engine";
+import { recalculateSchedule, deriveActivityStatus, deriveTankStatus } from "../brava/schedule-engine";
+import { todayISO } from "../brava/date-utils";
 
 /**
  * Inserts any TANKS_SEED tank whose id isn't in the table yet, and never
@@ -117,11 +118,17 @@ interface ActivityEdit {
   /** An empty string explicitly clears the field — omitting it leaves the stored value untouched. */
   actualStart?: string;
   actualEnd?: string;
-  /** Manual override — otherwise status is still auto-derived from progress as before, for a plain progress edit. */
-  status?: ActivityStatus;
 }
 
-/** Mirrors the exact reducer logic the client used to run itself against localStorage. */
+/**
+ * Mirrors the exact reducer logic the client used to run itself against
+ * localStorage, plus a final pass that re-derives every activity's status
+ * (and the tank's own) from the resulting dates/progress — see
+ * deriveActivityStatus/deriveTankStatus. Runs on every edit, not just ones
+ * that touch progress/actual dates, because shifting an upstream activity's
+ * planned dates (recalculateSchedule) can push a downstream one's planned
+ * end across "today", flipping it between ATUAL and ATRASADO.
+ */
 export async function updateTankActivity(
   tankId: string,
   activityId: string,
@@ -138,12 +145,7 @@ export async function updateTankActivity(
       durationDays: edit.durationDays,
     });
   }
-  if (
-    edit.progress !== undefined ||
-    edit.actualStart !== undefined ||
-    edit.actualEnd !== undefined ||
-    edit.status !== undefined
-  ) {
+  if (edit.progress !== undefined || edit.actualStart !== undefined || edit.actualEnd !== undefined) {
     activities = activities.map((a) =>
       a.id === activityId
         ? {
@@ -151,15 +153,40 @@ export async function updateTankActivity(
             progress: edit.progress ?? a.progress,
             actualStart: edit.actualStart !== undefined ? edit.actualStart || undefined : a.actualStart,
             actualEnd: edit.actualEnd !== undefined ? edit.actualEnd || undefined : a.actualEnd,
-            status:
-              edit.status ??
-              ((edit.progress ?? a.progress) >= 100 ? "CONCLUIDO" : a.status === "FUTURO" ? "ATUAL" : a.status),
           }
         : a
     );
   }
 
-  const updated: Tank = { ...tank, activities };
+  const today = todayISO();
+  activities = activities.map((a) => ({ ...a, status: deriveActivityStatus(a, today) }));
+  const status = deriveTankStatus(activities, tank.status, today);
+
+  const updated: Tank = { ...tank, status, activities };
+  await saveTank(updated);
+  return updated;
+}
+
+/**
+ * Clears every activity's real-execution data (dates + progress) back to a
+ * clean not-yet-started state, then re-derives status from scratch — the
+ * one-click fix for a tank whose plan was edited into a new window while
+ * its old execution data (a leftover CONCLUIDO/real dates from a previous
+ * cycle) was left behind, instead of clearing a dozen date fields by hand.
+ */
+export async function resetTankExecution(tankId: string): Promise<Tank | null> {
+  await ensureSchema();
+  const tank = await getTank(tankId);
+  if (!tank) return null;
+
+  const today = todayISO();
+  const activities = tank.activities.map((a) => {
+    const reset: Activity = { ...a, progress: 0, actualStart: undefined, actualEnd: undefined };
+    return { ...reset, status: deriveActivityStatus(reset, today) };
+  });
+  const status = deriveTankStatus(activities, tank.status, today);
+
+  const updated: Tank = { ...tank, status, activities };
   await saveTank(updated);
   return updated;
 }

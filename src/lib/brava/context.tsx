@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { ActivityStatus, Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./types";
+import { Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./types";
 import { withDerived } from "./selectors";
 import { todayISO } from "./date-utils";
 
@@ -19,11 +19,14 @@ interface ActivityEdit {
   plannedStart?: string;
   durationDays?: number;
   progress?: number;
-  /** An empty string explicitly clears the field — omitting it leaves the stored value untouched. */
+  /**
+   * An empty string explicitly clears the field — omitting it leaves the
+   * stored value untouched. There's no separate status field here: every
+   * activity's status (and the tank's own) is always re-derived server-side
+   * from these dates/progress, see deriveActivityStatus/deriveTankStatus.
+   */
   actualStart?: string;
   actualEnd?: string;
-  /** Manual override — otherwise status is still auto-derived from progress, for a plain progress edit. */
-  status?: ActivityStatus;
 }
 
 type LoadStatus = "loading" | "ready" | "error";
@@ -43,6 +46,8 @@ interface BravaContextValue {
     tankId: string,
     patch: Partial<Pick<Tank, "status" | "notes" | "responsible">>
   ) => void;
+  /** Clears every activity's real dates/progress back to not-yet-started and re-derives status from scratch. */
+  resetTankExecution: (tankId: string) => void;
 }
 
 const BravaContext = createContext<BravaContextValue | null>(null);
@@ -148,6 +153,22 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
     [fetchTanks]
   );
 
+  const resetTankExecution = useCallback(
+    (tankId: string) => {
+      fetch(`/api/tanks/${tankId}/reset-execution`, { method: "POST" })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(await parseErrorMessage(res));
+          const body = await res.json();
+          setTanksRaw((prev) => prev.map((t) => (t.id === tankId ? body.tank : t)));
+        })
+        .catch((err) => {
+          console.error("Falha ao redefinir a execução do tanque:", err);
+          fetchTanks();
+        });
+    },
+    [fetchTanks]
+  );
+
   const tanks = useMemo(() => withDerived(tanksRaw, today), [tanksRaw, today]);
 
   const getTank = useCallback(
@@ -167,6 +188,7 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
     getTank,
     updateActivity,
     updateTankMeta,
+    resetTankExecution,
   };
 
   return <BravaContext.Provider value={value}>{children}</BravaContext.Provider>;

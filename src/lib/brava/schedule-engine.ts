@@ -1,4 +1,4 @@
-import { Activity } from "./types";
+import { Activity, ActivityStatus, TankStatus } from "./types";
 import { STAGE_TEMPLATE } from "./stage-template";
 import { addDays, diffDays } from "./date-utils";
 
@@ -178,4 +178,45 @@ export function overallDeviationDays(activities: Activity[]): number {
   const baselineEnd = activities[activities.length - 1].baselineEnd;
   const plannedEnd = activities[activities.length - 1].plannedEnd;
   return diffDays(baselineEnd, plannedEnd);
+}
+
+/**
+ * The single source of truth for an activity's status — always recomputed
+ * from its own actualStart/actualEnd/progress fields (plus today, for
+ * telling "in progress" from "overdue"), never set independently. This is
+ * what keeps the Gantt, the dashboard summary and the planning table
+ * reading the same story: editing a real date or a progress number is the
+ * only way to change a stage's status, so they can never drift apart like
+ * they used to (a tank whose plan was pushed into the future could still
+ * carry a leftover CONCLUIDO on every activity from before the edit).
+ */
+export function deriveActivityStatus(activity: Activity, todayISO: string): ActivityStatus {
+  if (activity.actualEnd || activity.progress >= 100) return "CONCLUIDO";
+  if (activity.actualStart) return activity.plannedEnd < todayISO ? "ATRASADO" : "ATUAL";
+  return "FUTURO";
+}
+
+/**
+ * The tank-level status, recomputed from the aggregate of its (already
+ * re-derived) activities every time one of them is edited — same reasoning
+ * as deriveActivityStatus. CRITICO and SEM_PROJETO are the two exceptions:
+ * CRITICO is a human escalation call this won't walk back on its own (an
+ * activity edit could otherwise silently downgrade a flagged safety/priority
+ * issue back to plain "Atrasado"), and SEM_PROJETO means there's no
+ * execution plan to derive anything from. Both still yield to the two
+ * unambiguous endpoints — nothing started yet, or everything is done.
+ */
+export function deriveTankStatus(activities: Activity[], currentStatus: TankStatus, todayISO: string): TankStatus {
+  if (currentStatus === "SEM_PROJETO") return currentStatus;
+  if (activities.length === 0) return currentStatus;
+
+  const allConcluded = activities.every((a) => a.status === "CONCLUIDO");
+  if (allConcluded) return "CONCLUIDO";
+
+  const anyStarted = activities.some((a) => Boolean(a.actualStart));
+  if (!anyStarted) return "PROGRAMADO";
+
+  const anyLate = activities.some((a) => a.status !== "CONCLUIDO" && a.plannedEnd < todayISO);
+  if (currentStatus === "CRITICO") return currentStatus;
+  return anyLate ? "ATRASADO" : "EM_EXECUCAO";
 }

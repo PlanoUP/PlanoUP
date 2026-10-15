@@ -16,6 +16,11 @@ export function deriveTank(tank: Tank, todayISO: string): TankDerived {
 
   const progress = tank.status === "CONCLUIDO" ? 100 : weightedProgress(activities);
   const plannedEnd = last?.plannedEnd ?? "";
+  // Nothing has actually begun while the tank is still PROGRAMADO (or has no
+  // project at all) — any actualStart sitting on an activity at that point
+  // is leftover from a previous cycle, never real progress on this one, so
+  // it shouldn't surface as if it were.
+  const hasStarted = tank.status !== "PROGRAMADO" && tank.status !== "SEM_PROJETO";
 
   const daysToInternalInspection = getDaysToInspection(tank.nextInternalInspection, todayISO);
 
@@ -23,7 +28,7 @@ export function deriveTank(tank: Tank, todayISO: string): TankDerived {
     plannedStart: first?.plannedStart ?? "",
     plannedEnd,
     baselinePlannedEnd: last?.baselineEnd ?? "",
-    actualStart: first?.actualStart,
+    actualStart: hasStarted ? first?.actualStart : undefined,
     actualEnd: tank.status === "CONCLUIDO" ? last?.actualEnd : undefined,
     progress,
     daysRemaining: tank.status === "CONCLUIDO" || !plannedEnd ? null : diffDays(todayISO, plannedEnd),
