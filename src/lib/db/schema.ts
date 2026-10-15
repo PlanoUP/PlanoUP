@@ -1,6 +1,15 @@
 import { getSql } from "./client";
 
-const TABLES = ["tanks", "materials", "cost_entries", "map_coordinates"];
+const TABLES = [
+  "tanks",
+  "materials",
+  "cost_entries",
+  "map_coordinates",
+  "equipment",
+  "equipment_materials",
+  "equipment_cost_entries",
+  "equipment_map_coordinates",
+];
 
 /** Postgres error codes that mean "the table exists now" — the exact outcome CREATE TABLE IF NOT EXISTS was asked for. */
 const BENIGN_RACE_CODES = new Set([

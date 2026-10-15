@@ -1,0 +1,151 @@
+// Real equipment inventory for U-260 and U-270, as sent by the user — every
+// tag and type transcribed exactly as given, nothing invented. All start as
+// SEM_PROJETO (cadastro inicial, sem manutenção lançada) since no real
+// schedule/progress data exists yet — same baseline pattern used for the
+// tank inventory-only entries. TQ-28001/02/03 were listed under U-270 but
+// are tanks already tracked in the Tanques module — excluded here to avoid
+// double-tracking the same asset in two places.
+
+import { Equipment, EquipmentType, ProcessUnit } from "../types";
+
+function slug(tag: string): string {
+  return tag
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-");
+}
+
+function item(tag: string, unit: ProcessUnit, equipmentType: EquipmentType): Equipment {
+  return {
+    id: slug(tag),
+    tag,
+    unit,
+    equipmentType,
+    status: "SEM_PROJETO",
+    notes: "Cadastro inicial a partir do inventário de equipamentos — sem projeto de manutenção ativo; nenhuma data de cronograma foi definida.",
+    activities: [],
+  };
+}
+
+export const EQUIPMENT_SEED: Equipment[] = [
+  // ── U-260 ──────────────────────────────────────────────────────────────
+  item("F-26001", "U-260", "FORNO"),
+  item("F-24001", "U-260", "FORNO"),
+  item("T-26001", "U-260", "TORRE"),
+  item("T-26002", "U-260", "TORRE"),
+  item("T-26003", "U-260", "TORRE"),
+  item("P-26003", "U-260", "PERMUTADOR"),
+  item("P-26012", "U-260", "PERMUTADOR"),
+  item("P-26013", "U-260", "PERMUTADOR"),
+  item("P-26014A", "U-260", "PERMUTADOR"),
+  item("P-26014B", "U-260", "PERMUTADOR"),
+  item("P-260-101A", "U-260", "PERMUTADOR"),
+  item("P-260-101B", "U-260", "PERMUTADOR"),
+  item("P-260-102A", "U-260", "PERMUTADOR"),
+  item("P-260-102B", "U-260", "PERMUTADOR"),
+  item("P-26004", "U-260", "PERMUTADOR"),
+  item("P-26009A", "U-260", "PERMUTADOR"),
+  item("P-26009B", "U-260", "PERMUTADOR"),
+  item("P-26010", "U-260", "PERMUTADOR"),
+  item("P-26006B", "U-260", "AIR COOLER"),
+  item("P-26006D", "U-260", "AIR COOLER"),
+  item("P-26008B", "U-260", "AIR COOLER"),
+  item("P-26006C", "U-260", "AIR COOLER"),
+  item("P-26006A", "U-260", "AIR COOLER"),
+  item("P-26007A", "U-260", "AIR COOLER"),
+  item("P-26007B", "U-260", "AIR COOLER"),
+  item("P-26007C", "U-260", "AIR COOLER"),
+  item("P-26007D", "U-260", "AIR COOLER"),
+  item("P-26008A", "U-260", "AIR COOLER"),
+  item("P-26011", "U-260", "AIR COOLER"),
+  item("P-260-105", "U-260", "AIR COOLER"),
+  item("P-260-108", "U-260", "AIR COOLER"),
+  item("V-26003", "U-260", "VASO"),
+  item("TS-26001", "U-260", "VASO"),
+  item("TS-26002", "U-260", "VASO"),
+  item("V-26002", "U-260", "VASO"),
+  item("V-26006", "U-260", "VASO"),
+  item("V-26007", "U-260", "VASO"),
+  item("V-26010", "U-260", "VASO"),
+  item("V-26009", "U-260", "VASO"),
+  item("V-26050", "U-260", "VASO"),
+  item("V-26051", "U-260", "VASO"),
+  item("V-24011", "U-260", "VASO"),
+  item("V-26005", "U-260", "VASO"),
+  item("TB-260-01", "U-260", "TUBULACAO"),
+  item("TB-260-03", "U-260", "TUBULACAO"),
+  item("TB-260-04", "U-260", "TUBULACAO"),
+  item("TB-260-05", "U-260", "TUBULACAO"),
+  item("TB-260-06", "U-260", "TUBULACAO"),
+  item("TB-260-10", "U-260", "TUBULACAO"),
+  item("TB-260-11", "U-260", "TUBULACAO"),
+  item("TB-260-12", "U-260", "TUBULACAO"),
+  item("TB-260-13", "U-260", "TUBULACAO"),
+  item("TB-260-15", "U-260", "TUBULACAO"),
+  item("TB-260-16", "U-260", "TUBULACAO"),
+  item("TB-260-17", "U-260", "TUBULACAO"),
+
+  // ── U-270 ──────────────────────────────────────────────────────────────
+  item("F-27001", "U-270", "FORNO"),
+  item("T-27001", "U-270", "TORRE"),
+  item("T-27002", "U-270", "TORRE"),
+  item("T-27003", "U-270", "TORRE"),
+  item("P-27003A", "U-270", "PERMUTADOR"),
+  item("P-27003B", "U-270", "PERMUTADOR"),
+  item("P-27004A", "U-270", "PERMUTADOR"),
+  item("P-27004B", "U-270", "PERMUTADOR"),
+  item("P-27004C", "U-270", "PERMUTADOR"),
+  item("P-27016A", "U-270", "PERMUTADOR"),
+  item("P-27016B", "U-270", "PERMUTADOR"),
+  item("P-270-102", "U-270", "PERMUTADOR"),
+  item("P-27015A", "U-270", "PERMUTADOR"),
+  item("P-27015B", "U-270", "PERMUTADOR"),
+  item("P-270-101", "U-270", "PERMUTADOR"),
+  item("P-UH-27001A", "U-270", "PERMUTADOR"),
+  item("P-UH-27001B", "U-270", "PERMUTADOR"),
+  item("P-27009", "U-270", "PERMUTADOR"),
+  item("P-27010", "U-270", "PERMUTADOR"),
+  item("P-27014-03", "U-270", "AIR COOLER"),
+  item("P-27011-01", "U-270", "AIR COOLER"),
+  item("P-27011-02", "U-270", "AIR COOLER"),
+  item("P-27011-03", "U-270", "AIR COOLER"),
+  item("P-27011-04", "U-270", "AIR COOLER"),
+  item("P-27012", "U-270", "AIR COOLER"),
+  item("P-27013", "U-270", "AIR COOLER"),
+  item("P-27014-01", "U-270", "AIR COOLER"),
+  item("P-27014-02", "U-270", "AIR COOLER"),
+  item("P-27014-04", "U-270", "AIR COOLER"),
+  item("P-27014-05", "U-270", "AIR COOLER"),
+  item("P-27014-06", "U-270", "AIR COOLER"),
+  item("V-27002", "U-270", "VASO"),
+  item("V-27005", "U-270", "VASO"),
+  item("V-27007", "U-270", "VASO"),
+  item("V-5336-01", "U-270", "VASO"),
+  item("V-28001", "U-270", "VASO"),
+  item("V-28002", "U-270", "VASO"),
+  item("V-28003", "U-270", "VASO"),
+  item("V-28004", "U-270", "VASO"),
+  item("V-28005", "U-270", "VASO"),
+  item("DL-27001A", "U-270", "VASO"),
+  item("DL-27001B", "U-270", "VASO"),
+  item("V-27001", "U-270", "VASO"),
+  item("V-27006", "U-270", "VASO"),
+  item("V-54003A", "U-270", "VASO"),
+  item("V-27051", "U-270", "VASO"),
+  item("FT-27002", "U-270", "FILTRO"),
+  // TQ-28001, TQ-28002, TQ-28003 — tanques, já rastreados no módulo Tanques.
+  item("TU-270-01", "U-270", "TUBULACAO"),
+  item("TU-270-02", "U-270", "TUBULACAO"),
+  item("TU-270-04", "U-270", "TUBULACAO"),
+  item("TU-270-05", "U-270", "TUBULACAO"),
+  item("TU-270-06", "U-270", "TUBULACAO"),
+  item("TU-270-07", "U-270", "TUBULACAO"),
+  item("TU-270-08", "U-270", "TUBULACAO"),
+  item("TU-270-09", "U-270", "TUBULACAO"),
+  item("TU-270-10", "U-270", "TUBULACAO"),
+  item("TU-270-11", "U-270", "TUBULACAO"),
+  item("TU-270-15", "U-270", "TUBULACAO"),
+  item("TU-270-16", "U-270", "TUBULACAO"),
+  item("TU-270-18", "U-270", "TUBULACAO"),
+];
