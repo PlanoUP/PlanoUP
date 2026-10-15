@@ -47,6 +47,29 @@ export interface MapCoordinateOverride {
 
 export type MapCoordinateOverrideInput = Pick<MapCoordinateOverride, "mapId" | "tag" | "x" | "y">;
 
+/**
+ * A callout box's position, manually dragged on the map by an editor —
+ * persisted to the database the same way as MapCoordinateOverride, so it
+ * takes effect immediately for everyone. Overrides calloutLayout.ts's
+ * auto-computed fan-out for that one tag. Stored as a CSS-pixel {dx, dy}
+ * offset from the tank's own dot — the same unit computeCalloutLayout
+ * itself produces, with the same already-accepted imprecision: it doesn't
+ * rescale between very different rendered viewport sizes (e.g. saved while
+ * fullscreen, then viewed embedded), which the auto layout doesn't solve
+ * for either.
+ */
+export interface MapCalloutOffsetOverride {
+  id: string; // `${mapId}:${TAG}`
+  mapId: AssetMapId;
+  tag: string;
+  dx: number;
+  dy: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type MapCalloutOffsetOverrideInput = Pick<MapCalloutOffsetOverride, "mapId" | "tag" | "dx" | "dy">;
+
 export interface AssetMapConfig {
   id: AssetMapId;
   name: string;

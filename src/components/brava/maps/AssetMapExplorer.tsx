@@ -5,7 +5,7 @@ import { List } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
-import { useMapCoordinatesData } from "@/lib/brava/maps/context";
+import { useMapCoordinatesData, useMapCalloutOffsetsData } from "@/lib/brava/maps/context";
 import { AssetMapId, MapQuickFilter } from "@/lib/brava/maps/types";
 import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSummary, matchesMapFilter, findTankAcrossMaps } from "@/lib/brava/maps/selectors";
 import { computeCalloutLayout } from "@/lib/brava/maps/calloutLayout";
@@ -29,6 +29,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const { tanks, today } = useBravaData();
   const { isEditor } = useEditAuth();
   const { coordinates: overrides, saveCoordinate, deleteCoordinate } = useMapCoordinatesData();
+  const { offsets: calloutOffsetOverrides, saveOffset: saveCalloutOffset, deleteOffset: deleteCalloutOffset } = useMapCalloutOffsetsData();
   const [activeMapId, setActiveMapId] = useState<AssetMapId>(() => {
     if (initialTag) return getMapByTank(initialTag, overrides)?.id ?? "geral";
     return "geral";
@@ -44,6 +45,10 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   // for the callout layout instead of the image's native file dimensions —
   // see the comment on calloutLayout below for why that distinction matters.
   const [viewportSize, setViewportSize] = useState<{ width: number; height: number } | null>(null);
+  // Current zoom factor from MapZoomPan — needed to convert a callout drag's
+  // raw pointer-movement px into the (unscaled) layer space the offset
+  // itself is expressed in; see MapHotspot's onBoxPointerMove.
+  const [mapScale, setMapScale] = useState(1);
 
   const zoomPanRef = useRef<MapZoomPanHandle>(null);
   const lastAutoJumpRef = useRef<string | null>(null);
@@ -77,9 +82,18 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     const obstacles = visibleEntries
       .filter((e) => e.coordinate)
       .map((e) => ({ tag: e.tag, xPct: e.coordinate!.x, yPct: e.coordinate!.y }));
-    return computeCalloutLayout(points, layoutWidth, layoutHeight, obstacles);
+    const layout = computeCalloutLayout(points, layoutWidth, layoutHeight, obstacles);
+    // A manually dragged position (saved via MapHotspot's drag handling)
+    // wins over the auto-computed one for that tag — the auto layout still
+    // decides every OTHER box, which don't know to avoid a dragged box in
+    // return, same tradeoff the obstacle pass already accepts for ordinary
+    // tank icons that have no callout of their own.
+    for (const o of calloutOffsetOverrides) {
+      if (o.mapId === activeMapId && o.tag in layout) layout[o.tag] = { dx: o.dx, dy: o.dy };
+    }
+    return layout;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleEntries, layoutWidth, layoutHeight]);
+  }, [visibleEntries, layoutWidth, layoutHeight, calloutOffsetOverrides, activeMapId]);
 
   // Independent of the quick-filter chips/search — the fullscreen video
   // carousel always cycles every tank in maintenance on this area, not just
@@ -187,6 +201,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           fullscreenTickerItems={fullscreenTickerItems}
           maintenanceVideoTags={maintenanceVideoTags}
           onViewportSizeChange={setViewportSize}
+          onScaleChange={setMapScale}
         >
           <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />
           {visibleEntries.map((e) => (
@@ -202,6 +217,9 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
                 setSelectedTag(e.tag);
                 setHighlightedTag(e.tag);
               }}
+              draggable={IS_DEV || isEditor}
+              mapScale={mapScale}
+              onCalloutOffsetChange={(dx, dy) => saveCalloutOffset({ mapId: activeMapId, tag: e.tag, dx, dy })}
             />
           ))}
         </MapZoomPan>
@@ -234,6 +252,8 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
               setCalibrationPoint(null);
             }}
             onRemove={(id) => deleteCoordinate(id)}
+            draggedCallouts={calloutOffsetOverrides.filter((o) => o.mapId === activeMapId)}
+            onResetCallout={(id) => deleteCalloutOffset(id)}
           />
         )}
       </div>

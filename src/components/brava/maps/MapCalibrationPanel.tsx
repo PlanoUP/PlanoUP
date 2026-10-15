@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Crosshair, Copy, Check, Save, Trash2 } from "lucide-react";
-import { MapCoordinateOverride } from "@/lib/brava/maps/types";
+import { MapCalloutOffsetOverride, MapCoordinateOverride } from "@/lib/brava/maps/types";
 
 /**
  * Click anywhere on the map to capture its %X/%Y, pick which TAG that is,
@@ -22,6 +22,8 @@ export default function MapCalibrationPanel({
   savedCoordinates,
   onSave,
   onRemove,
+  draggedCallouts,
+  onResetCallout,
 }: {
   active: boolean;
   onToggle: () => void;
@@ -30,6 +32,9 @@ export default function MapCalibrationPanel({
   savedCoordinates: MapCoordinateOverride[];
   onSave: (tag: string, point: { x: number; y: number }) => void;
   onRemove: (id: string) => void;
+  /** Callout boxes manually dragged on this map — lets an editor undo one back to the auto-computed layout without touching the database directly. */
+  draggedCallouts?: MapCalloutOffsetOverride[];
+  onResetCallout?: (id: string) => void;
 }) {
   const [tag, setTag] = useState(tankIds[0] ?? "");
   const [copied, setCopied] = useState(false);
@@ -120,6 +125,32 @@ export default function MapCalibrationPanel({
                         onClick={() => onRemove(c.id)}
                         className="shrink-0 rounded-brava-sm p-1 text-brava-text-secondary transition-colors hover:bg-brava-danger-bg hover:text-brava-danger"
                         title="Remover"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
+
+          {draggedCallouts && draggedCallouts.length > 0 && (
+            <div className="border-t border-brava-border pt-2">
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-brava-text-secondary">
+                Informativos reposicionados ({draggedCallouts.length})
+              </p>
+              <ul className="max-h-40 space-y-1 overflow-y-auto">
+                {draggedCallouts
+                  .slice()
+                  .sort((a, b) => a.tag.localeCompare(b.tag))
+                  .map((o) => (
+                    <li key={o.id} className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="truncate font-mono text-brava-text">{o.tag}</span>
+                      <button
+                        type="button"
+                        onClick={() => onResetCallout?.(o.id)}
+                        className="shrink-0 rounded-brava-sm p-1 text-brava-text-secondary transition-colors hover:bg-brava-danger-bg hover:text-brava-danger"
+                        title="Redefinir posição automática"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>

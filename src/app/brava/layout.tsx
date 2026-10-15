@@ -4,7 +4,7 @@ import "@/styles/brava-tokens.css";
 import { BravaDataProvider } from "@/lib/brava/context";
 import { MaterialsDataProvider } from "@/lib/brava/materials/context";
 import { CostsDataProvider } from "@/lib/brava/costs/context";
-import { MapCoordinatesProvider } from "@/lib/brava/maps/context";
+import { MapCoordinatesProvider, MapCalloutOffsetsProvider } from "@/lib/brava/maps/context";
 import { UnitsDataProvider } from "@/lib/brava/units/context";
 import { EquipmentMaterialsDataProvider } from "@/lib/brava/units/materials/context";
 import { EquipmentCostsDataProvider } from "@/lib/brava/units/costs/context";
@@ -37,17 +37,19 @@ export default function BravaLayout({ children }: { children: React.ReactNode })
             <MaterialsDataProvider>
               <CostsDataProvider>
                 <MapCoordinatesProvider>
-                  <UnitsDataProvider>
-                    <EquipmentMaterialsDataProvider>
-                      <EquipmentCostsDataProvider>
-                        <EquipmentMapCoordinatesProvider>
-                          <Sidebar />
-                          <MobileTopBar />
-                          <div className="lg:pl-64">{children}</div>
-                        </EquipmentMapCoordinatesProvider>
-                      </EquipmentCostsDataProvider>
-                    </EquipmentMaterialsDataProvider>
-                  </UnitsDataProvider>
+                  <MapCalloutOffsetsProvider>
+                    <UnitsDataProvider>
+                      <EquipmentMaterialsDataProvider>
+                        <EquipmentCostsDataProvider>
+                          <EquipmentMapCoordinatesProvider>
+                            <Sidebar />
+                            <MobileTopBar />
+                            <div className="lg:pl-64">{children}</div>
+                          </EquipmentMapCoordinatesProvider>
+                        </EquipmentCostsDataProvider>
+                      </EquipmentMaterialsDataProvider>
+                    </UnitsDataProvider>
+                  </MapCalloutOffsetsProvider>
                 </MapCoordinatesProvider>
               </CostsDataProvider>
             </MaterialsDataProvider>

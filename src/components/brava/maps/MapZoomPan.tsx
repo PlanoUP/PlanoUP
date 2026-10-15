@@ -63,6 +63,8 @@ const MapZoomPan = forwardRef<
      * happens to render at exactly its native resolution.
      */
     onViewportSizeChange?: (size: { width: number; height: number }) => void;
+    /** Reports the current zoom factor whenever it changes — callers dragging something inside the transformed layer (e.g. a callout box) need this to convert pointer-movement px into the layer's own (unscaled) coordinate space. */
+    onScaleChange?: (scale: number) => void;
   }
 >(function MapZoomPan(
   {
@@ -75,6 +77,7 @@ const MapZoomPan = forwardRef<
     fullscreenTickerItems,
     maintenanceVideoTags,
     onViewportSizeChange,
+    onScaleChange,
   },
   ref
 ) {
@@ -144,6 +147,11 @@ const MapZoomPan = forwardRef<
       return () => observer.disconnect();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onViewportSizeChange]);
+
+    useEffect(() => {
+      onScaleChange?.(scale);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [scale, onScaleChange]);
 
     function toggleFullscreen() {
       const el = fullscreenRef.current;

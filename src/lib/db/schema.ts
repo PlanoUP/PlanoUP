@@ -5,6 +5,7 @@ const TABLES = [
   "materials",
   "cost_entries",
   "map_coordinates",
+  "map_callout_offsets",
   "equipment",
   "equipment_materials",
   "equipment_cost_entries",

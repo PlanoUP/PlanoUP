@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { INSPECTION_CRITICALITY_META, formatDaysToInspection } from "@/lib/brava/inspection";
 import { STATUS_META } from "@/lib/brava/status-meta";
@@ -15,6 +16,9 @@ export default function MapHotspot({
   highlighted,
   calloutOffset,
   onSelect,
+  draggable,
+  mapScale,
+  onCalloutOffsetChange,
 }: {
   tag: string;
   x: number;
@@ -24,7 +28,27 @@ export default function MapHotspot({
   /** Pre-computed by AssetMapExplorer for every in-maintenance tank on the map at once, so boxes don't collide. */
   calloutOffset?: CalloutOffset;
   onSelect: () => void;
+  /** Lets an editor drag the callout box to a manual position — gated the same way as Modo de Calibração. */
+  draggable?: boolean;
+  /** Current map zoom factor, to convert pointer-movement px into the (unscaled) layer space the offset itself is expressed in. */
+  mapScale?: number;
+  /** Fired once on drop, with the final {dx, dy} to persist — not during the drag itself. */
+  onCalloutOffsetChange?: (dx: number, dy: number) => void;
 }) {
+  // While dragging (or just after dropping, until the parent's own
+  // calloutOffset — recomputed from the saved override — catches up),
+  // this is the source of truth for where the box renders; it takes
+  // priority over the calloutOffset prop so the box and its leader line
+  // track the pointer immediately instead of waiting on a round trip.
+  const [dragOffset, setDragOffset] = useState<CalloutOffset | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ x: number; y: number; base: CalloutOffset } | null>(null);
+
+  useEffect(() => {
+    if (dragOffset && calloutOffset && calloutOffset.dx === dragOffset.dx && calloutOffset.dy === dragOffset.dy) {
+      setDragOffset(null);
+    }
+  }, [calloutOffset, dragOffset]);
   const criticality = tank?.derived.inspectionCriticality ?? "SEM_DATA";
   const meta = INSPECTION_CRITICALITY_META[criticality];
   // Statuses with a real maintenance record and a meaningful progress
@@ -35,10 +59,39 @@ export default function MapHotspot({
   const statusMeta = tank ? STATUS_META[tank.status] : null;
   const accentBorderClass = tank ? STATUS_ACCENT_BORDER[tank.status] : undefined;
   const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
-  const callout = calloutOffset ? toSvgGeometry(calloutOffset) : null;
+  const effectiveOffset = dragOffset ?? calloutOffset;
+  const callout = effectiveOffset ? toSvgGeometry(effectiveOffset) : null;
   // Staggered so dozens of dots don't all blink in lockstep — a cheap,
   // stable per-tag offset keeps the map feeling alive instead of static.
   const pulseDelay = (hashTag(tag) % 24) / 10;
+
+  function onBoxPointerDown(e: React.PointerEvent) {
+    if (!draggable || !callout) return;
+    e.stopPropagation(); // this is the box being grabbed, not the hotspot button being clicked
+    dragStartRef.current = { x: e.clientX, y: e.clientY, base: { dx: callout.dx, dy: callout.dy } };
+    setIsDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+
+  function onBoxPointerMove(e: React.PointerEvent) {
+    if (!dragStartRef.current) return;
+    const { x: startX, y: startY, base } = dragStartRef.current;
+    const scale = mapScale || 1;
+    setDragOffset({ dx: base.dx + (e.clientX - startX) / scale, dy: base.dy + (e.clientY - startY) / scale });
+  }
+
+  function onBoxPointerUp(e: React.PointerEvent) {
+    if (!dragStartRef.current) return;
+    const moved = Math.hypot(e.clientX - dragStartRef.current.x, e.clientY - dragStartRef.current.y);
+    dragStartRef.current = null;
+    setIsDragging(false);
+    if (moved > 4 && dragOffset) {
+      e.stopPropagation(); // was an actual drag — don't let the click bubble into onSelect
+      onCalloutOffsetChange?.(dragOffset.dx, dragOffset.dy);
+    } else {
+      setDragOffset(null); // negligible movement — treat as a plain click and let it bubble as before
+    }
+  }
 
   return (
     <button
@@ -85,11 +138,16 @@ export default function MapHotspot({
             />
           </svg>
           <span
+            onPointerDown={onBoxPointerDown}
+            onPointerMove={onBoxPointerMove}
+            onPointerUp={onBoxPointerUp}
+            onPointerCancel={onBoxPointerUp}
             className={cn(
-              "pointer-events-none absolute z-20 flex w-[126px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-2.5 py-1.5 shadow-brava-lg",
-              accentBorderClass
+              "absolute z-20 flex w-[126px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-2.5 py-1.5 shadow-brava-lg",
+              accentBorderClass,
+              draggable ? (isDragging ? "cursor-grabbing" : "cursor-grab hover:ring-2 hover:ring-brava-accent/60") : "pointer-events-none"
             )}
-            style={{ left: callout.dx, top: callout.dy, borderLeftWidth: 3 }}
+            style={{ left: callout.dx, top: callout.dy, borderLeftWidth: 3, touchAction: draggable ? "none" : undefined }}
           >
             <span className="flex items-center justify-between gap-1.5 whitespace-nowrap">
               <span className="font-mono text-[10px] font-bold text-brava-blue-dark">{tag}</span>
