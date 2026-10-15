@@ -1,4 +1,5 @@
 import LiveClock from "./LiveClock";
+import LiveDate from "./LiveDate";
 
 export interface FullscreenSummary {
   emExecucao: number;
@@ -11,10 +12,7 @@ export default function FullscreenControlBar({ title, summary }: { title: string
   return (
     <div className="pointer-events-none absolute left-1/2 top-10 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5">
       <div className="flex items-center gap-3 rounded-brava-sm border border-white/15 bg-black/65 px-4 py-2 text-white shadow-brava-lg backdrop-blur-sm">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_6px_2px_rgba(239,68,68,0.6)] animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-wide text-red-400">Ao Vivo</span>
-        </span>
+        <LiveDate className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide text-white/60" />
         <span className="h-4 w-px bg-white/20" />
         <span className="whitespace-nowrap text-center text-[13px] font-bold uppercase tracking-[0.12em]">
           {title}

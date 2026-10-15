@@ -118,10 +118,13 @@ export function computeCalloutLayout(
     // box must steer clear of, independent of how the boxes sit relative to
     // each other — otherwise a well-spaced box can still land on top of
     // some OTHER tank's icon just because that tank has no callout of its
-    // own competing for the same space.
+    // own competing for the same space. This INCLUDES a node's own dot: the
+    // initial BASE_DX/DY offset clears it in isolation, but a push from
+    // resolving a collision with a neighboring box or dot can shove a box
+    // right back on top of its own anchor if that anchor isn't itself kept
+    // as a no-go zone throughout every iteration.
     for (const a of nodes) {
       for (const o of obstacleNodes) {
-        if (o.tag === a.tag) continue; // a tank's own dot is its callout's anchor, already kept clear by BASE_DX/DY
         const ax = a.dotX + a.dx;
         const ay = a.dotY + a.dy;
         const overlapX = BOX_WIDTH / 2 + OBSTACLE_RADIUS - Math.abs(ax - o.x);
