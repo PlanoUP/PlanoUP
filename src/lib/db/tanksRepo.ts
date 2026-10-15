@@ -55,17 +55,6 @@ async function reconcilePlaceholderMetadata(): Promise<void> {
       continue;
     }
 
-    // A tank the seed backfilled into the historical "concluded campaign"
-    // after it was first seeded at the (now stale) "Programado" baseline —
-    // e.g. TQ-41005, whose activities already carry real per-stage progress
-    // and completion dates, just under the wrong top-level status. Only the
-    // status field is corrected; activities are left alone since they're
-    // already accurate.
-    if (tank.status === "PROGRAMADO" && seed.status === "CONCLUIDO") {
-      await saveTank({ ...tank, status: "CONCLUIDO" });
-      continue;
-    }
-
     const patch: Partial<Pick<Tank, "area" | "product" | "tankType">> = {};
     if (tank.area === PLACEHOLDER && seed.area !== PLACEHOLDER) patch.area = seed.area;
     if (tank.product === PLACEHOLDER && seed.product !== PLACEHOLDER) patch.product = seed.product;
