@@ -43,10 +43,17 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
     }
   }, [tags.length, index]);
 
-  function clearTimers() {
+  // Kept separate from the transition timer on purpose: this one gets
+  // reset every time `index` changes (see the effect below), and clearing
+  // both together there used to cancel the reopen timer `goTo` had just
+  // scheduled — the panel would fold shut and never come back.
+  function clearAdvanceTimer() {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     advanceTimerRef.current = null;
+  }
+
+  function clearTransitionTimer() {
+    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     transitionTimerRef.current = null;
   }
 
@@ -59,7 +66,7 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
     if (target === index) return;
     setCollapsed(true);
     setIndex(target);
-    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    clearTransitionTimer();
     transitionTimerRef.current = setTimeout(() => {
       setDisplayedIndex(target);
       setCollapsed(false);
@@ -70,17 +77,20 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
   // than expected runtime), still advance after the nominal clip length so
   // the carousel never gets stuck on one tank.
   useEffect(() => {
-    clearTimers();
+    clearAdvanceTimer();
     setMissing(false);
     if (tags.length === 0) return;
     advanceTimerRef.current = setTimeout(() => goTo(index + 1), VIDEO_DWELL_MS);
-    return () => {
-      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-    };
+    return clearAdvanceTimer;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, tags.length]);
 
-  useEffect(() => clearTimers, []);
+  useEffect(() => {
+    return () => {
+      clearAdvanceTimer();
+      clearTransitionTimer();
+    };
+  }, []);
 
   if (tags.length === 0) return null;
   const tag = tags[displayedIndex];
@@ -93,7 +103,7 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
 
   function handleError() {
     setMissing(true);
-    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    clearAdvanceTimer();
     advanceTimerRef.current = setTimeout(() => goTo(index + 1), MISSING_VIDEO_DWELL_MS);
   }
 
