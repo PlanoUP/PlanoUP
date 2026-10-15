@@ -11,7 +11,8 @@ import { cn } from "@/lib/brava/cn";
 // keeps old blobs unless pruned separately, which is a different concern.
 const VIDEO_DWELL_MS = 60_000; // ~1 min per clip, matching the real footage length
 const MISSING_VIDEO_DWELL_MS = 6_000; // short dwell on a tag with no clip yet, so the carousel doesn't stall
-const TRANSITION_MS = 350; // fade-to-black dip between two tanks' clips
+const CLOSE_MS = 300; // the panel folding shut before the next tank's clip loads underneath
+const OPEN_MS = 340; // unfurling back open once it has
 
 function videoSrcForTag(tag: string): string {
   return `/videos/brava/tanques/${tag}.mp4`;
@@ -20,10 +21,19 @@ function videoSrcForTag(tag: string): string {
 export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
   const [index, setIndex] = useState(0);
   const [displayedIndex, setDisplayedIndex] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
+  // Drives the whole panel's fold shut/open animation — true while the next
+  // tank's clip is being swapped in underneath, hidden from view.
+  const [collapsed, setCollapsed] = useState(true);
   const [missing, setMissing] = useState(false);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Entrance: the panel mounts folded shut, then opens — so appearing in
+  // fullscreen reads as "sliding in" rather than popping in abruptly.
+  useEffect(() => {
+    const t = setTimeout(() => setCollapsed(false), 20);
+    return () => clearTimeout(t);
+  }, []);
 
   // Keep the active index valid if the tag list changes size (map/area switch).
   useEffect(() => {
@@ -40,19 +50,20 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
     transitionTimerRef.current = null;
   }
 
-  // Dip to black, swap the clip underneath while hidden, then fade back in —
-  // a clean transition regardless of the two clips' actual content/timing.
+  // Fold the panel shut, swap the clip underneath while it's hidden, then
+  // unfurl it back open on the next tank — a transition on the carousel
+  // itself, not just a cut inside the video.
   function goTo(next: number) {
     if (tags.length === 0) return;
     const target = ((next % tags.length) + tags.length) % tags.length;
     if (target === index) return;
-    setTransitioning(true);
+    setCollapsed(true);
     setIndex(target);
     if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     transitionTimerRef.current = setTimeout(() => {
       setDisplayedIndex(target);
-      setTransitioning(false);
-    }, TRANSITION_MS);
+      setCollapsed(false);
+    }, CLOSE_MS);
   }
 
   // Safety net: if a clip never fires onEnded (stalled load, longer/shorter
@@ -87,7 +98,13 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
   }
 
   return (
-    <div className="absolute bottom-3 right-16 z-20 w-72 overflow-hidden rounded-brava-md border border-white/15 bg-black/70 shadow-brava-lg backdrop-blur-sm sm:w-80">
+    <div
+      className={cn(
+        "absolute bottom-3 right-16 z-20 w-72 origin-bottom overflow-hidden rounded-brava-md border border-white/15 bg-black/70 shadow-brava-lg backdrop-blur-sm ease-in-out sm:w-80",
+        collapsed ? "scale-x-90 scale-y-0 opacity-0" : "scale-x-100 scale-y-100 opacity-100"
+      )}
+      style={{ transitionProperty: "transform, opacity", transitionDuration: `${collapsed ? CLOSE_MS : OPEN_MS}ms` }}
+    >
       <div key={tag} className="flex items-center justify-between gap-2 px-3 py-1.5 animate-video-caption-in">
         <span className="truncate font-mono text-[11px] font-bold text-white">{tag}</span>
         <span className="shrink-0 text-[10px] font-semibold text-white/60">
@@ -114,15 +131,6 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
             className="h-full w-full object-cover animate-video-fade-in"
           />
         )}
-
-        {/* Fade-to-black dip, driven purely by CSS transition — covers the swap underneath. */}
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0 bg-black transition-opacity ease-in-out",
-            transitioning ? "opacity-100" : "opacity-0"
-          )}
-          style={{ transitionDuration: `${TRANSITION_MS}ms` }}
-        />
       </div>
 
       {tags.length > 1 && (
