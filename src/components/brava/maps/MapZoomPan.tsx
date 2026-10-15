@@ -163,7 +163,7 @@ const MapZoomPan = forwardRef<
           />
         )}
         {isFullscreen && fullscreenLabel && (
-          <div className="pointer-events-none absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-brava-sm border border-white/15 bg-black/60 px-4 py-2 text-center text-[13px] font-bold uppercase tracking-[0.12em] text-white shadow-brava-lg backdrop-blur-sm">
+          <div className="pointer-events-none absolute left-1/2 top-10 z-30 -translate-x-1/2 rounded-brava-sm border border-white/15 bg-black/60 px-4 py-2 text-center text-[13px] font-bold uppercase tracking-[0.12em] text-white shadow-brava-lg backdrop-blur-sm">
             {fullscreenLabel}
           </div>
         )}
