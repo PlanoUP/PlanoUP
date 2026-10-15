@@ -51,11 +51,12 @@ export default function MapHotspot({
   }, [calloutOffset, dragOffset]);
   const criticality = tank?.derived.inspectionCriticality ?? "SEM_DATA";
   const meta = INSPECTION_CRITICALITY_META[criticality];
-  // Statuses with a real maintenance record and a meaningful progress
-  // number to show at a glance — actively worked, overdue while worked, or
-  // finished. Excludes PROGRAMADO (nothing has actually started yet) and
-  // SEM_PROJETO (no project at all).
-  const showsProgress = tank ? ["EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"].includes(tank.status) : false;
+  // Statuses with a real, dated maintenance plan — a meaningful progress
+  // number to show at a glance, 0% included (PROGRAMADO: scheduled, next up,
+  // nothing started yet). Excludes SEM_PROJETO, which has no plan at all.
+  const showsProgress = tank
+    ? ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"].includes(tank.status)
+    : false;
   const statusMeta = tank ? STATUS_META[tank.status] : null;
   const accentBorderClass = tank ? STATUS_ACCENT_BORDER[tank.status] : undefined;
   const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
@@ -213,6 +214,7 @@ const STATUS_LABEL: Record<string, string> = {
 // Literal class names (not built dynamically) so Tailwind's content scanner
 // keeps them in the production build.
 const STATUS_LINE_CLASS: Record<string, string> = {
+  PROGRAMADO: "stroke-brava-text-secondary",
   EM_EXECUCAO: "stroke-brava-blue",
   ATRASADO: "stroke-brava-warning",
   CRITICO: "stroke-brava-danger",
@@ -220,6 +222,7 @@ const STATUS_LINE_CLASS: Record<string, string> = {
 };
 
 const STATUS_ACCENT_BORDER: Record<string, string> = {
+  PROGRAMADO: "border-l-brava-text-secondary",
   EM_EXECUCAO: "border-l-brava-blue",
   ATRASADO: "border-l-brava-warning",
   CRITICO: "border-l-brava-danger",

@@ -2,6 +2,7 @@ import LiveClock from "./LiveClock";
 import LiveDate from "./LiveDate";
 
 export interface FullscreenSummary {
+  programado: number;
   emExecucao: number;
   atrasado: number;
   critico: number;
@@ -22,6 +23,7 @@ export default function FullscreenControlBar({ title, summary }: { title: string
       </div>
 
       <div className="flex items-center gap-3 rounded-brava-sm border border-white/10 bg-black/50 px-3.5 py-1.5 text-[10.5px] font-bold text-white/90 shadow-brava-md backdrop-blur-sm">
+        <KpiChip label="Programados" value={summary.programado} dotClass="bg-white/50" />
         <KpiChip label="Em Execução" value={summary.emExecucao} dotClass="bg-brava-blue" />
         <KpiChip label="Atrasados" value={summary.atrasado} dotClass="bg-brava-warning" />
         <KpiChip label="Críticos" value={summary.critico} dotClass="bg-brava-danger" />

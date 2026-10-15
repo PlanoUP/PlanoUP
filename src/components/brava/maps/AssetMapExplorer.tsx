@@ -23,7 +23,12 @@ import MapAssetListPanel from "./MapAssetListPanel";
 import MapCalibrationPanel from "./MapCalibrationPanel";
 
 const IS_DEV = process.env.NODE_ENV === "development";
-const MAINTENANCE_STATUSES: TankStatus[] = ["EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"];
+// Every status with a real, dated maintenance plan to show on the map — a
+// callout (tag + progress bar), a ticker line, a carousel slot. PROGRAMADO
+// is included: it has confirmed dates and 0% progress is itself meaningful
+// information ("next up"), unlike SEM_PROJETO, which has no plan at all to
+// show anything about.
+const MAINTENANCE_STATUSES: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"];
 
 export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
@@ -104,6 +109,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   // Fullscreen control-bar KPIs and ticker — also independent of the
   // quick-filter chips, same reasoning as the video carousel above.
   const fullscreenSummary = {
+    programado: maintenanceEntries.filter((e) => e.tank!.status === "PROGRAMADO").length,
     emExecucao: maintenanceEntries.filter((e) => e.tank!.status === "EM_EXECUCAO").length,
     atrasado: maintenanceEntries.filter((e) => e.tank!.status === "ATRASADO").length,
     critico: maintenanceEntries.filter((e) => e.tank!.status === "CRITICO").length,
