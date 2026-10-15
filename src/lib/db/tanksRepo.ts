@@ -99,6 +99,16 @@ async function saveTank(tank: Tank): Promise<void> {
   ]);
 }
 
+/**
+ * A `status` in the patch is a request, not a direct write: it's run
+ * through deriveTankStatus (CRITICO/SEM_PROJETO excepted, see there) so it
+ * can't end up contradicting what the activities actually say — e.g.
+ * picking CONCLUIDO here only sticks if every activity really is, which is
+ * also what makes this call idempotent-safe against a stale/delayed
+ * duplicate landing after a later edit (resetTankExecution, another
+ * activity edit) already moved the tank on: it reconciles instead of
+ * blindly clobbering whatever's there.
+ */
 export async function updateTankMeta(
   tankId: string,
   patch: Partial<Pick<Tank, "status" | "notes" | "responsible">>
@@ -106,7 +116,8 @@ export async function updateTankMeta(
   await ensureSchema();
   const tank = await getTank(tankId);
   if (!tank) return null;
-  const updated: Tank = { ...tank, ...patch };
+  const status = patch.status !== undefined ? deriveTankStatus(tank.activities, patch.status, todayISO()) : tank.status;
+  const updated: Tank = { ...tank, ...patch, status };
   await saveTank(updated);
   return updated;
 }
@@ -169,10 +180,20 @@ export async function updateTankActivity(
 
 /**
  * Clears every activity's real-execution data (dates + progress) back to a
- * clean not-yet-started state, then re-derives status from scratch — the
- * one-click fix for a tank whose plan was edited into a new window while
- * its old execution data (a leftover CONCLUIDO/real dates from a previous
- * cycle) was left behind, instead of clearing a dozen date fields by hand.
+ * clean not-yet-started state, re-captures baseline from the CURRENT
+ * planned dates, then re-derives status from scratch — the one-click fix
+ * for a tank whose plan was edited into a new window while its old
+ * execution data (a leftover CONCLUIDO/real dates from a previous cycle)
+ * was left behind.
+ *
+ * Re-capturing baseline matters just as much as clearing the real dates:
+ * baseline is normally never touched after it's first set (it's the fixed
+ * reference deviation is measured against), but a tank being redone years
+ * later for a genuinely new cycle needs a new reference too — otherwise
+ * "Desvio" keeps comparing the new plan against the OLD cycle's baseline
+ * (a multi-year gap that reads as a wild deviation), and the Gantt's time
+ * axis has to stretch to cover both, cramming years of month labels into a
+ * fixed-width chart until they're unreadable.
  */
 export async function resetTankExecution(tankId: string): Promise<Tank | null> {
   await ensureSchema();
@@ -181,7 +202,14 @@ export async function resetTankExecution(tankId: string): Promise<Tank | null> {
 
   const today = todayISO();
   const activities = tank.activities.map((a) => {
-    const reset: Activity = { ...a, progress: 0, actualStart: undefined, actualEnd: undefined };
+    const reset: Activity = {
+      ...a,
+      progress: 0,
+      actualStart: undefined,
+      actualEnd: undefined,
+      baselineStart: a.plannedStart,
+      baselineEnd: a.plannedEnd,
+    };
     return { ...reset, status: deriveActivityStatus(reset, today) };
   });
   const status = deriveTankStatus(activities, tank.status, today);

@@ -46,7 +46,9 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
 
   function handleResetExecution() {
     const ok = window.confirm(
-      "Limpar início/término real e avanço de TODAS as atividades deste tanque, voltando o status para Programado? Essa ação não afeta as datas planejadas."
+      "Limpar início/término real e avanço de TODAS as atividades deste tanque, voltando o status para Programado? " +
+        "Também recaptura a baseline a partir das datas planejadas atuais (para um novo ciclo de manutenção, " +
+        "não faz sentido medir desvio contra o ciclo anterior) — as datas planejadas em si não mudam."
     );
     if (!ok) return;
     resetTankExecution(tank.id);
