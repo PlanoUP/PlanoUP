@@ -71,7 +71,13 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     const points = visibleEntries
       .filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate)
       .map((e) => ({ tag: e.tag, xPct: e.coordinate!.x, yPct: e.coordinate!.y }));
-    return computeCalloutLayout(points, layoutWidth, layoutHeight);
+    // Every dot currently on screen is an obstacle a callout box must steer
+    // clear of — not just the ones that get a callout of their own —
+    // otherwise a box can end up sitting on top of a NEIGHBORING tank's icon.
+    const obstacles = visibleEntries
+      .filter((e) => e.coordinate)
+      .map((e) => ({ tag: e.tag, xPct: e.coordinate!.x, yPct: e.coordinate!.y }));
+    return computeCalloutLayout(points, layoutWidth, layoutHeight, obstacles);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleEntries, layoutWidth, layoutHeight]);
 

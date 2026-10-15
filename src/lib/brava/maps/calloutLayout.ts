@@ -24,6 +24,11 @@ const BASE_DX = 60;
 const BASE_DY = 46;
 const RELAX_ITERATIONS = 64;
 const MAX_OFFSET = 260; // clamp so a dense cluster can't fling a box far off-image
+// Approximate on-screen footprint of a tank's icon in the photo (CSS px) —
+// keeps a callout box from landing squarely on top of a NEIGHBORING tank,
+// which reads as if the callout belongs to the wrong one. Every tank
+// rendered on the map is an obstacle, not just the ones that get a callout.
+const OBSTACLE_RADIUS = 46;
 
 /**
  * Three starting angles within whichever quadrant a dot's position picks
@@ -53,7 +58,9 @@ function clamp(value: number, max: number): number {
 export function computeCalloutLayout(
   points: CalloutPoint[],
   imageWidth: number,
-  imageHeight: number
+  imageHeight: number,
+  /** Every tank dot rendered on the map (maintenance or not) — callout boxes steer clear of all of them, not just each other. */
+  obstacles: CalloutPoint[] = []
 ): Record<string, CalloutOffset> {
   const nodes = points.map((p) => {
     const signX = p.xPct > 62 ? -1 : 1;
@@ -67,6 +74,12 @@ export function computeCalloutLayout(
       dy: signY * BASE_DY * dyMul,
     };
   });
+
+  const obstacleNodes = obstacles.map((o) => ({
+    tag: o.tag,
+    x: (o.xPct / 100) * imageWidth,
+    y: (o.yPct / 100) * imageHeight,
+  }));
 
   for (let iter = 0; iter < RELAX_ITERATIONS; iter++) {
     let moved = false;
@@ -100,6 +113,32 @@ export function computeCalloutLayout(
         }
       }
     }
+
+    // Box-vs-tank-icon separation: every rendered tank dot is an obstacle a
+    // box must steer clear of, independent of how the boxes sit relative to
+    // each other — otherwise a well-spaced box can still land on top of
+    // some OTHER tank's icon just because that tank has no callout of its
+    // own competing for the same space.
+    for (const a of nodes) {
+      for (const o of obstacleNodes) {
+        if (o.tag === a.tag) continue; // a tank's own dot is its callout's anchor, already kept clear by BASE_DX/DY
+        const ax = a.dotX + a.dx;
+        const ay = a.dotY + a.dy;
+        const overlapX = BOX_WIDTH / 2 + OBSTACLE_RADIUS - Math.abs(ax - o.x);
+        const overlapY = BOX_HEIGHT / 2 + OBSTACLE_RADIUS - Math.abs(ay - o.y);
+        if (overlapX <= 0 || overlapY <= 0) continue;
+
+        moved = true;
+        if (overlapX < overlapY * 1.8) {
+          const sign = Math.sign(ax - o.x) || 1;
+          a.dx = clamp(a.dx + sign * (overlapX + 1), MAX_OFFSET);
+        } else {
+          const sign = Math.sign(ay - o.y) || 1;
+          a.dy = clamp(a.dy + sign * (overlapY + 1), MAX_OFFSET);
+        }
+      }
+    }
+
     if (!moved) break;
   }
 
