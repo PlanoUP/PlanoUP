@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Check, RotateCcw } from "lucide-react";
-import { Tank, TankStatus } from "@/lib/brava/types";
+import { ActivityStatus, Tank, TankStatus } from "@/lib/brava/types";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { formatShort } from "@/lib/brava/date-utils";
@@ -17,6 +17,22 @@ const STATUS_OPTIONS: TankStatus[] = [
   "CRITICO",
   "CONCLUIDO",
 ];
+
+const ACTIVITY_STATUS_OPTIONS: ActivityStatus[] = ["FUTURO", "ATUAL", "ATRASADO", "CONCLUIDO"];
+
+const ACTIVITY_STATUS_LABEL: Record<ActivityStatus, string> = {
+  CONCLUIDO: "Concluído",
+  ATUAL: "Em andamento",
+  FUTURO: "Futuro",
+  ATRASADO: "Atrasado",
+};
+
+const ACTIVITY_STATUS_COLOR: Record<ActivityStatus, string> = {
+  CONCLUIDO: "text-brava-success",
+  ATUAL: "text-brava-blue",
+  FUTURO: "text-brava-text-secondary",
+  ATRASADO: "text-brava-warning",
+};
 
 export default function PlanningEditor({ tank }: { tank: Tank }) {
   const { updateActivity, updateTankMeta } = useBravaData();
@@ -92,6 +108,8 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
               <th className="px-3 py-2.5 font-medium">Início Planejado</th>
               <th className="px-3 py-2.5 font-medium">Duração</th>
               <th className="px-3 py-2.5 font-medium">Término Planejado</th>
+              <th className="px-3 py-2.5 font-medium">Início Real</th>
+              <th className="px-3 py-2.5 font-medium">Término Real</th>
               <th className="px-3 py-2.5 font-medium">Avanço</th>
               <th className="px-3 py-2.5 font-medium">Status</th>
             </tr>
@@ -144,6 +162,37 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
                 <td className="px-3 py-2.5">
                   {editing ? (
                     <input
+                      type="date"
+                      value={activity.actualStart ?? ""}
+                      onChange={(e) => {
+                        // An emptied date input sends "" — the server treats that as an explicit clear, not a no-op.
+                        updateActivity(tank.id, activity.id, { actualStart: e.target.value });
+                        flashSaved();
+                      }}
+                      className="w-[136px] rounded-brava-sm border border-brava-border px-1.5 py-1 text-[12px] focus:border-brava-blue focus:outline-none"
+                    />
+                  ) : (
+                    activity.actualStart ? formatShort(activity.actualStart) : "—"
+                  )}
+                </td>
+                <td className="px-3 py-2.5">
+                  {editing ? (
+                    <input
+                      type="date"
+                      value={activity.actualEnd ?? ""}
+                      onChange={(e) => {
+                        updateActivity(tank.id, activity.id, { actualEnd: e.target.value });
+                        flashSaved();
+                      }}
+                      className="w-[136px] rounded-brava-sm border border-brava-border px-1.5 py-1 text-[12px] focus:border-brava-blue focus:outline-none"
+                    />
+                  ) : (
+                    activity.actualEnd ? formatShort(activity.actualEnd) : "—"
+                  )}
+                </td>
+                <td className="px-3 py-2.5">
+                  {editing ? (
+                    <input
                       type="number"
                       min={0}
                       max={100}
@@ -161,7 +210,24 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
                   )}
                 </td>
                 <td className="px-3 py-2.5">
-                  <ActivityStatusTag status={activity.status} />
+                  {editing ? (
+                    <select
+                      value={activity.status}
+                      onChange={(e) => {
+                        updateActivity(tank.id, activity.id, { status: e.target.value as ActivityStatus });
+                        flashSaved();
+                      }}
+                      className="rounded-brava-sm border border-brava-border bg-brava-white px-1.5 py-1 text-[12px] focus:border-brava-blue focus:outline-none"
+                    >
+                      {ACTIVITY_STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {ACTIVITY_STATUS_LABEL[s]}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <ActivityStatusTag status={activity.status} />
+                  )}
                 </td>
               </tr>
             ))}
@@ -181,18 +247,10 @@ export default function PlanningEditor({ tank }: { tank: Tank }) {
   );
 }
 
-function ActivityStatusTag({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    CONCLUIDO: "text-brava-success",
-    ATUAL: "text-brava-blue",
-    FUTURO: "text-brava-text-secondary",
-    ATRASADO: "text-brava-warning",
-  };
-  const labels: Record<string, string> = {
-    CONCLUIDO: "Concluído",
-    ATUAL: "Em andamento",
-    FUTURO: "Futuro",
-    ATRASADO: "Atrasado",
-  };
-  return <span className={cn("text-[11.5px] font-medium", map[status])}>{labels[status] ?? status}</span>;
+function ActivityStatusTag({ status }: { status: ActivityStatus }) {
+  return (
+    <span className={cn("text-[11.5px] font-medium", ACTIVITY_STATUS_COLOR[status])}>
+      {ACTIVITY_STATUS_LABEL[status] ?? status}
+    </span>
+  );
 }

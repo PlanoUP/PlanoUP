@@ -1,6 +1,6 @@
 import { getSql } from "./client";
 import { ensureSchema } from "./schema";
-import { Tank } from "../brava/types";
+import { ActivityStatus, Tank } from "../brava/types";
 import { TANKS_SEED } from "../brava/data/tanks";
 import { recalculateSchedule } from "../brava/schedule-engine";
 
@@ -114,8 +114,11 @@ interface ActivityEdit {
   plannedStart?: string;
   durationDays?: number;
   progress?: number;
+  /** An empty string explicitly clears the field — omitting it leaves the stored value untouched. */
   actualStart?: string;
   actualEnd?: string;
+  /** Manual override — otherwise status is still auto-derived from progress as before, for a plain progress edit. */
+  status?: ActivityStatus;
 }
 
 /** Mirrors the exact reducer logic the client used to run itself against localStorage. */
@@ -135,16 +138,22 @@ export async function updateTankActivity(
       durationDays: edit.durationDays,
     });
   }
-  if (edit.progress !== undefined || edit.actualStart !== undefined || edit.actualEnd !== undefined) {
+  if (
+    edit.progress !== undefined ||
+    edit.actualStart !== undefined ||
+    edit.actualEnd !== undefined ||
+    edit.status !== undefined
+  ) {
     activities = activities.map((a) =>
       a.id === activityId
         ? {
             ...a,
             progress: edit.progress ?? a.progress,
-            actualStart: edit.actualStart ?? a.actualStart,
-            actualEnd: edit.actualEnd ?? a.actualEnd,
+            actualStart: edit.actualStart !== undefined ? edit.actualStart || undefined : a.actualStart,
+            actualEnd: edit.actualEnd !== undefined ? edit.actualEnd || undefined : a.actualEnd,
             status:
-              (edit.progress ?? a.progress) >= 100 ? "CONCLUIDO" : a.status === "FUTURO" ? "ATUAL" : a.status,
+              edit.status ??
+              ((edit.progress ?? a.progress) >= 100 ? "CONCLUIDO" : a.status === "FUTURO" ? "ATUAL" : a.status),
           }
         : a
     );

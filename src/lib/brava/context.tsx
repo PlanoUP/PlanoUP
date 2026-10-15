@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./types";
+import { ActivityStatus, Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./types";
 import { withDerived } from "./selectors";
 import { todayISO } from "./date-utils";
 
@@ -19,8 +19,11 @@ interface ActivityEdit {
   plannedStart?: string;
   durationDays?: number;
   progress?: number;
+  /** An empty string explicitly clears the field — omitting it leaves the stored value untouched. */
   actualStart?: string;
   actualEnd?: string;
+  /** Manual override — otherwise status is still auto-derived from progress, for a plain progress edit. */
+  status?: ActivityStatus;
 }
 
 type LoadStatus = "loading" | "ready" | "error";
