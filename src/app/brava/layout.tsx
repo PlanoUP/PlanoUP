@@ -5,6 +5,10 @@ import { BravaDataProvider } from "@/lib/brava/context";
 import { MaterialsDataProvider } from "@/lib/brava/materials/context";
 import { CostsDataProvider } from "@/lib/brava/costs/context";
 import { MapCoordinatesProvider } from "@/lib/brava/maps/context";
+import { UnitsDataProvider } from "@/lib/brava/units/context";
+import { EquipmentMaterialsDataProvider } from "@/lib/brava/units/materials/context";
+import { EquipmentCostsDataProvider } from "@/lib/brava/units/costs/context";
+import { EquipmentMapCoordinatesProvider } from "@/lib/brava/units/maps/context";
 import { EditAuthProvider } from "@/lib/brava/editAuthContext";
 import Sidebar from "@/components/brava/Sidebar";
 import MobileTopBar from "@/components/brava/MobileTopBar";
@@ -19,9 +23,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Tank Control | Brava Energia",
+  title: "Shutdown Control | Brava Energia",
   description:
-    "Painel corporativo de acompanhamento, planejamento e gestão das manutenções de tanques industriais da Brava Energia.",
+    "Painel corporativo de acompanhamento, planejamento e gestão das paradas de tanques e unidades de processo da Brava Energia.",
 };
 
 export default function BravaLayout({ children }: { children: React.ReactNode }) {
@@ -33,9 +37,17 @@ export default function BravaLayout({ children }: { children: React.ReactNode })
             <MaterialsDataProvider>
               <CostsDataProvider>
                 <MapCoordinatesProvider>
-                  <Sidebar />
-                  <MobileTopBar />
-                  <div className="lg:pl-64">{children}</div>
+                  <UnitsDataProvider>
+                    <EquipmentMaterialsDataProvider>
+                      <EquipmentCostsDataProvider>
+                        <EquipmentMapCoordinatesProvider>
+                          <Sidebar />
+                          <MobileTopBar />
+                          <div className="lg:pl-64">{children}</div>
+                        </EquipmentMapCoordinatesProvider>
+                      </EquipmentCostsDataProvider>
+                    </EquipmentMaterialsDataProvider>
+                  </UnitsDataProvider>
                 </MapCoordinatesProvider>
               </CostsDataProvider>
             </MaterialsDataProvider>

@@ -8,7 +8,7 @@ import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
 
-const NAV_ITEMS = [
+const TANQUES_NAV_ITEMS = [
   { href: "/brava", label: "Visão Geral", icon: LayoutGrid, matchExact: true },
   { href: "/brava#tank-control", label: "Tank Control", icon: Boxes, matchExact: false },
   { href: "/brava#cronograma", label: "Cronograma", icon: LayoutList, matchExact: false },
@@ -18,10 +18,23 @@ const NAV_ITEMS = [
   { href: "/brava/consolidado", label: "Consolidado", icon: GanttChartSquare, matchExact: true },
 ];
 
+const UNIDADES_NAV_ITEMS = [
+  { href: "/brava/unidades", label: "Visão Geral", icon: LayoutGrid, matchExact: true },
+  { href: "/brava/unidades#equipment-control", label: "Equipment Control", icon: Boxes, matchExact: false },
+  { href: "/brava/unidades#cronograma", label: "Cronograma", icon: LayoutList, matchExact: false },
+  { href: "/brava/unidades/mapa", label: "Mapa", icon: Map, matchExact: true },
+  { href: "/brava/unidades/custos", label: "Custos", icon: Wallet, matchExact: true },
+  { href: "/brava/unidades/materiais", label: "Materiais", icon: Package, matchExact: true },
+  { href: "/brava/unidades/consolidado", label: "Consolidado", icon: GanttChartSquare, matchExact: true },
+];
+
 export default function Sidebar() {
   const pathname = usePathname();
   const { today } = useBravaData();
   const { isEditor, requireEditor, lock, changePassword } = useEditAuth();
+
+  const isUnidades = pathname.startsWith("/brava/unidades");
+  const navItems = isUnidades ? UNIDADES_NAV_ITEMS : TANQUES_NAV_ITEMS;
 
   async function handleChangePassword() {
     const currentPassword = window.prompt("Senha atual:");
@@ -41,13 +54,34 @@ export default function Sidebar() {
         <div className="leading-tight">
           <p className="text-[13.5px] font-extrabold tracking-tight text-brava-blue-dark">BRAVA ENERGIA</p>
           <p className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-brava-text-secondary">
-            Tank Control System
+            Shutdown Control
           </p>
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-1 border-b border-brava-border p-3">
+        <Link
+          href="/brava"
+          className={cn(
+            "rounded-brava-sm px-2 py-2 text-center text-[11.5px] font-bold uppercase tracking-wide transition-colors",
+            !isUnidades ? "bg-brava-blue text-brava-white" : "text-brava-text-secondary hover:bg-brava-bg"
+          )}
+        >
+          Tanques
+        </Link>
+        <Link
+          href="/brava/unidades"
+          className={cn(
+            "rounded-brava-sm px-2 py-2 text-center text-[11.5px] font-bold uppercase tracking-wide transition-colors",
+            isUnidades ? "bg-brava-blue text-brava-white" : "text-brava-text-secondary hover:bg-brava-bg"
+          )}
+        >
+          Unidades
+        </Link>
+      </div>
+
       <nav className="flex-1 space-y-0.5 px-4 py-5">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const active = item.matchExact ? pathname === item.href : false;
           const Icon = item.icon;
           return (
@@ -103,7 +137,7 @@ export default function Sidebar() {
         </div>
         <p className="mt-1.5 text-[11px] text-brava-text-secondary">Atualizado em {formatShort(today)}</p>
         <p className="mt-3 border-t border-brava-border pt-3 text-[10.5px] leading-relaxed text-brava-text-secondary">
-          Tank Maintenance Control System
+          Shutdown Control System
           <br />
           Polo Potiguar — TAG / ATI
         </p>
