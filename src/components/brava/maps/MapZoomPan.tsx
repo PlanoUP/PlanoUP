@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import Image from "next/image";
 import { Plus, Minus, Maximize, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
+import MaintenanceVideoCarousel from "./MaintenanceVideoCarousel";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
@@ -44,8 +45,13 @@ const MapZoomPan = forwardRef<
     backgroundSrc?: string;
     /** Shown as a top-centered banner only while in fullscreen — e.g. "PARADAS DE MANUTENÇÃO - TANQUES". */
     fullscreenLabel?: string;
+    /** TAGs cycled through the bottom-right maintenance video carousel, only while in fullscreen. */
+    maintenanceVideoTags?: string[];
   }
->(function MapZoomPan({ aspectRatio, children, onCalibrationClick, backgroundSrc, fullscreenLabel }, ref) {
+>(function MapZoomPan(
+  { aspectRatio, children, onCalibrationClick, backgroundSrc, fullscreenLabel, maintenanceVideoTags },
+  ref
+) {
     const fullscreenRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
@@ -200,6 +206,10 @@ const MapZoomPan = forwardRef<
             <ZoomButton icon={RotateCcw} label="Reset" onClick={reset} />
             <ZoomButton icon={Maximize} label="Tela cheia" onClick={toggleFullscreen} />
           </div>
+
+          {isFullscreen && maintenanceVideoTags && maintenanceVideoTags.length > 0 && (
+            <MaintenanceVideoCarousel tags={maintenanceVideoTags} />
+          )}
         </div>
       </div>
     );

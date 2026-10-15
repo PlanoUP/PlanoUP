@@ -59,6 +59,14 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleEntries, map.imageWidth, map.imageHeight]);
 
+  // Independent of the quick-filter chips/search — the fullscreen video
+  // carousel always cycles every tank in maintenance on this area, not just
+  // whatever's currently filtered into view.
+  const maintenanceVideoTags = entries
+    .filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate)
+    .map((e) => e.tag)
+    .sort();
+
   function jumpTo(tag: string) {
     const targetMap = getMapByTank(tag, overrides);
     if (!targetMap) return;
@@ -142,6 +150,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           onCalibrationClick={calibrationActive ? (x, y) => setCalibrationPoint({ x, y }) : undefined}
           backgroundSrc={map.image}
           fullscreenLabel="Paradas de Manutenção - Tanques"
+          maintenanceVideoTags={maintenanceVideoTags}
         >
           <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />
           {visibleEntries.map((e) => (
