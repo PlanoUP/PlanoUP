@@ -54,6 +54,15 @@ const MapZoomPan = forwardRef<
     fullscreenTickerItems?: string[];
     /** TAGs cycled through the bottom-right maintenance video carousel, only while in fullscreen. */
     maintenanceVideoTags?: string[];
+    /**
+     * Reports the map's actual rendered CSS pixel size whenever it changes
+     * (mount, fullscreen toggle, window resize) — callers that position
+     * things in CSS px relative to the dots' own % position (callout boxes,
+     * via computeCalloutLayout) need this instead of the image's native
+     * file dimensions, since those two only coincide when the image
+     * happens to render at exactly its native resolution.
+     */
+    onViewportSizeChange?: (size: { width: number; height: number }) => void;
   }
 >(function MapZoomPan(
   {
@@ -65,6 +74,7 @@ const MapZoomPan = forwardRef<
     fullscreenSummary,
     fullscreenTickerItems,
     maintenanceVideoTags,
+    onViewportSizeChange,
   },
   ref
 ) {
@@ -117,6 +127,23 @@ const MapZoomPan = forwardRef<
       return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Reports the container's actual rendered size on every change (mount,
+    // fullscreen toggle, window resize) — covers normal embed, fullscreen,
+    // and anything in between without needing to special-case any of them.
+    useEffect(() => {
+      const el = containerRef.current;
+      if (!el || !onViewportSizeChange) return;
+      const observer = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) onViewportSizeChange({ width, height });
+      });
+      observer.observe(el);
+      return () => observer.disconnect();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [onViewportSizeChange]);
 
     function toggleFullscreen() {
       const el = fullscreenRef.current;

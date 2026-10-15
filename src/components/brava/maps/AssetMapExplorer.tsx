@@ -40,6 +40,10 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const [listOpen, setListOpen] = useState(false);
   const [calibrationActive, setCalibrationActive] = useState(false);
   const [calibrationPoint, setCalibrationPoint] = useState<{ x: number; y: number } | null>(null);
+  // The map's actual rendered CSS pixel size (reported by MapZoomPan), used
+  // for the callout layout instead of the image's native file dimensions —
+  // see the comment on calloutLayout below for why that distinction matters.
+  const [viewportSize, setViewportSize] = useState<{ width: number; height: number } | null>(null);
 
   const zoomPanRef = useRef<MapZoomPanHandle>(null);
   const lastAutoJumpRef = useRef<string | null>(null);
@@ -52,13 +56,24 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
 
   const visibleEntries = entries.filter((e) => e.coordinate && (e.tank ? matchesMapFilter(e.tank, quickFilter, map.filters) : quickFilter === "TODOS"));
 
+  // computeCalloutLayout's box-separation math (BOX_WIDTH/HEIGHT/MARGIN) is
+  // expressed in real CSS pixels, since that's what the callout box is
+  // finally rendered at — so the dot positions it starts from need to be in
+  // that same unit. The image's native file dimensions (map.imageWidth/
+  // imageHeight) only match the actual rendered CSS size by coincidence;
+  // fullscreen in particular almost always renders larger than native
+  // resolution. Falls back to the native dimensions only until the first
+  // real measurement comes in from MapZoomPan.
+  const layoutWidth = viewportSize?.width ?? map.imageWidth;
+  const layoutHeight = viewportSize?.height ?? map.imageHeight;
+
   const calloutLayout = useMemo(() => {
     const points = visibleEntries
       .filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate)
       .map((e) => ({ tag: e.tag, xPct: e.coordinate!.x, yPct: e.coordinate!.y }));
-    return computeCalloutLayout(points, map.imageWidth, map.imageHeight);
+    return computeCalloutLayout(points, layoutWidth, layoutHeight);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleEntries, map.imageWidth, map.imageHeight]);
+  }, [visibleEntries, layoutWidth, layoutHeight]);
 
   // Independent of the quick-filter chips/search — the fullscreen video
   // carousel always cycles every tank in maintenance on this area, not just
@@ -122,6 +137,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     setSearch("");
     setQuickFilter("TODOS");
     setHighlightedTag(null);
+    setViewportSize(null);
     zoomPanRef.current?.reset();
   }
 
@@ -164,6 +180,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           fullscreenSummary={fullscreenSummary}
           fullscreenTickerItems={fullscreenTickerItems}
           maintenanceVideoTags={maintenanceVideoTags}
+          onViewportSizeChange={setViewportSize}
         >
           <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />
           {visibleEntries.map((e) => (
