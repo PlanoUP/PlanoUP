@@ -19,13 +19,26 @@ export interface CalloutOffset {
 
 const BOX_WIDTH = 126;
 const BOX_HEIGHT = 50;
-const BOX_MARGIN = 14; // minimum gap enforced between two boxes
+const BOX_MARGIN = 20; // minimum gap enforced between two boxes
 const BASE_DX = 60;
 const BASE_DY = 46;
-const LANE_STEP_X = 14;
-const LANE_STEP_Y = 11;
-const RELAX_ITERATIONS = 48;
+const RELAX_ITERATIONS = 64;
 const MAX_OFFSET = 260; // clamp so a dense cluster can't fling a box far off-image
+
+/**
+ * Three starting angles within whichever quadrant a dot's position picks
+ * (see signX/signY below) — diagonal, mostly-horizontal and
+ * mostly-vertical. A tight cluster of 3+ tanks sharing the same quadrant
+ * used to all start on the same diagonal line and just get pushed further
+ * and further along it, stacking into a single column instead of fanning
+ * out. Varying the angle per lane gives the relaxation pass genuinely
+ * different starting directions to converge from.
+ */
+const LANE_ANGLES = [
+  { dxMul: 1, dyMul: 1 },
+  { dxMul: 1.5, dyMul: 0.55 },
+  { dxMul: 0.55, dyMul: 1.5 },
+];
 
 export function hashTag(tag: string): number {
   let h = 0;
@@ -45,13 +58,13 @@ export function computeCalloutLayout(
   const nodes = points.map((p) => {
     const signX = p.xPct > 62 ? -1 : 1;
     const signY = p.yPct < 20 ? 1 : -1;
-    const lane = hashTag(p.tag) % 3;
+    const { dxMul, dyMul } = LANE_ANGLES[hashTag(p.tag) % LANE_ANGLES.length];
     return {
       tag: p.tag,
       dotX: (p.xPct / 100) * imageWidth,
       dotY: (p.yPct / 100) * imageHeight,
-      dx: signX * (BASE_DX + lane * LANE_STEP_X),
-      dy: signY * (BASE_DY + lane * LANE_STEP_Y),
+      dx: signX * BASE_DX * dxMul,
+      dy: signY * BASE_DY * dyMul,
     };
   });
 
@@ -70,7 +83,11 @@ export function computeCalloutLayout(
         if (overlapX <= 0 || overlapY <= 0) continue;
 
         moved = true;
-        if (overlapX < overlapY) {
+        // Biased toward resolving horizontally: a vertical stack of boxes
+        // eats far more of the map (and reads as "piled up") than the same
+        // boxes spread left-right, so only fall back to a vertical push
+        // when horizontal is a clearly worse option, not just marginally.
+        if (overlapX < overlapY * 1.8) {
           const push = overlapX / 2 + 1;
           const sign = Math.sign(ax - bx) || 1;
           a.dx = clamp(a.dx + sign * push, MAX_OFFSET);
