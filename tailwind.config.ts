@@ -72,11 +72,21 @@ const config: Config = {
           "70%": { transform: "scale(2.3)", opacity: "0" },
           "100%": { transform: "scale(2.3)", opacity: "0" },
         },
+        "video-fade-in": {
+          "0%": { opacity: "0", transform: "scale(1.03)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "video-caption-in": {
+          "0%": { opacity: "0", transform: "translateY(-4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.6s ease-out forwards",
         "popover-in": "popover-in 0.18s ease-out",
         "radar-pulse": "radar-pulse 2.4s cubic-bezier(0.4,0,0.6,1) infinite",
+        "video-fade-in": "video-fade-in 700ms ease-out forwards",
+        "video-caption-in": "video-caption-in 400ms ease-out",
       },
     },
   },

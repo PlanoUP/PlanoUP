@@ -11,6 +11,7 @@ import { cn } from "@/lib/brava/cn";
 // keeps old blobs unless pruned separately, which is a different concern.
 const VIDEO_DWELL_MS = 60_000; // ~1 min per clip, matching the real footage length
 const MISSING_VIDEO_DWELL_MS = 6_000; // short dwell on a tag with no clip yet, so the carousel doesn't stall
+const TRANSITION_MS = 350; // fade-to-black dip between two tanks' clips
 
 function videoSrcForTag(tag: string): string {
   return `/videos/brava/tanques/${tag}.mp4`;
@@ -18,74 +19,91 @@ function videoSrcForTag(tag: string): string {
 
 export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
   const [index, setIndex] = useState(0);
+  const [displayedIndex, setDisplayedIndex] = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
   const [missing, setMissing] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep the active index valid if the tag list changes size (map/area switch).
   useEffect(() => {
-    if (index >= tags.length) setIndex(0);
+    if (index >= tags.length) {
+      setIndex(0);
+      setDisplayedIndex(0);
+    }
   }, [tags.length, index]);
 
-  function goTo(next: number) {
-    if (tags.length === 0) return;
-    setIndex(((next % tags.length) + tags.length) % tags.length);
+  function clearTimers() {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    advanceTimerRef.current = null;
+    transitionTimerRef.current = null;
   }
 
-  function clearAdvanceTimer() {
-    if (advanceTimerRef.current) {
-      clearTimeout(advanceTimerRef.current);
-      advanceTimerRef.current = null;
-    }
+  // Dip to black, swap the clip underneath while hidden, then fade back in —
+  // a clean transition regardless of the two clips' actual content/timing.
+  function goTo(next: number) {
+    if (tags.length === 0) return;
+    const target = ((next % tags.length) + tags.length) % tags.length;
+    if (target === index) return;
+    setTransitioning(true);
+    setIndex(target);
+    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    transitionTimerRef.current = setTimeout(() => {
+      setDisplayedIndex(target);
+      setTransitioning(false);
+    }, TRANSITION_MS);
   }
 
   // Safety net: if a clip never fires onEnded (stalled load, longer/shorter
   // than expected runtime), still advance after the nominal clip length so
   // the carousel never gets stuck on one tank.
   useEffect(() => {
-    clearAdvanceTimer();
+    clearTimers();
     setMissing(false);
     if (tags.length === 0) return;
     advanceTimerRef.current = setTimeout(() => goTo(index + 1), VIDEO_DWELL_MS);
-    return clearAdvanceTimer;
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, tags.length]);
 
-  if (tags.length === 0) return null;
+  useEffect(() => clearTimers, []);
 
-  const tag = tags[index];
+  if (tags.length === 0) return null;
+  const tag = tags[displayedIndex];
+  if (!tag) return null;
 
   function handleEnded() {
     if (tags.length <= 1) return; // nothing else to advance to — let it loop in place
-    clearAdvanceTimer();
     goTo(index + 1);
   }
 
   function handleError() {
     setMissing(true);
-    clearAdvanceTimer();
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     advanceTimerRef.current = setTimeout(() => goTo(index + 1), MISSING_VIDEO_DWELL_MS);
   }
 
   return (
     <div className="absolute bottom-3 right-16 z-20 w-72 overflow-hidden rounded-brava-md border border-white/15 bg-black/70 shadow-brava-lg backdrop-blur-sm sm:w-80">
-      <div className="flex items-center justify-between gap-2 px-3 py-1.5">
+      <div key={tag} className="flex items-center justify-between gap-2 px-3 py-1.5 animate-video-caption-in">
         <span className="truncate font-mono text-[11px] font-bold text-white">{tag}</span>
         <span className="shrink-0 text-[10px] font-semibold text-white/60">
-          {index + 1}/{tags.length}
+          {displayedIndex + 1}/{tags.length}
         </span>
       </div>
 
-      <div className="relative aspect-video w-full bg-black">
+      <div className="relative aspect-video w-full overflow-hidden bg-black">
         {missing ? (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-white/60">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-white/60 animate-video-fade-in">
             <VideoOff className="h-6 w-6" strokeWidth={1.5} />
             <p className="text-[10.5px] font-medium">Vídeo não disponível</p>
           </div>
         ) : (
           <video
             key={tag}
-            ref={videoRef}
             src={videoSrcForTag(tag)}
             autoPlay
             muted
@@ -93,9 +111,18 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
             playsInline
             onEnded={handleEnded}
             onError={handleError}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover animate-video-fade-in"
           />
         )}
+
+        {/* Fade-to-black dip, driven purely by CSS transition — covers the swap underneath. */}
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 bg-black transition-opacity ease-in-out",
+            transitioning ? "opacity-100" : "opacity-0"
+          )}
+          style={{ transitionDuration: `${TRANSITION_MS}ms` }}
+        />
       </div>
 
       {tags.length > 1 && (
@@ -105,7 +132,10 @@ export default function MaintenanceVideoCarousel({ tags }: { tags: string[] }) {
             {tags.map((t, i) => (
               <span
                 key={t}
-                className={cn("h-1.5 w-1.5 rounded-full transition-colors", i === index ? "bg-white" : "bg-white/30")}
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full transition-all duration-300",
+                  i === displayedIndex ? "w-3.5 bg-white" : "bg-white/30"
+                )}
               />
             ))}
           </div>
