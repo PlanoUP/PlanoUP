@@ -42,8 +42,10 @@ const MapZoomPan = forwardRef<
     children: React.ReactNode;
     onCalibrationClick?: (xPct: number, yPct: number) => void;
     backgroundSrc?: string;
+    /** Shown as a top-centered banner only while in fullscreen — e.g. "PARADAS DE MANUTENÇÃO - TANQUES". */
+    fullscreenLabel?: string;
   }
->(function MapZoomPan({ aspectRatio, children, onCalibrationClick, backgroundSrc }, ref) {
+>(function MapZoomPan({ aspectRatio, children, onCalibrationClick, backgroundSrc, fullscreenLabel }, ref) {
     const fullscreenRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
@@ -153,6 +155,11 @@ const MapZoomPan = forwardRef<
             aria-hidden
             className="scale-110 object-cover opacity-50 blur-2xl"
           />
+        )}
+        {isFullscreen && fullscreenLabel && (
+          <div className="pointer-events-none absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-brava-sm border border-white/15 bg-black/60 px-4 py-2 text-center text-[13px] font-bold uppercase tracking-[0.12em] text-white shadow-brava-lg backdrop-blur-sm">
+            {fullscreenLabel}
+          </div>
         )}
         <div
           ref={containerRef}
