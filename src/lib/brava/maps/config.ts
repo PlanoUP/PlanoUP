@@ -153,9 +153,9 @@ export const ASSET_MAPS: AssetMapConfig[] = [
     id: "1222",
     name: "Área 1222",
     shortLabel: "Área 1222",
-    image: "/images/brava/maps/1222.jpg",
-    imageWidth: 1586,
-    imageHeight: 832,
+    image: "/images/brava/maps/1222.webp",
+    imageWidth: 1915,
+    imageHeight: 821,
     tankIds: [
       "TQ-1222-21",
       "TQ-1222-22",
@@ -174,24 +174,16 @@ export const ASSET_MAPS: AssetMapConfig[] = [
       "TQ-1222-43",
       "TQ-1222-44",
     ],
-    coordinates: [
-      { tag: "TQ-1222-21", x: 79, y: 38 },
-      { tag: "TQ-1222-22", x: 71, y: 35 },
-      // TQ-1222-23: sem posição confirmada — não aparece rotulado no mapa.
-      { tag: "TQ-1222-24", x: 78, y: 47 },
-      { tag: "TQ-1222-25", x: 71, y: 44 },
-      { tag: "TQ-1222-31", x: 46, y: 42 },
-      { tag: "TQ-1222-32", x: 48, y: 34 },
-      { tag: "TQ-1222-33", x: 52, y: 25 },
-      { tag: "TQ-1222-34", x: 54, y: 17 },
-      { tag: "TQ-1222-35", x: 17, y: 48 },
-      { tag: "TQ-1222-36", x: 15, y: 58 },
-      { tag: "TQ-1222-37", x: 26, y: 80 },
-      { tag: "TQ-1222-41", x: 71, y: 25 },
-      { tag: "TQ-1222-42", x: 76, y: 17 },
-      { tag: "TQ-1222-43", x: 78, y: 27 },
-      { tag: "TQ-1222-44", x: 79, y: 20 },
-    ],
+    // Intentionally empty: the background photo above was swapped for a
+    // new aerial crop (2026-10-16) and the old coordinates were measured
+    // against the previous image's framing — reusing them here would place
+    // dots over the wrong tanks instead of just being imprecise, which is
+    // worse than showing nothing. Recalibrate via "Modo de Calibração"
+    // (click each tank in the new photo, pick its real TAG) rather than
+    // guessing positions from visual similarity to the old reference —
+    // same policy as the file header note above, and the same thing just
+    // done for the 410-6313 and 270 maps.
+    coordinates: [],
     filters: [
       { value: "LAV_FRIO", label: "Lav. Frio", productMatch: "Lavagem a Frio" },
       { value: "LAV_QUENTE", label: "Lav. Quente", productMatch: "Lavagem a Quente" },
