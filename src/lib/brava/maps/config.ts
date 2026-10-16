@@ -78,11 +78,11 @@ export const ASSET_MAPS: AssetMapConfig[] = [
   },
   {
     id: "410-6313",
-    name: "Tancagem 410 / 6313",
-    shortLabel: "410 / 6313",
-    image: "/images/brava/maps/410-6313.jpg",
-    imageWidth: 1586,
-    imageHeight: 832,
+    name: "TAG 410 / 6313",
+    shortLabel: "TAG 410 / 6313",
+    image: "/images/brava/maps/410-6313.webp",
+    imageWidth: 2000,
+    imageHeight: 750,
     tankIds: [
       "TQ-41001",
       "TQ-41002",
@@ -98,21 +98,15 @@ export const ASSET_MAPS: AssetMapConfig[] = [
       "TQ-6313006",
       "TQ-6313007",
     ],
-    coordinates: [
-      { tag: "TQ-6313007", x: 54, y: 9 },
-      { tag: "TQ-6313003", x: 63, y: 10 },
-      { tag: "TQ-41002", x: 49, y: 24 },
-      { tag: "TQ-6313004", x: 64, y: 19 },
-      { tag: "TQ-41001", x: 44, y: 36 },
-      { tag: "TQ-41005", x: 59, y: 29 },
-      { tag: "TQ-6313005", x: 30, y: 52 },
-      { tag: "TQ-41004", x: 56, y: 43 },
-      { tag: "TQ-6313006", x: 26, y: 60 },
-      { tag: "TQ-41007", x: 44, y: 53 },
-      { tag: "TQ-41008", x: 40, y: 69 },
-      { tag: "TQ-6313001", x: 31, y: 83 },
-      { tag: "TQ-6313002", x: 40, y: 88 },
-    ],
+    // Intentionally empty: the background photo above was swapped for a
+    // new, much tighter aerial crop (2026-10-16) and the old coordinates
+    // were measured against the previous image's framing — reusing them
+    // here would place dots over the wrong tanks instead of just being
+    // imprecise, which is worse than showing nothing. Recalibrate via
+    // "Modo de Calibração" (click each tank in the new photo, pick its
+    // real TAG) rather than guessing positions from visual similarity to
+    // the old reference — same policy as the file header note above.
+    coordinates: [],
     filters: [
       { value: "410", label: "410", familyMatch: "410" },
       { value: "6313", label: "6313", familyMatch: "6313" },
