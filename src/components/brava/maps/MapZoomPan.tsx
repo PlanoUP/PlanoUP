@@ -6,7 +6,6 @@ import { Plus, Minus, Maximize, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
 import MaintenanceVideoCarousel from "./MaintenanceVideoCarousel";
 import FullscreenControlBar, { FullscreenSummary } from "./FullscreenControlBar";
-import MaintenanceEventTicker from "./MaintenanceEventTicker";
 import HudCorners from "./HudCorners";
 import BlueprintGrid from "../BlueprintGrid";
 
@@ -50,8 +49,6 @@ const MapZoomPan = forwardRef<
     /** Shown as a top-centered control bar only while in fullscreen — e.g. "PARADAS DE MANUTENÇÃO - TANQUES". Requires fullscreenSummary too. */
     fullscreenLabel?: string;
     fullscreenSummary?: FullscreenSummary;
-    /** Scrolling ticker strip under the control bar, only while in fullscreen. */
-    fullscreenTickerItems?: string[];
     /** TAGs cycled through the bottom-right maintenance video carousel, only while in fullscreen. */
     maintenanceVideoTags?: string[];
     /**
@@ -74,7 +71,6 @@ const MapZoomPan = forwardRef<
     backgroundSrc,
     fullscreenLabel,
     fullscreenSummary,
-    fullscreenTickerItems,
     maintenanceVideoTags,
     onViewportSizeChange,
     onScaleChange,
@@ -217,7 +213,6 @@ const MapZoomPan = forwardRef<
         {isFullscreen && fullscreenLabel && fullscreenSummary && (
           <FullscreenControlBar title={fullscreenLabel} summary={fullscreenSummary} />
         )}
-        {isFullscreen && fullscreenTickerItems && <MaintenanceEventTicker items={fullscreenTickerItems} />}
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"

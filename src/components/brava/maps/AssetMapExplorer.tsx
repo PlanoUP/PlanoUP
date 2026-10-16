@@ -11,7 +11,6 @@ import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSum
 import { computeCalloutLayout } from "@/lib/brava/maps/calloutLayout";
 import { TankStatus } from "@/lib/brava/types";
 import { sortByInspectionPriority } from "@/lib/brava/inspection";
-import { STATUS_META } from "@/lib/brava/status-meta";
 import MapAreaSelector from "./MapAreaSelector";
 import MapFilterBar from "./MapFilterBar";
 import MapLegend from "./MapLegend";
@@ -106,8 +105,8 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const maintenanceEntries = entries.filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate);
   const maintenanceVideoTags = maintenanceEntries.map((e) => e.tag).sort();
 
-  // Fullscreen control-bar KPIs and ticker — also independent of the
-  // quick-filter chips, same reasoning as the video carousel above.
+  // Fullscreen control-bar KPIs — also independent of the quick-filter
+  // chips, same reasoning as the video carousel above.
   const fullscreenSummary = {
     programado: maintenanceEntries.filter((e) => e.tank!.status === "PROGRAMADO").length,
     emExecucao: maintenanceEntries.filter((e) => e.tank!.status === "EM_EXECUCAO").length,
@@ -115,9 +114,6 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     critico: maintenanceEntries.filter((e) => e.tank!.status === "CRITICO").length,
     concluido: maintenanceEntries.filter((e) => e.tank!.status === "CONCLUIDO").length,
   };
-  const fullscreenTickerItems = maintenanceEntries.map(
-    (e) => `${e.tag} · ${e.tank!.derived.progress}% · ${STATUS_META[e.tank!.status].label}`
-  );
 
   function jumpTo(tag: string) {
     const targetMap = getMapByTank(tag, overrides);
@@ -204,7 +200,6 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           backgroundSrc={map.image}
           fullscreenLabel="Paradas de Manutenção - Tanques"
           fullscreenSummary={fullscreenSummary}
-          fullscreenTickerItems={fullscreenTickerItems}
           maintenanceVideoTags={maintenanceVideoTags}
           onViewportSizeChange={setViewportSize}
           onScaleChange={setMapScale}

@@ -80,10 +80,6 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(-4px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
-        marquee: {
-          "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-50%)" },
-        },
       },
       animation: {
         "fade-up": "fade-up 0.6s ease-out forwards",
@@ -91,7 +87,6 @@ const config: Config = {
         "radar-pulse": "radar-pulse 2.4s cubic-bezier(0.4,0,0.6,1) infinite",
         "video-fade-in": "video-fade-in 700ms ease-out forwards",
         "video-caption-in": "video-caption-in 400ms ease-out",
-        marquee: "marquee 26s linear infinite",
       },
     },
   },
