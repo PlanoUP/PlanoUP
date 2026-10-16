@@ -5,9 +5,9 @@ import { EQUIPMENT_TYPE_LABELS } from "../types";
 // "geral" uses the real aerial photo of the plant provided by the user —
 // nothing on it is labeled yet, so coordinates stay empty until someone
 // calibrates each equipment's position via "Modo de Calibração", exactly
-// like the tanks "geral" map worked before it was calibrated. U-260/U-270
-// still use placeholder background images until their own close-up photos
-// are provided.
+// like the tanks "geral" map worked before it was calibrated. U-270 now
+// uses its own real close-up photo too (2026-10-16); U-260 still uses a
+// placeholder background image until its own photo is provided.
 
 const U260_TAGS = EQUIPMENT_SEED.filter((e) => e.unit === "U-260").map((e) => e.tag);
 const U270_TAGS = EQUIPMENT_SEED.filter((e) => e.unit === "U-270").map((e) => e.tag);
@@ -44,7 +44,7 @@ export const EQUIPMENT_ASSET_MAPS: EquipmentAssetMapConfig[] = [
     id: "U-270",
     name: "Unidade U-270",
     shortLabel: "U-270",
-    image: "/images/brava/maps/units/u-270.png",
+    image: "/images/brava/maps/units/u-270.jpg",
     imageWidth: 1600,
     imageHeight: 900,
     equipmentIds: U270_TAGS,
