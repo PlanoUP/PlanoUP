@@ -116,9 +116,9 @@ export const ASSET_MAPS: AssetMapConfig[] = [
     id: "270",
     name: "Área 270",
     shortLabel: "Área 270",
-    image: "/images/brava/maps/270.jpg",
-    imageWidth: 1586,
-    imageHeight: 832,
+    image: "/images/brava/maps/270.webp",
+    imageWidth: 1774,
+    imageHeight: 887,
     tankIds: [
       "TQ-27001",
       "TQ-27002",
@@ -133,17 +133,16 @@ export const ASSET_MAPS: AssetMapConfig[] = [
       // claramente identificado no mapa (ver getTanksByMap: entra na lista/
       // busca com "posição a definir").
     ],
-    coordinates: [
-      { tag: "TQ-27009", x: 57, y: 8 },
-      { tag: "TQ-27010", x: 54, y: 16 },
-      { tag: "TQ-27001", x: 49, y: 29 },
-      { tag: "TQ-27002", x: 45, y: 39 },
-      { tag: "TQ-27004", x: 43, y: 55 },
-      { tag: "TQ-27011", x: 68, y: 12 },
-      { tag: "TQ-27003", x: 63, y: 28 },
-      { tag: "TQ-27015", x: 43, y: 65 },
-      { tag: "TQ-27016", x: 44, y: 78 },
-    ],
+    // Intentionally empty: the background photo above was swapped for a
+    // new aerial crop (2026-10-16) and the old coordinates were measured
+    // against the previous image's framing — reusing them here would place
+    // dots over the wrong tanks instead of just being imprecise, which is
+    // worse than showing nothing. Recalibrate via "Modo de Calibração"
+    // (click each tank in the new photo, pick its real TAG) rather than
+    // guessing positions from visual similarity to the old reference —
+    // same policy as the file header note above, and the same thing just
+    // done for the 410-6313 map.
+    coordinates: [],
     filters: [
       { value: "DIESEL", label: "Diesel", productMatch: "Diesel" },
       { value: "QAV", label: "QAV", productMatch: "QAV" },
