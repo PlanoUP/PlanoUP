@@ -74,6 +74,15 @@ export default function Hero() {
             Veja tudo que você recebe
             <ArrowDown className="h-4 w-4 animate-bounce" />
           </a>
+          <a
+            href="#sob-medida"
+            className="mt-3 inline-flex items-center gap-2 text-sm text-text-secondary transition-colors hover:text-accent"
+          >
+            Precisa de um equipamento específico?{" "}
+            <span className="font-semibold text-white underline decoration-accent/60 underline-offset-4">
+              Peça um modelo sob medida
+            </span>
+          </a>
         </div>
 
         {/* RIGHT — composição dos equipamentos */}

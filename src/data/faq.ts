@@ -44,4 +44,14 @@ export const faq: FaqItem[] = [
     answer:
       "Os arquivos são compatíveis com versões recentes do SketchUp. Em caso de dúvida sobre uma versão específica, entre em contato com o suporte PlanoUP.",
   },
+  {
+    question: "Vocês modelam um equipamento que não está na biblioteca?",
+    answer:
+      "Sim. Na seção Modelo sob medida você pede um equipamento específico (a partir de R$ 119,90), uma área industrial (a partir de R$ 299,90) ou uma animação de manobra (sob orçamento). Basta enviar desenho, foto ou as dimensões principais.",
+  },
+  {
+    question: "Como funciona o pedido de modelo personalizado?",
+    answer:
+      "Você preenche o formulário ou chama direto no WhatsApp, envia as referências e recebe o orçamento com prazo. O modelo é entregue em arquivo .SKP editável.",
+  },
 ];

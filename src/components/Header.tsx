@@ -43,6 +43,12 @@ export default function Header() {
           >
             Ver biblioteca
           </a>
+          <a
+            href="#sob-medida"
+            className="hidden text-sm font-medium text-text-secondary transition-colors hover:text-white md:block"
+          >
+            Modelo sob medida
+          </a>
           <CheckoutLink
             origin="header"
             className="rounded-md bg-accent px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-background transition-colors hover:bg-accent-hover sm:px-5 sm:text-sm"
