@@ -13,7 +13,11 @@ import { Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./typ
 import { withDerived } from "./selectors";
 import { todayISO } from "./date-utils";
 
-const POLL_INTERVAL_MS = 8000;
+// 8s was far too aggressive once multiplied across every provider mounted
+// in the layout (9 of them, each polling independently) and every open
+// tab — real contributor to exhausting the Neon database's request quota
+// (2026-10-20). 45s keeps the dashboard feeling live without hammering it.
+const POLL_INTERVAL_MS = 45000;
 
 interface ActivityEdit {
   plannedStart?: string;

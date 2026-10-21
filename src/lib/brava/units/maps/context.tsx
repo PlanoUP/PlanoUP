@@ -3,7 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { EquipmentMapCoordinateOverride, EquipmentMapCoordinateOverrideInput } from "./types";
 
-const POLL_INTERVAL_MS = 8000;
+// See the same constant in lib/brava/context.tsx for why this isn't 8s anymore.
+const POLL_INTERVAL_MS = 45000;
 
 type LoadStatus = "loading" | "ready" | "error";
 
