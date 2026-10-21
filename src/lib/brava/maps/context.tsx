@@ -2,9 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MapCalloutOffsetOverride, MapCalloutOffsetOverrideInput, MapCoordinateOverride, MapCoordinateOverrideInput } from "./types";
-
-// See the same constant in lib/brava/context.tsx for why this isn't 8s anymore.
-const POLL_INTERVAL_MS = 45000;
+import { useBravaPollInterval } from "../use-poll-interval";
 
 type LoadStatus = "loading" | "ready" | "error";
 
@@ -30,6 +28,7 @@ export function MapCoordinatesProvider({ children }: { children: React.ReactNode
   const [coordinates, setCoordinates] = useState<MapCoordinateOverride[]>([]);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const hasLoadedOnce = useRef(false);
+  const pollInterval = useBravaPollInterval();
 
   const fetchCoordinates = useCallback(async () => {
     try {
@@ -51,9 +50,9 @@ export function MapCoordinatesProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     fetchCoordinates();
-    const interval = setInterval(fetchCoordinates, POLL_INTERVAL_MS);
+    const interval = setInterval(fetchCoordinates, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchCoordinates]);
+  }, [fetchCoordinates, pollInterval]);
 
   const saveCoordinate = useCallback(
     (input: MapCoordinateOverrideInput) => {
@@ -116,6 +115,7 @@ const MapCalloutOffsetsContext = createContext<MapCalloutOffsetsContextValue | n
 export function MapCalloutOffsetsProvider({ children }: { children: React.ReactNode }) {
   const [offsets, setOffsets] = useState<MapCalloutOffsetOverride[]>([]);
   const hasLoadedOnce = useRef(false);
+  const pollInterval = useBravaPollInterval();
 
   const fetchOffsets = useCallback(async () => {
     try {
@@ -134,9 +134,9 @@ export function MapCalloutOffsetsProvider({ children }: { children: React.ReactN
 
   useEffect(() => {
     fetchOffsets();
-    const interval = setInterval(fetchOffsets, POLL_INTERVAL_MS);
+    const interval = setInterval(fetchOffsets, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchOffsets]);
+  }, [fetchOffsets, pollInterval]);
 
   const saveOffset = useCallback(
     (input: MapCalloutOffsetOverrideInput) => {

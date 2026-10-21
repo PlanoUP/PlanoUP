@@ -2,9 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { CostEntry, CostEntryInput } from "./types";
-
-// See the same constant in lib/brava/context.tsx for why this isn't 8s anymore.
-const POLL_INTERVAL_MS = 45000;
+import { useBravaPollInterval } from "../use-poll-interval";
 
 type LoadStatus = "loading" | "ready" | "error";
 
@@ -33,6 +31,7 @@ export function CostsDataProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const hasLoadedOnce = useRef(false);
+  const pollInterval = useBravaPollInterval();
 
   const fetchCosts = useCallback(async () => {
     try {
@@ -64,9 +63,9 @@ export function CostsDataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchCosts();
-    const interval = setInterval(fetchCosts, POLL_INTERVAL_MS);
+    const interval = setInterval(fetchCosts, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchCosts]);
+  }, [fetchCosts, pollInterval]);
 
   const addCost = useCallback(
     (input: CostEntryInput) => {

@@ -4,9 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { Equipment, EquipmentStatus, EquipmentWithDerived, EquipmentFilter, UnitView } from "./types";
 import { withDerived } from "./selectors";
 import { todayISO } from "../date-utils";
-
-// See the same constant in lib/brava/context.tsx for why this isn't 8s anymore.
-const POLL_INTERVAL_MS = 45000;
+import { useBravaPollInterval } from "../use-poll-interval";
 
 interface ActivityEdit {
   plannedStart?: string;
@@ -54,6 +52,7 @@ export function UnitsDataProvider({ children }: { children: React.ReactNode }) {
   const [unitView, setUnitView] = useState<UnitView>("TODAS");
   const today = useMemo(() => todayISO(), []);
   const hasLoadedOnce = useRef(false);
+  const pollInterval = useBravaPollInterval();
 
   const fetchEquipment = useCallback(async () => {
     try {
@@ -85,9 +84,9 @@ export function UnitsDataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchEquipment();
-    const interval = setInterval(fetchEquipment, POLL_INTERVAL_MS);
+    const interval = setInterval(fetchEquipment, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchEquipment]);
+  }, [fetchEquipment, pollInterval]);
 
   const setFilter = useCallback((patch: Partial<EquipmentFilter>) => {
     setFilterState((prev) => ({ ...prev, ...patch }));

@@ -12,12 +12,7 @@ import {
 import { Tank, TankStatus, TankWithDerived, TankFilter, FamilyView } from "./types";
 import { withDerived } from "./selectors";
 import { todayISO } from "./date-utils";
-
-// 8s was far too aggressive once multiplied across every provider mounted
-// in the layout (9 of them, each polling independently) and every open
-// tab — real contributor to exhausting the Neon database's request quota
-// (2026-10-20). 45s keeps the dashboard feeling live without hammering it.
-const POLL_INTERVAL_MS = 45000;
+import { useBravaPollInterval } from "./use-poll-interval";
 
 interface ActivityEdit {
   plannedStart?: string;
@@ -73,6 +68,7 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
   const [familyView, setFamilyView] = useState<FamilyView>("CRITICIDADE");
   const today = useMemo(() => todayISO(), []);
   const hasLoadedOnce = useRef(false);
+  const pollInterval = useBravaPollInterval();
 
   const fetchTanks = useCallback(async () => {
     try {
@@ -104,9 +100,9 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchTanks();
-    const interval = setInterval(fetchTanks, POLL_INTERVAL_MS);
+    const interval = setInterval(fetchTanks, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchTanks]);
+  }, [fetchTanks, pollInterval]);
 
   const setFilter = useCallback((patch: Partial<TankFilter>) => {
     setFilterState((prev) => ({ ...prev, ...patch }));

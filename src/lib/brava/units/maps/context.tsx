@@ -2,9 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { EquipmentMapCoordinateOverride, EquipmentMapCoordinateOverrideInput } from "./types";
-
-// See the same constant in lib/brava/context.tsx for why this isn't 8s anymore.
-const POLL_INTERVAL_MS = 45000;
+import { useBravaPollInterval } from "../../use-poll-interval";
 
 type LoadStatus = "loading" | "ready" | "error";
 
@@ -30,6 +28,7 @@ export function EquipmentMapCoordinatesProvider({ children }: { children: React.
   const [coordinates, setCoordinates] = useState<EquipmentMapCoordinateOverride[]>([]);
   const [status, setStatus] = useState<LoadStatus>("loading");
   const hasLoadedOnce = useRef(false);
+  const pollInterval = useBravaPollInterval();
 
   const fetchCoordinates = useCallback(async () => {
     try {
@@ -51,9 +50,9 @@ export function EquipmentMapCoordinatesProvider({ children }: { children: React.
 
   useEffect(() => {
     fetchCoordinates();
-    const interval = setInterval(fetchCoordinates, POLL_INTERVAL_MS);
+    const interval = setInterval(fetchCoordinates, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchCoordinates]);
+  }, [fetchCoordinates, pollInterval]);
 
   const saveCoordinate = useCallback(
     (input: EquipmentMapCoordinateOverrideInput) => {

@@ -2,9 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { EquipmentMaterial, EquipmentMaterialInput } from "./types";
-
-// See the same constant in lib/brava/context.tsx for why this isn't 8s anymore.
-const POLL_INTERVAL_MS = 45000;
+import { useBravaPollInterval } from "../../use-poll-interval";
 
 type LoadStatus = "loading" | "ready" | "error";
 
@@ -35,6 +33,7 @@ export function EquipmentMaterialsDataProvider({ children }: { children: React.R
   const [status, setStatus] = useState<LoadStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const hasLoadedOnce = useRef(false);
+  const pollInterval = useBravaPollInterval();
 
   const fetchMaterials = useCallback(async () => {
     try {
@@ -66,9 +65,9 @@ export function EquipmentMaterialsDataProvider({ children }: { children: React.R
 
   useEffect(() => {
     fetchMaterials();
-    const interval = setInterval(fetchMaterials, POLL_INTERVAL_MS);
+    const interval = setInterval(fetchMaterials, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchMaterials]);
+  }, [fetchMaterials, pollInterval]);
 
   const addMaterial = useCallback(
     (input: EquipmentMaterialInput) => {
