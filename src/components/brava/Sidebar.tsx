@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Boxes, GanttChartSquare, LayoutList, Package, Map, Wallet, Lock, Unlock, KeyRound } from "lucide-react";
+import { LayoutGrid, Boxes, GanttChartSquare, LayoutList, Package, Map, Wallet, Lock, Unlock, KeyRound, ClipboardCheck } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { formatShort } from "@/lib/brava/date-utils";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/brava/cn";
 
 const TANQUES_NAV_ITEMS = [
   { href: "/brava", label: "Visão Geral", icon: LayoutGrid, matchExact: true },
+  { href: "/brava/campo", label: "Campo", icon: ClipboardCheck, matchExact: true },
   { href: "/brava#tank-control", label: "Tank Control", icon: Boxes, matchExact: false },
   { href: "/brava#cronograma", label: "Cronograma", icon: LayoutList, matchExact: false },
   { href: "/brava/mapa", label: "Mapa", icon: Map, matchExact: true },
