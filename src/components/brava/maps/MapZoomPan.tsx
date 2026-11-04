@@ -65,6 +65,16 @@ const MapZoomPan = forwardRef<
     onViewportSizeChange?: (size: { width: number; height: number }) => void;
     /** Reports the current zoom factor whenever it changes — callers dragging something inside the transformed layer (e.g. a callout box) need this to convert pointer-movement px into the layer's own (unscaled) coordinate space. */
     onScaleChange?: (scale: number) => void;
+    /**
+     * Applies the exact same viewport-filling sizing and HUD chrome (letterbox
+     * sizing, blurred background, HudCorners, blueprint grid, FullscreenControlBar)
+     * that real document.fullscreenElement normally gates — without requiring the
+     * actual Fullscreen API, which browsers only allow from a user gesture and
+     * can't be engaged automatically on page load. Used by the map's own
+     * always-on-screen "kiosk" mode (/brava/mapa); the real "Tela cheia" button
+     * still layers true OS fullscreen on top of this independently.
+     */
+    forceChrome?: boolean;
   }
 >(function MapZoomPan(
   {
@@ -77,6 +87,7 @@ const MapZoomPan = forwardRef<
     tourSlot,
     onViewportSizeChange,
     onScaleChange,
+    forceChrome,
   },
   ref
 ) {
@@ -197,12 +208,14 @@ const MapZoomPan = forwardRef<
       onCalibrationClick((contentX / rect.width) * 100, (contentY / rect.height) * 100);
     }
 
+    const showChrome = isFullscreen || !!forceChrome;
+
     return (
       <div
         ref={fullscreenRef}
-        className={cn(isFullscreen && "relative flex h-full w-full items-center justify-center bg-black")}
+        className={cn(showChrome && "relative flex h-full w-full items-center justify-center bg-black")}
       >
-        {isFullscreen && backgroundSrc && (
+        {showChrome && backgroundSrc && (
           <Image
             src={backgroundSrc}
             alt=""
@@ -212,15 +225,15 @@ const MapZoomPan = forwardRef<
             className="scale-110 object-cover opacity-50 blur-2xl"
           />
         )}
-        {isFullscreen && <HudCorners />}
-        {isFullscreen && fullscreenLabel && fullscreenSummary && (
+        {showChrome && <HudCorners />}
+        {showChrome && fullscreenLabel && fullscreenSummary && (
           <FullscreenControlBar title={fullscreenLabel} summary={fullscreenSummary} />
         )}
         <div
           ref={containerRef}
           className="relative overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"
           style={
-            isFullscreen
+            showChrome
               ? {
                   // containerRef's only normal-flow child is position:absolute
                   // (the transform layer below), which contributes nothing to
@@ -249,7 +262,7 @@ const MapZoomPan = forwardRef<
             {children}
           </div>
 
-          {isFullscreen && (
+          {showChrome && (
             <BlueprintGrid className="pointer-events-none absolute inset-0 h-full w-full text-white opacity-[0.07]" />
           )}
 

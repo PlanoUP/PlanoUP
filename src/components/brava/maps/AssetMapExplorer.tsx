@@ -23,6 +23,7 @@ import MapAssetListPanel from "./MapAssetListPanel";
 import MapCalibrationPanel from "./MapCalibrationPanel";
 import MapTourPanel from "./MapTourPanel";
 import MapPresentationMode from "./MapPresentationMode";
+import MapHoverToolbar from "./MapHoverToolbar";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 // Every status with a real, dated maintenance plan to show on the map — a
@@ -242,12 +243,11 @@ export default function AssetMapExplorer({
     .filter((e) => e.tank === null)
     .map((e) => ({ tag: e.tag, tank: null, hasCoordinate: !!e.coordinate }));
 
-  return (
+  const chrome = (
     <>
-    <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <MapAreaSelector activeMapId={activeMapId} onChange={handleAreaChange} />
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
             onClick={() => (tourActive ? stopTour() : startTour())}
@@ -255,9 +255,13 @@ export default function AssetMapExplorer({
             title={tourTags.length === 0 ? "Nenhum ativo em manutenção neste mapa" : undefined}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-brava-sm border px-3 py-1.5 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-              tourActive
-                ? "border-brava-blue bg-brava-blue text-brava-white"
-                : "border-brava-border bg-brava-white text-brava-text-secondary hover:border-brava-blue/30 hover:text-brava-text"
+              embedded
+                ? tourActive
+                  ? "border-brava-blue bg-brava-blue text-brava-white"
+                  : "border-brava-border bg-brava-white text-brava-text-secondary hover:border-brava-blue/30 hover:text-brava-text"
+                : tourActive
+                  ? "border-white bg-white text-brava-blue-dark"
+                  : "border-white/20 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
             )}
           >
             {tourActive ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
@@ -266,7 +270,12 @@ export default function AssetMapExplorer({
           <button
             type="button"
             onClick={() => setListOpen((v) => !v)}
-            className="inline-flex items-center gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-3 py-1.5 text-[12px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-text"
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-brava-sm border px-3 py-1.5 text-[12px] font-semibold transition-colors",
+              embedded
+                ? "border-brava-border bg-brava-white text-brava-text-secondary hover:border-brava-blue/30 hover:text-brava-text"
+                : "border-white/20 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
+            )}
           >
             <List className="h-3.5 w-3.5" />
             Lista de Ativos
@@ -275,7 +284,7 @@ export default function AssetMapExplorer({
             <button
               type="button"
               onClick={() => setPresentationActive(true)}
-              className="inline-flex items-center gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-3 py-1.5 text-[12px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-text"
+              className="inline-flex items-center gap-1.5 rounded-brava-sm border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:border-white/40 hover:bg-white/20"
             >
               <MonitorPlay className="h-3.5 w-3.5" />
               Modo Apresentação
@@ -287,87 +296,106 @@ export default function AssetMapExplorer({
       <MapSummaryCard map={map} summary={summary} />
 
       <MapFilterBar search={search} onSearchChange={setSearch} filter={quickFilter} onFilterChange={setQuickFilter} extraFilters={map.filters} />
+    </>
+  );
 
-      <div className="relative">
-        <MapZoomPan
-          key={activeMapId}
-          ref={zoomPanRef}
-          aspectRatio={map.imageWidth / map.imageHeight}
-          onCalibrationClick={calibrationActive ? (x, y) => setCalibrationPoint({ x, y }) : undefined}
-          backgroundSrc={map.image}
-          fullscreenLabel="Paradas de Manutenção - Tanques"
-          fullscreenSummary={fullscreenSummary}
-          onViewportSizeChange={setViewportSize}
-          onScaleChange={setMapScale}
-          tourSlot={
-            tourActive && tourTags.length > 0 ? (
-              <MapTourPanel
-                tags={tourTags}
-                activeIndex={tourIndex}
-                tanksByTag={tanksByTag}
-                onAdvance={() => setTourIndex((i) => (i + 1) % tourTags.length)}
-                onPrev={() => setTourIndex((i) => (i - 1 + tourTags.length) % tourTags.length)}
-                onNext={() => setTourIndex((i) => (i + 1) % tourTags.length)}
-                onStop={stopTour}
-              />
-            ) : undefined
-          }
-        >
-          <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />
-          {visibleEntries.map((e) => (
-            <MapHotspot
-              key={e.tag}
-              tag={e.tag}
-              x={e.coordinate!.x}
-              y={e.coordinate!.y}
-              tank={e.tank}
-              highlighted={highlightedTag === e.tag}
-              calloutOffset={calloutLayout[e.tag]}
-              onSelect={() => {
-                setTourActive(false);
-                setSelectedTag(e.tag);
-                setHighlightedTag(e.tag);
-              }}
-              draggable={IS_DEV || isEditor}
-              mapScale={mapScale}
-              onCalloutOffsetChange={(dx, dy) => saveCalloutOffset({ mapId: activeMapId, tag: e.tag, dx, dy })}
+  const mapCanvas = (
+    <div className={cn("relative", !embedded && "h-full w-full")}>
+      <MapZoomPan
+        key={activeMapId}
+        ref={zoomPanRef}
+        aspectRatio={map.imageWidth / map.imageHeight}
+        forceChrome={!embedded}
+        onCalibrationClick={calibrationActive ? (x, y) => setCalibrationPoint({ x, y }) : undefined}
+        backgroundSrc={map.image}
+        fullscreenLabel="Paradas de Manutenção - Tanques"
+        fullscreenSummary={fullscreenSummary}
+        onViewportSizeChange={setViewportSize}
+        onScaleChange={setMapScale}
+        tourSlot={
+          tourActive && tourTags.length > 0 ? (
+            <MapTourPanel
+              tags={tourTags}
+              activeIndex={tourIndex}
+              tanksByTag={tanksByTag}
+              onAdvance={() => setTourIndex((i) => (i + 1) % tourTags.length)}
+              onPrev={() => setTourIndex((i) => (i - 1 + tourTags.length) % tourTags.length)}
+              onNext={() => setTourIndex((i) => (i + 1) % tourTags.length)}
+              onStop={stopTour}
             />
-          ))}
-        </MapZoomPan>
-
-        <MapLegend />
-
-        {listOpen && (
-          <MapAssetListPanel
-            entries={[...sortedListEntries, ...undatedListEntries]}
-            onSelect={(tag) => {
-              jumpTo(tag);
-              setListOpen(false);
+          ) : undefined
+        }
+      >
+        <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />
+        {visibleEntries.map((e) => (
+          <MapHotspot
+            key={e.tag}
+            tag={e.tag}
+            x={e.coordinate!.x}
+            y={e.coordinate!.y}
+            tank={e.tank}
+            highlighted={highlightedTag === e.tag}
+            calloutOffset={calloutLayout[e.tag]}
+            onSelect={() => {
+              setTourActive(false);
+              setSelectedTag(e.tag);
+              setHighlightedTag(e.tag);
             }}
-            onClose={() => setListOpen(false)}
+            draggable={IS_DEV || isEditor}
+            mapScale={mapScale}
+            onCalloutOffsetChange={(dx, dy) => saveCalloutOffset({ mapId: activeMapId, tag: e.tag, dx, dy })}
           />
-        )}
+        ))}
+      </MapZoomPan>
 
-        {(IS_DEV || isEditor) && (
-          <MapCalibrationPanel
-            active={calibrationActive}
-            onToggle={() => {
-              setCalibrationActive((v) => !v);
-              setCalibrationPoint(null);
-            }}
-            point={calibrationPoint}
-            tankIds={map.tankIds}
-            savedCoordinates={overrides.filter((o) => o.mapId === activeMapId)}
-            onSave={(tag, point) => {
-              saveCoordinate({ mapId: activeMapId, tag, x: point.x, y: point.y });
-              setCalibrationPoint(null);
-            }}
-            onRemove={(id) => deleteCoordinate(id)}
-            draggedCallouts={calloutOffsetOverrides.filter((o) => o.mapId === activeMapId)}
-            onResetCallout={(id) => deleteCalloutOffset(id)}
-          />
-        )}
-      </div>
+      <MapLegend />
+
+      {listOpen && (
+        <MapAssetListPanel
+          entries={[...sortedListEntries, ...undatedListEntries]}
+          onSelect={(tag) => {
+            jumpTo(tag);
+            setListOpen(false);
+          }}
+          onClose={() => setListOpen(false)}
+        />
+      )}
+
+      {(IS_DEV || isEditor) && (
+        <MapCalibrationPanel
+          active={calibrationActive}
+          onToggle={() => {
+            setCalibrationActive((v) => !v);
+            setCalibrationPoint(null);
+          }}
+          point={calibrationPoint}
+          tankIds={map.tankIds}
+          savedCoordinates={overrides.filter((o) => o.mapId === activeMapId)}
+          onSave={(tag, point) => {
+            saveCoordinate({ mapId: activeMapId, tag, x: point.x, y: point.y });
+            setCalibrationPoint(null);
+          }}
+          onRemove={(id) => deleteCoordinate(id)}
+          draggedCallouts={calloutOffsetOverrides.filter((o) => o.mapId === activeMapId)}
+          onResetCallout={(id) => deleteCalloutOffset(id)}
+        />
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {embedded ? (
+        <div className="space-y-4">
+          {chrome}
+          {mapCanvas}
+        </div>
+      ) : (
+        <div className="fixed inset-0 z-[60] bg-black">
+          {mapCanvas}
+          <MapHoverToolbar exitHref="/brava">{chrome}</MapHoverToolbar>
+        </div>
+      )}
 
       {selectedTag && (
         <MapAssetDrawer
@@ -380,10 +408,10 @@ export default function AssetMapExplorer({
           }}
         />
       )}
-    </div>
-    {!embedded && presentationActive && (
-      <MapPresentationMode onExit={() => setPresentationActive(false)} />
-    )}
+
+      {!embedded && presentationActive && (
+        <MapPresentationMode onExit={() => setPresentationActive(false)} />
+      )}
     </>
   );
 }
