@@ -109,14 +109,23 @@ async function reconcileOctober2026ReportSync(): Promise<void> {
  * was already on the row: the whole point of the fix is that the new notes
  * fold in the 2022-2023 history that the old CONCLUIDO row's structured
  * activities used to carry, so keeping the old (plain scope-text) notes
- * here would silently lose that history in production. Self-terminating
- * like the others: once the row is PROGRAMADO, this never fires again.
+ * here would silently lose that history in production.
+ *
+ * Checks the NOTES, not the status: an earlier version of this fix (now
+ * corrected) checked `status === "CONCLUIDO"` and had already flipped the
+ * live row to PROGRAMADO — with the old notes still on it — by the time
+ * this version shipped, so a status-based check would never find anything
+ * to do again. Checking for the new notes' own prefix instead means this
+ * still self-terminates (once the prefix is there, it stays there) but
+ * also actually fixes a row the earlier buggy pass already half-fixed.
  */
+const TQ_6313005_HISTORY_PREFIX = "Ciclo de manutenção 2022–2023 concluído";
+
 async function reconcileTq6313005Reclassification(): Promise<void> {
   const seed = TANKS_SEED.find((t) => t.id === "tq-6313005");
   if (!seed) return;
   const tank = await getTank("tq-6313005");
-  if (!tank || tank.status !== "CONCLUIDO") return;
+  if (!tank || tank.notes?.startsWith(TQ_6313005_HISTORY_PREFIX)) return;
   await saveTank(seed);
 }
 
