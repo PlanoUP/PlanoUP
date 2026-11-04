@@ -2,43 +2,36 @@
 
 import { useBravaData } from "@/lib/brava/context";
 import { filterTanks } from "@/lib/brava/selectors";
-import { sortByInspectionPriority } from "@/lib/brava/inspection";
 import TankCard from "./TankCard";
 import FilterBar from "./FilterBar";
-import FamilyFilterBar from "./FamilyFilterBar";
 import SectionHeading from "./SectionHeading";
 
-const FAMILY_TITLES: Record<string, string> = {
-  CRITICIDADE: "Tank Control — Criticidade das Inspeções",
-  "410": "Tancagem 410",
-  "6313": "Tancagem 6313",
-  "270": "Tancagem 270",
-};
+const TANK_CONTROL_STATUS_OPTIONS = ["TODOS", "EM_EXECUCAO", "PROGRAMADO"] as const;
+// Lower order number sorts first: tanks already being worked on are more
+// immediately relevant than ones merely scheduled.
+const STATUS_SORT_ORDER: Record<string, number> = { EM_EXECUCAO: 0, ATRASADO: 0, CRITICO: 0, PROGRAMADO: 1 };
 
 export default function TankControlGrid() {
-  const { tanks, filter, familyView } = useBravaData();
-  // A finished project no longer belongs in active progress control — still
-  // shown on its own dashboard page, just not here. See FilterBar: the
-  // "Concluído" status chip was removed to match, since it would otherwise
-  // always land on an empty grid now.
-  const activeTanks = tanks.filter((t) => t.status !== "CONCLUIDO");
-  const byStatusAndSearch = filterTanks(activeTanks, filter);
-  const byFamily =
-    familyView === "CRITICIDADE"
-      ? byStatusAndSearch
-      : byStatusAndSearch.filter((t) => t.derived.family === familyView);
-  const filtered = sortByInspectionPriority(byFamily);
+  const { tanks, filter } = useBravaData();
+  // Tank Control only tracks tanks with a real, confirmed maintenance plan
+  // this cycle — CONCLUIDO (done, has its own dashboard page) and
+  // SEM_PROJETO (no confirmed plan, just an inspection-inventory record)
+  // don't belong in active progress control.
+  const activeTanks = tanks.filter((t) => t.status !== "CONCLUIDO" && t.status !== "SEM_PROJETO");
+  const filtered = filterTanks(activeTanks, filter)
+    .slice()
+    .sort((a, b) => {
+      const byStatus = (STATUS_SORT_ORDER[a.status] ?? 1) - (STATUS_SORT_ORDER[b.status] ?? 1);
+      return byStatus !== 0 ? byStatus : a.tag.localeCompare(b.tag);
+    });
 
   return (
     <section id="tank-control" className="scroll-mt-24">
-      <div className="mb-4">
-        <FamilyFilterBar />
-      </div>
       <SectionHeading
         eyebrow="Operação"
-        title={FAMILY_TITLES[familyView]}
-        subtitle={`${filtered.length} de ${activeTanks.length} tanques · ordenado pela próxima inspeção interna`}
-        actions={<FilterBar />}
+        title="Tank Control"
+        subtitle={`${filtered.length} de ${activeTanks.length} tanques em manutenção · status e avanço atuais`}
+        actions={<FilterBar statusOptions={[...TANK_CONTROL_STATUS_OPTIONS]} />}
       />
 
       {filtered.length === 0 ? (

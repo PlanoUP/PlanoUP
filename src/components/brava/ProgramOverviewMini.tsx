@@ -6,7 +6,10 @@ import { useBravaData } from "@/lib/brava/context";
 import { buildTimeScale, monthTicks } from "@/lib/brava/timescale";
 import SectionHeading from "./SectionHeading";
 
-const MAX_ROWS = 6;
+// High enough to show every real tank Tank Control also tracks (8 today)
+// without truncating — this mini-Gantt already excludes SEM_PROJETO/CONCLUIDO
+// tanks on its own, so there's no long tail left to cap.
+const MAX_ROWS = 10;
 
 export default function ProgramOverviewMini() {
   const { tanks } = useBravaData();

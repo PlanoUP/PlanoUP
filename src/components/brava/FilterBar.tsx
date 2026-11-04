@@ -19,8 +19,18 @@ const FILTER_OPTIONS: { value: "TODOS" | TankStatus; label: string }[] = [
   { value: "SEM_PROJETO", label: "Sem Projeto" },
 ];
 
-export default function FilterBar({ searchPlaceholder }: { searchPlaceholder?: string }) {
+export default function FilterBar({
+  searchPlaceholder,
+  statusOptions,
+}: {
+  searchPlaceholder?: string;
+  /** Restricts which status chips render — e.g. Tank Control only ever has PROGRAMADO/EM_EXECUCAO tanks to show, so the rest would just be dead-end chips. Defaults to the full set (Consolidado's Gantt still wants all of them). */
+  statusOptions?: ("TODOS" | TankStatus)[];
+}) {
   const { filter, setFilter } = useBravaData();
+  const options = statusOptions
+    ? FILTER_OPTIONS.filter((opt) => statusOptions.includes(opt.value))
+    : FILTER_OPTIONS;
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -35,7 +45,7 @@ export default function FilterBar({ searchPlaceholder }: { searchPlaceholder?: s
       </div>
 
       <div className="flex flex-wrap gap-1.5">
-        {FILTER_OPTIONS.map((opt) => {
+        {options.map((opt) => {
           const active = filter.status === opt.value;
           const dotClass = opt.value === "TODOS" ? "bg-brava-blue" : STATUS_META[opt.value].dotClass;
           return (
