@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { List, Play, Pause } from "lucide-react";
+import { List, Play, Pause, MonitorPlay } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
@@ -22,6 +22,7 @@ import MapAssetDrawer from "./MapAssetDrawer";
 import MapAssetListPanel from "./MapAssetListPanel";
 import MapCalibrationPanel from "./MapCalibrationPanel";
 import MapTourPanel from "./MapTourPanel";
+import MapPresentationMode from "./MapPresentationMode";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 // Every status with a real, dated maintenance plan to show on the map — a
@@ -34,10 +35,13 @@ const MAINTENANCE_STATUSES: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASA
 export default function AssetMapExplorer({
   initialTag,
   autoStartTour,
+  embedded,
 }: {
   initialTag?: string;
   /** Starts the auto-tour itself once there's something to cycle through — for an unattended context (Modo Apresentação) that can't click the button. */
   autoStartTour?: boolean;
+  /** True when mounted inside the map's own Modo Apresentação overlay — hides the "Modo Apresentação" entry point so it can't nest inside itself. */
+  embedded?: boolean;
 }) {
   const { tanks, today } = useBravaData();
   const { isEditor } = useEditAuth();
@@ -68,6 +72,7 @@ export default function AssetMapExplorer({
   // drift out of sync with each other.
   const [tourActive, setTourActive] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
+  const [presentationActive, setPresentationActive] = useState(false);
 
   const zoomPanRef = useRef<MapZoomPanHandle>(null);
   const lastAutoJumpRef = useRef<string | null>(null);
@@ -238,6 +243,7 @@ export default function AssetMapExplorer({
     .map((e) => ({ tag: e.tag, tank: null, hasCoordinate: !!e.coordinate }));
 
   return (
+    <>
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <MapAreaSelector activeMapId={activeMapId} onChange={handleAreaChange} />
@@ -265,6 +271,16 @@ export default function AssetMapExplorer({
             <List className="h-3.5 w-3.5" />
             Lista de Ativos
           </button>
+          {!embedded && (
+            <button
+              type="button"
+              onClick={() => setPresentationActive(true)}
+              className="inline-flex items-center gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-3 py-1.5 text-[12px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-text"
+            >
+              <MonitorPlay className="h-3.5 w-3.5" />
+              Modo Apresentação
+            </button>
+          )}
         </div>
       </div>
 
@@ -365,5 +381,9 @@ export default function AssetMapExplorer({
         />
       )}
     </div>
+    {!embedded && presentationActive && (
+      <MapPresentationMode onExit={() => setPresentationActive(false)} />
+    )}
+    </>
   );
 }

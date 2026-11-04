@@ -46,8 +46,6 @@ export default function AttentionPanel() {
                 className="flex items-start gap-3 rounded-brava-lg border border-brava-border bg-brava-white p-4 shadow-brava-sm transition-colors hover:border-brava-danger/40"
               >
                 <span className={cn("mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full", meta.dotClass)}>
-                  {/* Literal white, not brava-white — that token flips to a dark panel
-                      color in Modo TV, which would hide the icon against the dot. */}
                   <Icon className="h-3.5 w-3.5 text-white" strokeWidth={2.25} />
                 </span>
                 <div className="min-w-0">

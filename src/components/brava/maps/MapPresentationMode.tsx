@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { ChevronLeft, ChevronRight, Pause, Play, X, Maximize } from "lucide-react";
-import AssetMapExplorer from "@/components/brava/maps/AssetMapExplorer";
+import AssetMapExplorer from "./AssetMapExplorer";
 import AttentionPanel from "@/components/brava/AttentionPanel";
 import DeadlinesPanel from "@/components/brava/DeadlinesPanel";
 import PresentationSummarySlide from "@/components/brava/PresentationSummarySlide";
-import LiveClock from "@/components/brava/maps/LiveClock";
-import LiveDate from "@/components/brava/maps/LiveDate";
+import LiveClock from "./LiveClock";
+import LiveDate from "./LiveDate";
 import { cn } from "@/lib/brava/cn";
 
 const SLIDES = [
@@ -21,14 +20,14 @@ const SLIDES = [
 const SLIDE_DWELL_MS = 30_000;
 
 /**
- * A fixed, full-viewport overlay rather than relying on the real Fullscreen
- * API by default — /brava/layout.tsx always renders the Sidebar/MobileTopBar
- * around any page's children, and a nested layout can't remove an ancestor
- * layout's own markup. Covering it with position:fixed is what actually
- * takes over the screen the moment this page opens; the "Tela cheia" button
- * below is an extra, for also hiding the browser's own chrome on a TV.
+ * A fixed, full-viewport overlay rather than the real Fullscreen API by
+ * default — /brava/layout.tsx always renders the Sidebar/MobileTopBar
+ * around any page's children, and this mode is toggled from inside
+ * AssetMapExplorer, nested well below that layout. Covering it with
+ * position:fixed is what actually takes over the screen; the "Tela cheia"
+ * button below is an extra, for also hiding the browser's own chrome on a TV.
  */
-export default function ApresentacaoPage() {
+export default function MapPresentationMode({ onExit }: { onExit: () => void }) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,11 +63,11 @@ export default function ApresentacaoPage() {
   const Slide = SLIDES[index];
 
   return (
-    <div ref={containerRef} className="brava-tv fixed inset-0 z-[100] flex flex-col font-brava">
-      <header className="flex items-center justify-between border-b border-brava-border px-6 py-4 sm:px-10">
+    <div ref={containerRef} className="fixed inset-0 z-[100] flex flex-col bg-brava-bg font-brava">
+      <header className="flex items-center justify-between border-b border-brava-border bg-brava-white px-6 py-4 sm:px-10">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-brava-sm bg-brava-accent">
-            <span className="font-mono text-[15px] font-extrabold leading-none text-brava-blue-dark">B</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-brava-sm bg-brava-blue">
+            <span className="font-mono text-[15px] font-extrabold leading-none text-brava-accent">B</span>
           </div>
           <div className="leading-tight">
             <p className="text-[13px] font-extrabold tracking-tight text-brava-blue-dark">BRAVA ENERGIA</p>
@@ -79,18 +78,19 @@ export default function ApresentacaoPage() {
         </div>
         <div className="flex items-center gap-4">
           <LiveDate className="hidden text-[11px] font-semibold uppercase tracking-wide text-brava-text-secondary sm:inline" />
-          <LiveClock className="font-mono text-[13px] font-bold tabular-nums text-brava-accent" />
-          <Link
-            href="/brava"
-            aria-label="Fechar apresentação"
+          <LiveClock className="font-mono text-[13px] font-bold tabular-nums text-brava-blue" />
+          <button
+            type="button"
+            onClick={onExit}
+            aria-label="Sair da apresentação"
             className="rounded-brava-sm border border-brava-border p-1.5 text-brava-text-secondary transition-colors hover:border-brava-blue/40 hover:text-brava-blue-dark"
           >
             <X className="h-4 w-4" />
-          </Link>
+          </button>
         </div>
       </header>
 
-      <nav className="flex items-center justify-center gap-2 border-b border-brava-border px-6 py-2.5 sm:px-10">
+      <nav className="flex items-center justify-center gap-2 border-b border-brava-border bg-brava-white px-6 py-2.5 sm:px-10">
         {SLIDES.map((s, i) => (
           <button
             key={s.key}
@@ -98,9 +98,7 @@ export default function ApresentacaoPage() {
             onClick={() => goTo(i)}
             className={cn(
               "rounded-full px-3.5 py-1 text-[11px] font-bold uppercase tracking-wide transition-colors",
-              i === index
-                ? "bg-brava-accent text-brava-blue-dark"
-                : "text-brava-text-secondary hover:text-brava-blue-dark"
+              i === index ? "bg-brava-blue text-brava-white" : "text-brava-text-secondary hover:text-brava-blue-dark"
             )}
           >
             {s.label}
@@ -110,12 +108,12 @@ export default function ApresentacaoPage() {
 
       <main className="flex-1 overflow-y-auto px-6 py-6 sm:px-10 sm:py-8">
         {Slide.key === "resumo" && <PresentationSummarySlide />}
-        {Slide.key === "mapa" && <AssetMapExplorer autoStartTour />}
+        {Slide.key === "mapa" && <AssetMapExplorer autoStartTour embedded />}
         {Slide.key === "atencao" && <AttentionPanel />}
         {Slide.key === "vencimentos" && <DeadlinesPanel limit={14} />}
       </main>
 
-      <div className="flex items-center justify-center gap-3 border-t border-brava-border px-6 py-3 sm:px-10">
+      <div className="flex items-center justify-center gap-3 border-t border-brava-border bg-brava-white px-6 py-3 sm:px-10">
         <NavButton icon={ChevronLeft} label="Anterior" onClick={() => goTo(index - 1)} />
         <button
           type="button"

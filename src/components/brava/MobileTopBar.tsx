@@ -8,12 +8,8 @@ import { cn } from "@/lib/brava/cn";
 
 const TANQUES_NAV_ITEMS = [
   { href: "/brava", label: "Visão Geral", matchExact: true },
-  { href: "/brava/campo", label: "Campo", matchExact: true },
-  { href: "/brava#tank-control", label: "Tank Control", matchExact: false },
-  { href: "/brava#cronograma", label: "Cronograma", matchExact: false },
   { href: "/brava/mapa", label: "Mapa", matchExact: true },
-  { href: "/brava/apresentacao", label: "Apresentação", matchExact: true },
-  { href: "/brava/materiais", label: "Materiais", matchExact: true },
+  { href: "/brava/campo", label: "Campo", matchExact: true },
   { href: "/brava/consolidado", label: "Consolidado", matchExact: true },
 ];
 

@@ -59,7 +59,7 @@ export default function MaterialsHomeSummary() {
       )}
 
       <Link
-        href="/brava/materiais"
+        href="/brava/consolidado?tab=materiais"
         className="inline-flex shrink-0 items-center gap-1.5 text-[12.5px] font-semibold text-brava-blue hover:text-brava-blue-dark"
       >
         Ver Materiais
