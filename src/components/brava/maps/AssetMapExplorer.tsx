@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { List, Play, Pause } from "lucide-react";
+import { List, Play, Square } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
@@ -55,13 +55,14 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   // raw pointer-movement px into the (unscaled) layer space the offset
   // itself is expressed in; see MapHotspot's onBoxPointerMove.
   const [mapScale, setMapScale] = useState(1);
-  // The map's own "presentation" — one shared index drives both the zoom
-  // and MapTourPanel's media (video, then photo, then a plain status card),
-  // so the two can never drift out of sync. Starts itself the moment there's
-  // something to cycle through (no separate "start" step), and `tourActive`
-  // from then on just means playing vs. paused-on-the-current-tank —
-  // clicking a tank's pin pauses it in place rather than resetting anything.
-  const [tourActive, setTourActive] = useState(false);
+  // One shared index drives both MapTourPanel's media (video, then photo,
+  // then a plain status card) and — only while presenting — the map's zoom,
+  // so the two can never drift out of sync with each other. The video
+  // corner cycles on its own by default (videoPlaying starts true); the map
+  // itself stays static until "Iniciar Apresentação" turns presentationActive
+  // on, and resets back to the overview the moment it's turned off again.
+  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [presentationActive, setPresentationActive] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
 
   const zoomPanRef = useRef<MapZoomPanHandle>(null);
@@ -132,7 +133,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   };
 
   function jumpTo(tag: string) {
-    setTourActive(false);
+    setVideoPlaying(false);
     const targetMap = getMapByTank(tag, overrides);
     if (!targetMap) return;
     if (targetMap.id !== activeMapId) setActiveMapId(targetMap.id);
@@ -145,28 +146,35 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     }
   }
 
-  // Fires once, the first time there's something to show — the map opens
-  // straight into the presentation, no button needed.
-  const didAutoStartRef = useRef(false);
-  useEffect(() => {
-    if (didAutoStartRef.current || tourTags.length === 0) return;
-    didAutoStartRef.current = true;
-    setTourActive(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourTags.length]);
-
   // Keeps the zoom locked onto whichever tank the index is currently
-  // sitting on, playing or paused — MapTourPanel only ever advances
-  // tourIndex itself, this is what actually moves the map, so the two can
-  // never fall out of sync with each other.
+  // sitting on — but only while actually presenting; the rest of the time
+  // the map stays put and only the corner panel's own media changes.
+  // MapTourPanel only ever advances tourIndex itself, this is what actually
+  // moves the map, so the two can never fall out of sync with each other.
   useEffect(() => {
+    if (!presentationActive) return;
     const tag = tourTags[tourIndex];
     if (!tag) return;
     setHighlightedTag(tag);
     const coord = getTankCoordinates(activeMapId, tag, overrides);
     if (coord) zoomPanRef.current?.focusOn(coord.x, coord.y);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourIndex, activeMapId]);
+  }, [tourIndex, activeMapId, presentationActive]);
+
+  function togglePresentation() {
+    setPresentationActive((active) => {
+      const next = !active;
+      if (next) {
+        setVideoPlaying(true);
+      } else {
+        // "Parar" — back to the static screen: stop following, snap the
+        // zoom back to the overview, drop whichever pin was highlighted.
+        zoomPanRef.current?.reset();
+        setHighlightedTag(null);
+      }
+      return next;
+    });
+  }
 
   // The tour's tank list can shrink mid-cycle (a tank wraps up, a filter...
   // no, filters don't affect it — but the underlying maintenance set can
@@ -202,7 +210,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   }, [search, tanks, overrides]);
 
   function handleAreaChange(id: AssetMapId) {
-    setTourActive(false);
+    setPresentationActive(false);
     setActiveMapId(id);
     setSearch("");
     setQuickFilter("TODOS");
@@ -228,18 +236,18 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
-            onClick={() => setTourActive((v) => !v)}
+            onClick={togglePresentation}
             disabled={tourTags.length === 0}
             title={tourTags.length === 0 ? "Nenhum ativo em manutenção neste mapa" : undefined}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-brava-sm border px-3 py-1.5 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-              tourActive
+              presentationActive
                 ? "border-white bg-white text-brava-blue-dark"
                 : "border-white/20 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
             )}
           >
-            {tourActive ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            {tourActive ? "Pausar Apresentação" : "Apresentação"}
+            {presentationActive ? <Square className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {presentationActive ? "Parar Apresentação" : "Iniciar Apresentação"}
           </button>
           <button
             type="button"
@@ -277,11 +285,11 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
               tags={tourTags}
               activeIndex={tourIndex}
               tanksByTag={tanksByTag}
-              playing={tourActive}
+              playing={videoPlaying}
               onAdvance={() => setTourIndex((i) => (i + 1) % tourTags.length)}
               onPrev={() => setTourIndex((i) => (i - 1 + tourTags.length) % tourTags.length)}
               onNext={() => setTourIndex((i) => (i + 1) % tourTags.length)}
-              onTogglePlay={() => setTourActive((v) => !v)}
+              onTogglePlay={() => setVideoPlaying((v) => !v)}
             />
           ) : undefined
         }
@@ -299,15 +307,19 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
             onSelect={() => {
               const idx = tourTags.indexOf(e.tag);
               if (idx !== -1) {
-                // In the presentation's own lineup — pause it right here
-                // instead of resetting anything, so its video/dashboard
-                // (already showing via tourIndex's own sync effect) just
-                // stops advancing rather than jumping to a different panel.
+                // In the presentation's own lineup — jump the corner panel
+                // to it and pause there, and zoom in directly (not via the
+                // tourIndex sync effect, which only runs while presenting)
+                // so a deliberate click always focuses the tank regardless
+                // of whether the big "Apresentação" sequence is running.
                 setSelectedTag(null);
                 setTourIndex(idx);
-                setTourActive(false);
+                setVideoPlaying(false);
+                setHighlightedTag(e.tag);
+                const coord = getTankCoordinates(activeMapId, e.tag, overrides);
+                if (coord) zoomPanRef.current?.focusOn(coord.x, coord.y);
               } else {
-                setTourActive(false);
+                setVideoPlaying(false);
                 setSelectedTag(e.tag);
                 setHighlightedTag(e.tag);
               }
