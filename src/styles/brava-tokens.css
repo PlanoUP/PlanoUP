@@ -39,6 +39,46 @@
   --brava-radius-lg: 16px;
 }
 
+/**
+ * "Modo TV" — a dark, high-contrast variant of the exact same brand tokens
+ * above (not a new palette), for the presentation mode meant to be read
+ * from across a room. Every brava-* Tailwind color resolves to one of
+ * these CSS variables (see tailwind.config.ts), so wrapping a subtree in
+ * .brava-tv reskins every existing component automatically — nothing
+ * needs its own dark-mode styling written. --brava-accent (the real Brava
+ * lime, #d2f51e) is untouched on purpose: it already pops hard against a
+ * dark background and is what ties this back to the same brand as the
+ * light app instead of reading as an unrelated theme.
+ */
+.brava-tv {
+  --brava-white: #160f47; /* card/panel surface — lighter than the page bg, same relation as light mode */
+  --brava-blue: #9b8cff; /* was the darkest brand indigo; brightened so it still reads as "blue" on a dark bg */
+  --brava-blue-dark: #ffffff; /* boldest heading/number color */
+  --brava-accent: #d2f51e;
+
+  --brava-bg: #0a0730;
+  --brava-border: #332a74;
+  --brava-text-secondary: #9c93c9;
+  --brava-text: #e7e4f7;
+
+  --brava-warning: #ffcf3a;
+  --brava-warning-bg: rgba(255, 207, 58, 0.12);
+  --brava-warning-border: rgba(255, 207, 58, 0.35);
+  --brava-danger: #ff5a6a;
+  --brava-danger-bg: rgba(255, 90, 106, 0.12);
+  --brava-danger-border: rgba(255, 90, 106, 0.35);
+  --brava-success: #2ee59d;
+  --brava-success-bg: rgba(46, 229, 157, 0.12);
+  --brava-success-border: rgba(46, 229, 157, 0.35);
+
+  --brava-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --brava-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --brava-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+
+  background: var(--brava-bg);
+  color: var(--brava-text);
+}
+
 .brava-app {
   background: var(--brava-bg);
   color: var(--brava-text);

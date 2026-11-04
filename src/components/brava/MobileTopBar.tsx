@@ -12,6 +12,7 @@ const TANQUES_NAV_ITEMS = [
   { href: "/brava#tank-control", label: "Tank Control", matchExact: false },
   { href: "/brava#cronograma", label: "Cronograma", matchExact: false },
   { href: "/brava/mapa", label: "Mapa", matchExact: true },
+  { href: "/brava/apresentacao", label: "Apresentação", matchExact: true },
   { href: "/brava/materiais", label: "Materiais", matchExact: true },
   { href: "/brava/consolidado", label: "Consolidado", matchExact: true },
 ];

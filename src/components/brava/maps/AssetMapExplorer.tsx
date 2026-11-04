@@ -31,7 +31,14 @@ const IS_DEV = process.env.NODE_ENV === "development";
 // show anything about.
 const MAINTENANCE_STATUSES: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO"];
 
-export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
+export default function AssetMapExplorer({
+  initialTag,
+  autoStartTour,
+}: {
+  initialTag?: string;
+  /** Starts the auto-tour itself once there's something to cycle through — for an unattended context (Modo Apresentação) that can't click the button. */
+  autoStartTour?: boolean;
+}) {
   const { tanks, today } = useBravaData();
   const { isEditor } = useEditAuth();
   const { coordinates: overrides, saveCoordinate, deleteCoordinate } = useMapCoordinatesData();
@@ -155,6 +162,14 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     setHighlightedTag(null);
     zoomPanRef.current?.reset();
   }
+
+  const didAutoStartRef = useRef(false);
+  useEffect(() => {
+    if (!autoStartTour || didAutoStartRef.current || tourTags.length === 0) return;
+    didAutoStartRef.current = true;
+    startTour();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStartTour, tourTags.length]);
 
   // Keeps the zoom locked onto whichever tank the tour is currently sitting
   // on — MapTourPanel only advances tourIndex, this is what actually moves
