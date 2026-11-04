@@ -87,11 +87,6 @@ const OCT_2026_REPORT_SYNC: { tankId: string; stillStale: (tank: Tank) => boolea
   { tankId: "tq-1222-33", stillStale: (t) => t.activities[0]?.baselineStart === "2026-10-14" },
   { tankId: "tq-6313004", stillStale: (t) => t.activities[0]?.baselineStart === "2026-10-14" },
   { tankId: "tq-1222-36", stillStale: (t) => t.activities[0]?.baselineStart === "2026-08-03" },
-  // TQ-6313005 was wrongly marked CONCLUIDO forever (its 2022–2023 cycle
-  // really finished, but it has an unregistered new 2027 maintenance cycle
-  // per the CAPEX 2026-2031 budget) — reclassify it as PROGRAMADO like the
-  // corrected TANKS_SEED entry, which folds the old history into notes.
-  { tankId: "tq-6313005", stillStale: (t) => t.status === "CONCLUIDO" },
 ];
 
 async function reconcileOctober2026ReportSync(): Promise<void> {
@@ -105,11 +100,32 @@ async function reconcileOctober2026ReportSync(): Promise<void> {
   }
 }
 
+/**
+ * TQ-6313005 was wrongly marked CONCLUIDO forever (its 2022–2023 cycle
+ * really finished, but it has an unregistered new 2027 maintenance cycle
+ * per the CAPEX 2026-2031 budget) — reclassify it as PROGRAMADO like the
+ * corrected TANKS_SEED entry. Unlike reconcileOctober2026ReportSync above,
+ * this adopts the seed's notes wholesale instead of preserving whatever
+ * was already on the row: the whole point of the fix is that the new notes
+ * fold in the 2022-2023 history that the old CONCLUIDO row's structured
+ * activities used to carry, so keeping the old (plain scope-text) notes
+ * here would silently lose that history in production. Self-terminating
+ * like the others: once the row is PROGRAMADO, this never fires again.
+ */
+async function reconcileTq6313005Reclassification(): Promise<void> {
+  const seed = TANKS_SEED.find((t) => t.id === "tq-6313005");
+  if (!seed) return;
+  const tank = await getTank("tq-6313005");
+  if (!tank || tank.status !== "CONCLUIDO") return;
+  await saveTank(seed);
+}
+
 export async function listTanks(): Promise<Tank[]> {
   await ensureSchema();
   await ensureSeeded();
   await reconcilePlaceholderMetadata();
   await reconcileOctober2026ReportSync();
+  await reconcileTq6313005Reclassification();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks ORDER BY id");
   return rows.map((r: Record<string, unknown>) => r.data as Tank);
