@@ -28,6 +28,34 @@
   --brava-success-bg: #ecfdf3;
   --brava-success-border: #abefc6;
 
+  /*
+   * Same colors again, as space-separated R G B components — the format
+   * Tailwind's rgb(var(--x-rgb) / <alpha-value>) needs to synthesize
+   * opacity-modifier utilities (bg-brava-blue-dark with a slash-90 suffix,
+   * and friends, wired up in tailwind.config.ts). The hex vars above can't
+   * do this themselves: Tailwind has no way to splice an alpha channel
+   * into an opaque var() reference, so every such opacity-modified brava
+   * color class in the codebase was silently generating no CSS at all
+   * (fully transparent) until these were added.
+   */
+  --brava-white-rgb: 255 255 255;
+  --brava-blue-rgb: 32 20 117;
+  --brava-blue-dark-rgb: 23 16 82;
+  --brava-accent-rgb: 210 245 30;
+  --brava-bg-rgb: 246 247 249;
+  --brava-border-rgb: 229 231 235;
+  --brava-text-secondary-rgb: 102 112 133;
+  --brava-text-rgb: 29 41 57;
+  --brava-warning-rgb: 181 71 8;
+  --brava-warning-bg-rgb: 255 250 235;
+  --brava-warning-border-rgb: 254 223 137;
+  --brava-danger-rgb: 180 35 24;
+  --brava-danger-bg-rgb: 254 243 242;
+  --brava-danger-border-rgb: 254 205 202;
+  --brava-success-rgb: 2 122 72;
+  --brava-success-bg-rgb: 236 253 243;
+  --brava-success-border-rgb: 171 239 198;
+
   /* Elevation */
   --brava-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
   --brava-shadow-md: 0 2px 8px rgba(16, 24, 40, 0.06);

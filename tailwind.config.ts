@@ -13,24 +13,30 @@ const config: Config = {
         "text-secondary": "#A7ADB0",
         border: "rgba(255,255,255,.08)",
 
+        // Each resolves through its own `--brava-x-rgb` triplet (see
+        // brava-tokens.css) via `rgb(... / <alpha-value>)`, the pattern
+        // Tailwind needs to synthesize opacity-modifier utilities
+        // (bg-brava-blue-dark/90 and the like) for a CSS-variable-backed
+        // color — a plain var(--brava-x) reference can't carry an alpha
+        // channel Tailwind can splice a modifier into.
         brava: {
-          white: "var(--brava-white)",
-          blue: "var(--brava-blue)",
-          "blue-dark": "var(--brava-blue-dark)",
-          accent: "var(--brava-accent)",
-          bg: "var(--brava-bg)",
-          border: "var(--brava-border)",
-          "text-secondary": "var(--brava-text-secondary)",
-          text: "var(--brava-text)",
-          warning: "var(--brava-warning)",
-          "warning-bg": "var(--brava-warning-bg)",
-          "warning-border": "var(--brava-warning-border)",
-          danger: "var(--brava-danger)",
-          "danger-bg": "var(--brava-danger-bg)",
-          "danger-border": "var(--brava-danger-border)",
-          success: "var(--brava-success)",
-          "success-bg": "var(--brava-success-bg)",
-          "success-border": "var(--brava-success-border)",
+          white: "rgb(var(--brava-white-rgb) / <alpha-value>)",
+          blue: "rgb(var(--brava-blue-rgb) / <alpha-value>)",
+          "blue-dark": "rgb(var(--brava-blue-dark-rgb) / <alpha-value>)",
+          accent: "rgb(var(--brava-accent-rgb) / <alpha-value>)",
+          bg: "rgb(var(--brava-bg-rgb) / <alpha-value>)",
+          border: "rgb(var(--brava-border-rgb) / <alpha-value>)",
+          "text-secondary": "rgb(var(--brava-text-secondary-rgb) / <alpha-value>)",
+          text: "rgb(var(--brava-text-rgb) / <alpha-value>)",
+          warning: "rgb(var(--brava-warning-rgb) / <alpha-value>)",
+          "warning-bg": "rgb(var(--brava-warning-bg-rgb) / <alpha-value>)",
+          "warning-border": "rgb(var(--brava-warning-border-rgb) / <alpha-value>)",
+          danger: "rgb(var(--brava-danger-rgb) / <alpha-value>)",
+          "danger-bg": "rgb(var(--brava-danger-bg-rgb) / <alpha-value>)",
+          "danger-border": "rgb(var(--brava-danger-border-rgb) / <alpha-value>)",
+          success: "rgb(var(--brava-success-rgb) / <alpha-value>)",
+          "success-bg": "rgb(var(--brava-success-bg-rgb) / <alpha-value>)",
+          "success-border": "rgb(var(--brava-success-border-rgb) / <alpha-value>)",
         },
       },
       fontFamily: {

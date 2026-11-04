@@ -58,8 +58,7 @@ export default function MapHotspot({
     ? ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"].includes(tank.status)
     : false;
   const statusMeta = tank ? STATUS_META[tank.status] : null;
-  const accentBorderClass = tank ? STATUS_ACCENT_BORDER[tank.status] : undefined;
-  const lineClass = tank ? STATUS_LINE_CLASS[tank.status] : undefined;
+  const statusFillClass = tank ? STATUS_FILL_CLASS[tank.status] : undefined;
   const effectiveOffset = dragOffset ?? calloutOffset;
   const callout = effectiveOffset ? toSvgGeometry(effectiveOffset) : null;
   // Staggered so dozens of dots don't all blink in lockstep — a cheap,
@@ -126,16 +125,34 @@ export default function MapHotspot({
 
       {tank && showsProgress && statusMeta && callout && (
         <>
+          {/*
+            One quadratic curve through the same corner the old two-segment
+            elbow met at, instead of a hard right angle — a gentle bend reads
+            as one continuous line pulling the card off the dot, rather than
+            a ruler-drawn connector. Kept neutral white (not status-colored)
+            on purpose: the dot's own color is the inspection-criticality
+            scale, the card's status dot below is the maintenance-status
+            scale — two different legends meeting at this line, so tinting
+            it either color would misattribute it to one of them. White
+            reads as the connective tissue between both, not a third signal.
+          */}
           <svg
             className="pointer-events-none absolute z-10 overflow-visible"
-            style={{ left: callout.svgLeft, top: callout.svgTop, width: callout.svgWidth, height: callout.svgHeight }}
+            style={{
+              left: callout.svgLeft,
+              top: callout.svgTop,
+              width: callout.svgWidth,
+              height: callout.svgHeight,
+              filter: "drop-shadow(0 0 2.5px rgba(255,255,255,0.55))",
+            }}
             viewBox={`0 0 ${callout.svgWidth} ${callout.svgHeight}`}
           >
             <path
-              d={`M ${callout.dotLocalX} ${callout.dotLocalY} L ${callout.dotLocalX} ${callout.boxLocalY} L ${callout.boxLocalX} ${callout.boxLocalY}`}
+              d={`M ${callout.dotLocalX} ${callout.dotLocalY} Q ${callout.dotLocalX} ${callout.boxLocalY} ${callout.boxLocalX} ${callout.boxLocalY}`}
               fill="none"
               strokeWidth={1.5}
-              className={lineClass}
+              strokeLinecap="round"
+              className="stroke-white/80"
             />
           </svg>
           <span
@@ -144,20 +161,22 @@ export default function MapHotspot({
             onPointerUp={onBoxPointerUp}
             onPointerCancel={onBoxPointerUp}
             className={cn(
-              "absolute z-20 flex w-[126px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-2.5 py-1.5 shadow-brava-lg",
-              accentBorderClass,
-              draggable ? (isDragging ? "cursor-grabbing" : "cursor-grab hover:ring-2 hover:ring-brava-accent/60") : "pointer-events-none"
+              "absolute z-20 flex w-[132px] -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 rounded-brava-md border border-white/15 bg-brava-blue-dark/90 px-3 py-2 shadow-brava-lg backdrop-blur-md",
+              draggable ? (isDragging ? "cursor-grabbing" : "cursor-grab hover:border-brava-accent/60") : "pointer-events-none"
             )}
-            style={{ left: callout.dx, top: callout.dy, borderLeftWidth: 3, touchAction: draggable ? "none" : undefined }}
+            style={{ left: callout.dx, top: callout.dy, touchAction: draggable ? "none" : undefined }}
           >
             <span className="flex items-center justify-between gap-1.5 whitespace-nowrap">
-              <span className="font-mono text-[10px] font-bold text-brava-blue-dark">{tag}</span>
-              <span className={cn("text-[10px] font-extrabold", statusMeta.textClass)}>{tank.derived.progress}%</span>
+              <span className="flex items-center gap-1.5">
+                <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", statusFillClass)} />
+                <span className="font-mono text-[10px] font-bold text-white">{tag}</span>
+              </span>
+              <span className="text-[10px] font-extrabold text-brava-accent">{tank.derived.progress}%</span>
             </span>
             {/* Track (the "end of progress" reference, full width) with the fill overlaid on top. */}
-            <span className="relative h-[5px] w-full overflow-hidden rounded-full bg-[#98A2B3]">
+            <span className="relative h-[4px] w-full overflow-hidden rounded-full bg-white/15">
               <span
-                className="absolute inset-y-0 left-0 rounded-full bg-brava-accent transition-[width] duration-700 ease-out"
+                className="absolute inset-y-0 left-0 rounded-full bg-brava-accent shadow-[0_0_5px_rgba(210,245,30,0.65)] transition-[width] duration-700 ease-out"
                 style={{ width: `${Math.max(4, Math.min(100, tank.derived.progress))}%` }}
               />
             </span>
@@ -212,21 +231,14 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 // Literal class names (not built dynamically) so Tailwind's content scanner
-// keeps them in the production build.
-const STATUS_LINE_CLASS: Record<string, string> = {
-  PROGRAMADO: "stroke-brava-text-secondary",
-  EM_EXECUCAO: "stroke-brava-blue",
-  ATRASADO: "stroke-brava-warning",
-  CRITICO: "stroke-brava-danger",
-  CONCLUIDO: "stroke-brava-success",
-};
-
-const STATUS_ACCENT_BORDER: Record<string, string> = {
-  PROGRAMADO: "border-l-brava-text-secondary",
-  EM_EXECUCAO: "border-l-brava-blue",
-  ATRASADO: "border-l-brava-warning",
-  CRITICO: "border-l-brava-danger",
-  CONCLUIDO: "border-l-brava-success",
+// keeps them in the production build. The maintenance-status legend, shown
+// as the small dot inside the callout card next to the tag.
+const STATUS_FILL_CLASS: Record<string, string> = {
+  PROGRAMADO: "bg-brava-text-secondary",
+  EM_EXECUCAO: "bg-brava-blue",
+  ATRASADO: "bg-brava-warning",
+  CRITICO: "bg-brava-danger",
+  CONCLUIDO: "bg-brava-success",
 };
 
 /** Converts a pre-computed {dx, dy} offset into the local SVG box/path the elbow leader line is drawn in. */
