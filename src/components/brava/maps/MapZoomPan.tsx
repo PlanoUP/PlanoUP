@@ -32,11 +32,15 @@ export interface MapZoomPanHandle {
  * explicit min(vw, vh*ratio)/min(vh, vw/ratio) calc (see below) rather than
  * width/height:auto — the box's only normal-flow child is itself
  * position:absolute, so auto sizing has no content to size against and
- * collapses to zero. When fullscreen leaves black letterbox bars (the
- * screen's aspect ratio rarely matches the map image's), backgroundSrc — a
- * blurred, cover-cropped copy of the same image — fills them in behind the
- * precise foreground instead of leaving them black, without touching the
- * foreground's alignment.
+ * collapses to zero. The box is sized to COVER the viewport (the larger of
+ * the two candidate sizes, not the smaller/"contain" one) and the wrapper
+ * clips the overflow — since the box keeps the image's exact aspect ratio,
+ * this crops the same way object-cover would on the image itself, but
+ * without disturbing the hotspots' percentage-based coordinate system
+ * (still expressed against the box, not the viewport). backgroundSrc — a
+ * blurred, cover-cropped copy of the same image — sits behind the
+ * foreground as a safety net for the (now purely theoretical) case the
+ * box ever comes up short of the viewport.
  */
 const MapZoomPan = forwardRef<
   MapZoomPanHandle,
@@ -213,7 +217,7 @@ const MapZoomPan = forwardRef<
     return (
       <div
         ref={fullscreenRef}
-        className={cn(showChrome && "relative flex h-full w-full items-center justify-center bg-black")}
+        className={cn(showChrome && "relative flex h-full w-full items-center justify-center overflow-hidden bg-black")}
       >
         {showChrome && backgroundSrc && (
           <Image
@@ -231,18 +235,27 @@ const MapZoomPan = forwardRef<
         )}
         <div
           ref={containerRef}
-          className="relative overflow-hidden rounded-brava-lg border border-brava-border bg-brava-bg"
+          className={cn(
+            "relative overflow-hidden bg-brava-bg",
+            // The border/rounding frame an exact "contain" fit nicely (the
+            // embedded, non-chrome case) but would read as an inconsistent
+            // half-visible edge once the box covers and overflows the
+            // viewport — HudCorners frames the screen itself in that case.
+            showChrome ? "border-0" : "rounded-brava-lg border border-brava-border"
+          )}
           style={
             showChrome
               ? {
                   // containerRef's only normal-flow child is position:absolute
                   // (the transform layer below), which contributes nothing to
                   // an auto-sized box — width/height:auto here would collapse
-                  // to 0. Compute the exact "contain" size explicitly instead:
-                  // whichever of these two is smaller is the true fit, and the
-                  // other works out to match (see MapZoomPan's own math).
-                  width: `min(100vw, calc(100vh * ${aspectRatio}))`,
-                  height: `min(100vh, calc(100vw / ${aspectRatio}))`,
+                  // to 0. Compute the exact "cover" size explicitly instead:
+                  // whichever of these two is LARGER is the true fit (fills
+                  // both viewport dimensions, overflowing the other one by
+                  // design — the wrapper's overflow-hidden clips it, same as
+                  // object-cover would), and the other works out to match.
+                  width: `max(100vw, calc(100vh * ${aspectRatio}))`,
+                  height: `max(100vh, calc(100vw / ${aspectRatio}))`,
                 }
               : { aspectRatio: String(aspectRatio), width: "100%" }
           }

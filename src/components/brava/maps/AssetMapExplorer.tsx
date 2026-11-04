@@ -34,7 +34,7 @@ const MAINTENANCE_STATUSES: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASA
 
 export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
-  const { isEditor } = useEditAuth();
+  const { isEditor, requireEditor } = useEditAuth();
   const { coordinates: overrides, saveCoordinate, deleteCoordinate } = useMapCoordinatesData();
   const { offsets: calloutOffsetOverrides, saveOffset: saveCalloutOffset, deleteOffset: deleteCalloutOffset } = useMapCalloutOffsetsData();
   const [activeMapId, setActiveMapId] = useState<AssetMapId>(() => {
@@ -48,6 +48,11 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const [listOpen, setListOpen] = useState(false);
   const [calibrationActive, setCalibrationActive] = useState(false);
   const [calibrationPoint, setCalibrationPoint] = useState<{ x: number; y: number } | null>(null);
+  // Set when the calibration button is clicked while still logged out — the
+  // password modal (requireEditor) opens, and once isEditor actually flips
+  // to true this turns straight into calibration mode on its own, instead
+  // of making the person click the button a second time.
+  const [calibrationPending, setCalibrationPending] = useState(false);
   // The map's actual rendered CSS pixel size (reported by MapZoomPan), used
   // for the callout layout instead of the image's native file dimensions —
   // see the comment on calloutLayout below for why that distinction matters.
@@ -184,6 +189,17 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     if (tourIndex >= tourTags.length) setTourIndex(0);
   }, [tourTags.length, tourIndex]);
 
+  // Finishes the "click calibration while logged out" flow: the click
+  // itself only opened the password modal (see toggleCalibration below);
+  // once the password actually lands and isEditor flips to true, jump
+  // straight into calibration mode instead of requiring a second click.
+  useEffect(() => {
+    if (isEditor && calibrationPending) {
+      setCalibrationPending(false);
+      setCalibrationActive(true);
+    }
+  }, [isEditor, calibrationPending]);
+
   // Deep link from /brava/mapa?tank=TAG
   useEffect(() => {
     if (!initialTag || didInitialFocusRef.current) return;
@@ -209,6 +225,25 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, tanks, overrides]);
+
+  // The calibration button is always visible, even logged out — clicking it
+  // while not yet an editor asks for the password right here (via the
+  // already-global EditPasswordModal) instead of sending the person off to
+  // find an "ativar editor" control elsewhere first.
+  function toggleCalibration() {
+    if (calibrationActive) {
+      setCalibrationActive(false);
+      setCalibrationPoint(null);
+      return;
+    }
+    if (!isEditor) {
+      setCalibrationPending(true);
+      requireEditor();
+      return;
+    }
+    setCalibrationActive(true);
+    setCalibrationPoint(null);
+  }
 
   function handleAreaChange(id: AssetMapId) {
     setPresentationActive(false);
@@ -343,25 +378,20 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
         />
       )}
 
-      {(IS_DEV || isEditor) && (
-        <MapCalibrationPanel
-          active={calibrationActive}
-          onToggle={() => {
-            setCalibrationActive((v) => !v);
-            setCalibrationPoint(null);
-          }}
-          point={calibrationPoint}
-          tankIds={map.tankIds}
-          savedCoordinates={overrides.filter((o) => o.mapId === activeMapId)}
-          onSave={(tag, point) => {
-            saveCoordinate({ mapId: activeMapId, tag, x: point.x, y: point.y });
-            setCalibrationPoint(null);
-          }}
-          onRemove={(id) => deleteCoordinate(id)}
-          draggedCallouts={calloutOffsetOverrides.filter((o) => o.mapId === activeMapId)}
-          onResetCallout={(id) => deleteCalloutOffset(id)}
-        />
-      )}
+      <MapCalibrationPanel
+        active={calibrationActive}
+        onToggle={toggleCalibration}
+        point={calibrationPoint}
+        tankIds={map.tankIds}
+        savedCoordinates={overrides.filter((o) => o.mapId === activeMapId)}
+        onSave={(tag, point) => {
+          saveCoordinate({ mapId: activeMapId, tag, x: point.x, y: point.y });
+          setCalibrationPoint(null);
+        }}
+        onRemove={(id) => deleteCoordinate(id)}
+        draggedCallouts={calloutOffsetOverrides.filter((o) => o.mapId === activeMapId)}
+        onResetCallout={(id) => deleteCalloutOffset(id)}
+      />
     </div>
   );
 

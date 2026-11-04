@@ -7,9 +7,13 @@ import { MapCalloutOffsetOverride, MapCoordinateOverride } from "@/lib/brava/map
 /**
  * Click anywhere on the map to capture its %X/%Y, pick which TAG that is,
  * then "Salvar" to persist it to the database — it shows up for everyone
- * immediately, no code change or redeploy needed. Shown in development,
- * and in production to anyone in edit mode (see AssetMapExplorer's
- * IS_DEV || isEditor guard) — never to a logged-out visitor.
+ * immediately, no code change or redeploy needed. The toggle button is
+ * always visible, even logged out — AssetMapExplorer's onToggle asks for
+ * the edit password right there (via requireEditor) instead of silently
+ * hiding the button, and only actually opens calibration mode once that
+ * succeeds. The save/drag actions themselves still only work once the
+ * person is truly authenticated (the API routes check the edit cookie
+ * server-side regardless of what this panel shows).
  *
  * "Copiar configuração" stays as a secondary action for baking a value
  * into lib/brava/maps/config.ts permanently once it's been confirmed live.
@@ -55,7 +59,14 @@ export default function MapCalibrationPanel({
   }
 
   return (
-    <div className="absolute left-3 top-3 z-30 w-max max-w-[300px]">
+    // top-16, not top-3: MapHoverToolbar's hover-reveal wrapper spans the
+    // full width right at the top of the screen (so it can catch a mouse
+    // approaching its centered "Menu" handle) and sits above this panel in
+    // z-order — anywhere inside that strip, even visually empty space,
+    // swallows clicks meant for whatever is underneath. Clearing it is the
+    // simplest fix; moving the toolbar's own hit area to just its button
+    // would be the alternative, but risks breaking the hover reveal itself.
+    <div className="absolute left-3 top-16 z-30 w-max max-w-[300px]">
       <button
         type="button"
         onClick={onToggle}
