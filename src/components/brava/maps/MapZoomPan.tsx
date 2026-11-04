@@ -10,7 +10,7 @@ import BlueprintGrid from "../BlueprintGrid";
 
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
-const FOCUS_SCALE = 2.2;
+const FOCUS_SCALE = 1.7; // a gentle zoom on focus — enough to bring the tank into view without feeling like a hard cut
 
 export interface MapZoomPanHandle {
   /** Centers the viewport on a % point of the content and zooms in. */

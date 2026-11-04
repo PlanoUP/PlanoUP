@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { List, Play, Pause, MonitorPlay } from "lucide-react";
+import { List, Play, Pause } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
@@ -21,7 +21,6 @@ import MapAssetDrawer from "./MapAssetDrawer";
 import MapAssetListPanel from "./MapAssetListPanel";
 import MapCalibrationPanel from "./MapCalibrationPanel";
 import MapTourPanel from "./MapTourPanel";
-import MapPresentationMode from "./MapPresentationMode";
 import MapHoverToolbar from "./MapHoverToolbar";
 
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -32,17 +31,7 @@ const IS_DEV = process.env.NODE_ENV === "development";
 // show anything about.
 const MAINTENANCE_STATUSES: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO"];
 
-export default function AssetMapExplorer({
-  initialTag,
-  autoStartTour,
-  embedded,
-}: {
-  initialTag?: string;
-  /** Starts the auto-tour itself once there's something to cycle through — for an unattended context (Modo Apresentação) that can't click the button. */
-  autoStartTour?: boolean;
-  /** True when mounted inside the map's own Modo Apresentação overlay — hides the "Modo Apresentação" entry point so it can't nest inside itself. */
-  embedded?: boolean;
-}) {
+export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
   const { isEditor } = useEditAuth();
   const { coordinates: overrides, saveCoordinate, deleteCoordinate } = useMapCoordinatesData();
@@ -66,13 +55,14 @@ export default function AssetMapExplorer({
   // raw pointer-movement px into the (unscaled) layer space the offset
   // itself is expressed in; see MapHotspot's onBoxPointerMove.
   const [mapScale, setMapScale] = useState(1);
-  // Auto-tour: cycles the map's zoom through each in-maintenance tank, in
-  // lockstep with MapTourPanel's media (video, then photo, then a plain
-  // status card) — one index, shared, so the zoom and the panel can never
-  // drift out of sync with each other.
+  // The map's own "presentation" — one shared index drives both the zoom
+  // and MapTourPanel's media (video, then photo, then a plain status card),
+  // so the two can never drift out of sync. Starts itself the moment there's
+  // something to cycle through (no separate "start" step), and `tourActive`
+  // from then on just means playing vs. paused-on-the-current-tank —
+  // clicking a tank's pin pauses it in place rather than resetting anything.
   const [tourActive, setTourActive] = useState(false);
   const [tourIndex, setTourIndex] = useState(0);
-  const [presentationActive, setPresentationActive] = useState(false);
 
   const zoomPanRef = useRef<MapZoomPanHandle>(null);
   const lastAutoJumpRef = useRef<string | null>(null);
@@ -155,39 +145,28 @@ export default function AssetMapExplorer({
     }
   }
 
-  function startTour() {
-    if (tourTags.length === 0) return;
-    setSelectedTag(null);
-    setTourIndex(0);
-    setTourActive(true);
-  }
-
-  function stopTour() {
-    setTourActive(false);
-    setHighlightedTag(null);
-    zoomPanRef.current?.reset();
-  }
-
+  // Fires once, the first time there's something to show — the map opens
+  // straight into the presentation, no button needed.
   const didAutoStartRef = useRef(false);
   useEffect(() => {
-    if (!autoStartTour || didAutoStartRef.current || tourTags.length === 0) return;
+    if (didAutoStartRef.current || tourTags.length === 0) return;
     didAutoStartRef.current = true;
-    startTour();
+    setTourActive(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoStartTour, tourTags.length]);
+  }, [tourTags.length]);
 
-  // Keeps the zoom locked onto whichever tank the tour is currently sitting
-  // on — MapTourPanel only advances tourIndex, this is what actually moves
-  // the map, so the two can never fall out of sync with each other.
+  // Keeps the zoom locked onto whichever tank the index is currently
+  // sitting on, playing or paused — MapTourPanel only ever advances
+  // tourIndex itself, this is what actually moves the map, so the two can
+  // never fall out of sync with each other.
   useEffect(() => {
-    if (!tourActive) return;
     const tag = tourTags[tourIndex];
     if (!tag) return;
     setHighlightedTag(tag);
     const coord = getTankCoordinates(activeMapId, tag, overrides);
     if (coord) zoomPanRef.current?.focusOn(coord.x, coord.y);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourActive, tourIndex, activeMapId]);
+  }, [tourIndex, activeMapId]);
 
   // The tour's tank list can shrink mid-cycle (a tank wraps up, a filter...
   // no, filters don't affect it — but the underlying maintenance set can
@@ -249,46 +228,27 @@ export default function AssetMapExplorer({
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
-            onClick={() => (tourActive ? stopTour() : startTour())}
+            onClick={() => setTourActive((v) => !v)}
             disabled={tourTags.length === 0}
             title={tourTags.length === 0 ? "Nenhum ativo em manutenção neste mapa" : undefined}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-brava-sm border px-3 py-1.5 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-              embedded
-                ? tourActive
-                  ? "border-brava-blue bg-brava-blue text-brava-white"
-                  : "border-brava-border bg-brava-white text-brava-text-secondary hover:border-brava-blue/30 hover:text-brava-text"
-                : tourActive
-                  ? "border-white bg-white text-brava-blue-dark"
-                  : "border-white/20 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
+              tourActive
+                ? "border-white bg-white text-brava-blue-dark"
+                : "border-white/20 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
             )}
           >
             {tourActive ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            {tourActive ? "Pausar Tour" : "Tour Automático"}
+            {tourActive ? "Pausar Apresentação" : "Apresentação"}
           </button>
           <button
             type="button"
             onClick={() => setListOpen((v) => !v)}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-brava-sm border px-3 py-1.5 text-[12px] font-semibold transition-colors",
-              embedded
-                ? "border-brava-border bg-brava-white text-brava-text-secondary hover:border-brava-blue/30 hover:text-brava-text"
-                : "border-white/20 bg-white/10 text-white hover:border-white/40 hover:bg-white/20"
-            )}
+            className="inline-flex items-center gap-1.5 rounded-brava-sm border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:border-white/40 hover:bg-white/20"
           >
             <List className="h-3.5 w-3.5" />
             Lista de Ativos
           </button>
-          {!embedded && (
-            <button
-              type="button"
-              onClick={() => setPresentationActive(true)}
-              className="inline-flex items-center gap-1.5 rounded-brava-sm border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:border-white/40 hover:bg-white/20"
-            >
-              <MonitorPlay className="h-3.5 w-3.5" />
-              Modo Apresentação
-            </button>
-          )}
         </div>
       </div>
 
@@ -299,12 +259,12 @@ export default function AssetMapExplorer({
   );
 
   const mapCanvas = (
-    <div className={cn("relative", !embedded && "h-full w-full")}>
+    <div className="relative h-full w-full">
       <MapZoomPan
         key={activeMapId}
         ref={zoomPanRef}
         aspectRatio={map.imageWidth / map.imageHeight}
-        forceChrome={!embedded}
+        forceChrome
         onCalibrationClick={calibrationActive ? (x, y) => setCalibrationPoint({ x, y }) : undefined}
         backgroundSrc={map.image}
         fullscreenLabel="Paradas de Manutenção - Tanques"
@@ -312,15 +272,16 @@ export default function AssetMapExplorer({
         onViewportSizeChange={setViewportSize}
         onScaleChange={setMapScale}
         tourSlot={
-          tourActive && tourTags.length > 0 ? (
+          tourTags.length > 0 ? (
             <MapTourPanel
               tags={tourTags}
               activeIndex={tourIndex}
               tanksByTag={tanksByTag}
+              playing={tourActive}
               onAdvance={() => setTourIndex((i) => (i + 1) % tourTags.length)}
               onPrev={() => setTourIndex((i) => (i - 1 + tourTags.length) % tourTags.length)}
               onNext={() => setTourIndex((i) => (i + 1) % tourTags.length)}
-              onStop={stopTour}
+              onTogglePlay={() => setTourActive((v) => !v)}
             />
           ) : undefined
         }
@@ -336,9 +297,20 @@ export default function AssetMapExplorer({
             highlighted={highlightedTag === e.tag}
             calloutOffset={calloutLayout[e.tag]}
             onSelect={() => {
-              setTourActive(false);
-              setSelectedTag(e.tag);
-              setHighlightedTag(e.tag);
+              const idx = tourTags.indexOf(e.tag);
+              if (idx !== -1) {
+                // In the presentation's own lineup — pause it right here
+                // instead of resetting anything, so its video/dashboard
+                // (already showing via tourIndex's own sync effect) just
+                // stops advancing rather than jumping to a different panel.
+                setSelectedTag(null);
+                setTourIndex(idx);
+                setTourActive(false);
+              } else {
+                setTourActive(false);
+                setSelectedTag(e.tag);
+                setHighlightedTag(e.tag);
+              }
             }}
             draggable={IS_DEV || isEditor}
             mapScale={mapScale}
@@ -382,17 +354,10 @@ export default function AssetMapExplorer({
 
   return (
     <>
-      {embedded ? (
-        <div className="space-y-4">
-          {chrome}
-          {mapCanvas}
-        </div>
-      ) : (
-        <div className="fixed inset-0 z-[60] bg-black">
-          {mapCanvas}
-          <MapHoverToolbar exitHref="/brava">{chrome}</MapHoverToolbar>
-        </div>
-      )}
+      <div className="fixed inset-0 z-[60] bg-black">
+        {mapCanvas}
+        <MapHoverToolbar exitHref="/brava">{chrome}</MapHoverToolbar>
+      </div>
 
       {selectedTag && (
         <MapAssetDrawer
@@ -404,10 +369,6 @@ export default function AssetMapExplorer({
             setHighlightedTag(null);
           }}
         />
-      )}
-
-      {!embedded && presentationActive && (
-        <MapPresentationMode onExit={() => setPresentationActive(false)} />
       )}
     </>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Pause, ImageOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, ImageOff, ArrowUpRight, CalendarRange } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { getTankTourPhotoSrc } from "@/lib/brava/photos";
@@ -27,19 +27,22 @@ export default function MapTourPanel({
   tags,
   activeIndex,
   tanksByTag,
+  playing,
   onAdvance,
   onPrev,
   onNext,
-  onStop,
+  onTogglePlay,
 }: {
   tags: string[];
   activeIndex: number;
   tanksByTag: Map<string, TankWithDerived>;
+  /** Whether it's auto-cycling to the next tank on its own, or paused sitting on the current one. */
+  playing: boolean;
   /** Called once the current tank has had its turn (clip ended, dwell elapsed) — advance the shared index. */
   onAdvance: () => void;
   onPrev: () => void;
   onNext: () => void;
-  onStop: () => void;
+  onTogglePlay: () => void;
 }) {
   const [displayedIndex, setDisplayedIndex] = useState(activeIndex);
   const [collapsed, setCollapsed] = useState(true);
@@ -79,15 +82,16 @@ export default function MapTourPanel({
   }, [activeIndex]);
 
   // Safety net: whatever's showing (video, photo, or nothing) still advances
-  // on its own nominal dwell even if a media event never fires.
+  // on its own nominal dwell even if a media event never fires — but only
+  // while actually playing; paused just sits on the current tank.
   useEffect(() => {
     clearDwellTimer();
+    if (!playing || tags.length === 0) return;
     const dwell = media === "video" ? VIDEO_DWELL_MS : media === "photo" ? PHOTO_DWELL_MS : NO_MEDIA_DWELL_MS;
-    if (tags.length === 0) return;
     dwellTimerRef.current = setTimeout(onAdvance, dwell);
     return clearDwellTimer;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayedIndex, media, tags.length]);
+  }, [displayedIndex, media, tags.length, playing]);
 
   useEffect(() => () => {
     clearDwellTimer();
@@ -110,7 +114,7 @@ export default function MapTourPanel({
   }
 
   function handleVideoEnded() {
-    if (tags.length <= 1) return; // nothing else to cycle to — let it loop in place
+    if (!playing || tags.length <= 1) return; // paused, or nothing else to cycle to — let it loop in place
     onAdvance();
   }
 
@@ -122,45 +126,33 @@ export default function MapTourPanel({
     setMedia("none");
   }
 
-  function stopNavigation(e: React.SyntheticEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
   return (
     <div
       className={cn(
-        "absolute bottom-3 right-16 z-20 w-72 origin-bottom overflow-hidden rounded-brava-md border border-white/15 bg-black/70 shadow-brava-lg backdrop-blur-sm ease-in-out sm:w-80",
+        "absolute bottom-3 right-16 z-20 w-80 origin-bottom overflow-hidden rounded-brava-md border border-brava-border bg-brava-white shadow-brava-lg ease-in-out sm:w-96",
         collapsed ? "scale-x-90 scale-y-0 opacity-0" : "scale-x-100 scale-y-100 opacity-100"
       )}
       style={{ transitionProperty: "transform, opacity", transitionDuration: `${collapsed ? CLOSE_MS : OPEN_MS}ms` }}
     >
-      <div key={tag} className="flex items-center justify-between gap-2 px-3 py-1.5 animate-video-caption-in">
-        <span className="truncate font-mono text-[11px] font-bold text-white">{tag}</span>
+      <div key={tag} className="flex items-center justify-between gap-2 border-b border-brava-border px-3 py-2 animate-video-caption-in">
+        <span className="truncate font-mono text-[12px] font-bold text-brava-blue-dark">{tag}</span>
         <div className="flex items-center gap-2">
-          <span className="shrink-0 text-[10px] font-semibold text-white/60">
+          <span className="shrink-0 text-[10.5px] font-semibold text-brava-text-secondary">
             {displayedIndex + 1}/{tags.length}
           </span>
           <button
             type="button"
-            onClick={(e) => {
-              stopNavigation(e);
-              onStop();
-            }}
-            title="Pausar tour"
-            aria-label="Pausar tour"
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-brava-sm text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            onClick={onTogglePlay}
+            title={playing ? "Pausar apresentação" : "Retomar apresentação"}
+            aria-label={playing ? "Pausar apresentação" : "Retomar apresentação"}
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-brava-sm text-brava-text-secondary transition-colors hover:bg-brava-bg hover:text-brava-blue"
           >
-            <Pause className="h-3 w-3" />
+            {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>
 
-      <Link
-        href={`/brava/tanques/${encodeURIComponent(tag)}`}
-        className="relative block aspect-video w-full overflow-hidden bg-black"
-        title={`Abrir dashboard de ${tag}`}
-      >
+      <div className="relative aspect-video w-full overflow-hidden bg-black">
         {media === "none" ? (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/70 animate-video-fade-in">
             {statusMeta ? (
@@ -194,14 +186,14 @@ export default function MapTourPanel({
               src={videoSrcForTag(tag)}
               autoPlay
               muted
-              loop={tags.length <= 1}
+              loop={tags.length <= 1 || !playing}
               playsInline
               onEnded={handleVideoEnded}
               onError={handleVideoError}
               onTimeUpdate={handleTimeUpdate}
               className="h-full w-full object-cover animate-video-fade-in"
             />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-white/15">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-white/20">
               <div
                 className="h-full bg-brava-accent transition-[width] duration-150 ease-linear"
                 style={{ width: `${Math.max(0, Math.min(100, clipProgress))}%` }}
@@ -209,13 +201,10 @@ export default function MapTourPanel({
             </div>
           </>
         )}
-        <span className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5 text-[10px] font-semibold text-white/90 opacity-0 transition-opacity duration-150 hover:opacity-100">
-          Abrir dashboard do tanque
-        </span>
-      </Link>
+      </div>
 
       {tags.length > 1 && (
-        <div className="flex items-center justify-between px-1.5 py-1">
+        <div className="flex items-center justify-between border-b border-brava-border px-1.5 py-1">
           <CarouselButton icon={ChevronLeft} label="Anterior" onClick={onPrev} />
           <div className="flex gap-1">
             {tags.map((t, i) => (
@@ -223,12 +212,41 @@ export default function MapTourPanel({
                 key={t}
                 className={cn(
                   "h-1.5 w-1.5 rounded-full transition-all duration-300",
-                  i === displayedIndex ? "w-3.5 bg-white" : "bg-white/30"
+                  i === displayedIndex ? "w-3.5 bg-brava-blue" : "bg-brava-border"
                 )}
               />
             ))}
           </div>
           <CarouselButton icon={ChevronRight} label="Próximo" onClick={onNext} />
+        </div>
+      )}
+
+      {tank && (
+        <div className="px-3 py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-brava-text">
+              {statusMeta && <span className={cn("h-1.5 w-1.5 rounded-full", statusMeta.dotClass)} />}
+              {statusMeta?.label ?? tank.status}
+            </span>
+            <span className="font-mono text-[14px] font-extrabold text-brava-blue-dark">{tank.derived.progress}%</span>
+          </div>
+
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
+            <Link
+              href={`/brava/tanques/${encodeURIComponent(tag)}`}
+              className="flex items-center justify-center gap-1 rounded-brava-sm bg-brava-blue px-2 py-1.5 text-[11.5px] font-semibold text-brava-white transition-colors hover:bg-brava-blue-dark"
+            >
+              Ver mais detalhes
+              <ArrowUpRight className="h-3 w-3" />
+            </Link>
+            <Link
+              href={`/brava/tanques/${encodeURIComponent(tag)}?tab=PLANEJAMENTO`}
+              className="flex items-center justify-center gap-1 rounded-brava-sm border border-brava-border px-2 py-1.5 text-[11.5px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-blue-dark"
+            >
+              <CalendarRange className="h-3 w-3" />
+              Ver cronograma
+            </Link>
+          </div>
         </div>
       )}
     </div>
@@ -247,14 +265,10 @@ function CarouselButton({
   return (
     <button
       type="button"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onClick();
-      }}
+      onClick={onClick}
       title={label}
       aria-label={label}
-      className="flex h-6 w-6 items-center justify-center rounded-brava-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+      className="flex h-6 w-6 items-center justify-center rounded-brava-sm text-brava-text-secondary transition-colors hover:bg-brava-bg hover:text-brava-blue"
     >
       <Icon className="h-3.5 w-3.5" strokeWidth={2} />
     </button>
