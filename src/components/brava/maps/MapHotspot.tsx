@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TankWithDerived } from "@/lib/brava/types";
+import { TankStatus, TankWithDerived } from "@/lib/brava/types";
 import { INSPECTION_CRITICALITY_META, formatDaysToInspection } from "@/lib/brava/inspection";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { CalloutOffset, hashTag } from "@/lib/brava/maps/calloutLayout";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
+
+// Work has actually started on the tank — the map pin goes red for these,
+// gray for everything else (PROGRAMADO, SEM_PROJETO, no tank record at all).
+const MAINTENANCE_ACTIVE_STATUSES: TankStatus[] = ["EM_EXECUCAO", "ATRASADO", "CRITICO"];
 
 export default function MapHotspot({
   tag,
@@ -51,6 +55,14 @@ export default function MapHotspot({
   }, [calloutOffset, dragOffset]);
   const criticality = tank?.derived.inspectionCriticality ?? "SEM_DATA";
   const meta = INSPECTION_CRITICALITY_META[criticality];
+  // The map pin itself only answers one question at a glance — is this tank
+  // being worked on right now, or not yet — rather than the finer
+  // inspection-criticality scale (still shown, spelled out in words, in the
+  // hover tooltip below). ATRASADO/CRITICO count as "in maintenance" too:
+  // work has started, it just needs attention, which the callout card and
+  // tooltip already cover in more detail than a dot color could.
+  const isInMaintenance = tank ? MAINTENANCE_ACTIVE_STATUSES.includes(tank.status) : false;
+  const dotColorClass = isInMaintenance ? "bg-brava-danger" : "bg-brava-text-secondary";
   // Statuses with a real, dated maintenance plan — a meaningful progress
   // number to show at a glance, 0% included (PROGRAMADO: scheduled, next up,
   // nothing started yet). Excludes SEM_PROJETO, which has no plan at all.
@@ -102,23 +114,23 @@ export default function MapHotspot({
       aria-label={tag}
     >
       {highlighted ? (
-        <span className={cn("absolute inset-0 -m-3 animate-ping rounded-full opacity-50", meta.dotClass)} />
+        <span className={cn("absolute inset-0 -m-3 animate-ping rounded-full opacity-50", dotColorClass)} />
       ) : (
         <span
-          className={cn("absolute inset-0 -m-1.5 rounded-full animate-radar-pulse", meta.dotClass)}
+          className={cn("absolute inset-0 -m-1.5 rounded-full animate-radar-pulse", dotColorClass)}
           style={{ animationDelay: `${pulseDelay}s` }}
         />
       )}
       <span
         className={cn(
           "absolute inset-0 -m-2 scale-0 rounded-full opacity-0 transition-all duration-150 group-hover/hotspot:scale-100 group-hover/hotspot:opacity-25",
-          meta.dotClass
+          dotColorClass
         )}
       />
       <span
         className={cn(
           "relative block h-3 w-3 rounded-full border-2 border-brava-white shadow-brava-md transition-transform duration-150 group-hover/hotspot:scale-125",
-          meta.dotClass,
+          dotColorClass,
           highlighted && "scale-150"
         )}
       />

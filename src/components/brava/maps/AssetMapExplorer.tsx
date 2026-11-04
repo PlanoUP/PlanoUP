@@ -14,7 +14,6 @@ import { sortByInspectionPriority } from "@/lib/brava/inspection";
 import { cn } from "@/lib/brava/cn";
 import MapAreaSelector from "./MapAreaSelector";
 import MapFilterBar from "./MapFilterBar";
-import MapLegend from "./MapLegend";
 import MapSummaryCard from "./MapSummaryCard";
 import MapZoomPan, { MapZoomPanHandle } from "./MapZoomPan";
 import MapHotspot from "./MapHotspot";
@@ -347,8 +346,6 @@ export default function AssetMapExplorer({
           />
         ))}
       </MapZoomPan>
-
-      <MapLegend />
 
       {listOpen && (
         <MapAssetListPanel
