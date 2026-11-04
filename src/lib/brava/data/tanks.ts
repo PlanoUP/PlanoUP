@@ -149,16 +149,6 @@ const SERVICOS_LAVAGEM =
 export const TANKS_SEED: Tank[] = [
   // ── Histórico concluído (campanha 2022–2025) ──────────────────────────
   buildConcluded({
-    tag: "TQ-6313005",
-    area: "Tancagem de S-10",
-    product: "Diesel S-10",
-    tankType: "Teto Fixo/Flutuante",
-    actualStart: "2022-10-01",
-    actualEnd: "2023-04-15",
-    nextInternalInspection: "2027-01-03",
-    notes: SERVICOS_TETO_FIXO_FLUTUANTE,
-  }),
-  buildConcluded({
     tag: "TQ-41001",
     area: "Tancagem de Petróleo",
     product: "Petróleo",
@@ -439,6 +429,36 @@ export const TANKS_SEED: Tank[] = [
     responsible: "Coordenação de Manutenção UTE",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
+  // Ciclo 2022–2023 concluído (histórico preservado nas notas abaixo, já que
+  // o progresso geral do tanque é uma média ponderada por duração de TODAS
+  // as atividades do array — reencadear uma nova parada depois das antigas
+  // sem substituí-las distorceria o % exibido). Orçamento CAPEX 2026-2031 já
+  // prevê nova parada em 2027 para este tanque, mas sem data exata ainda
+  // informada — baselineStart abaixo é um placeholder até confirmação.
+  buildScheduled({
+    tag: "TQ-6313005",
+    area: "Tancagem de S-10",
+    product: "Diesel S-10",
+    tankType: "Teto Fixo/Flutuante",
+    baselineStart: "2027-02-02",
+    nextInternalInspection: "2027-01-03",
+    notes:
+      "Ciclo de manutenção 2022–2023 concluído (01/10/2022 a 15/04/2023). " +
+      SERVICOS_TETO_FIXO_FLUTUANTE,
+  }),
+  // Promovido de "Sem Projeto" — orçamento CAPEX 2026-2031 já prevê parada em
+  // 2027 para este tanque, mas sem data exata ainda informada — baselineStart
+  // abaixo é um placeholder até confirmação.
+  buildScheduled({
+    tag: "TQ-1222-31",
+    area: "ETO",
+    product: "Petróleo — Lavagem a Frio",
+    tankType: "Teto Fixo",
+    baselineStart: "2027-04-01",
+    nextInternalInspection: "2026-08-07",
+    responsible: "Coordenação de Manutenção ETO",
+    notes: SERVICOS_LAVAGEM,
+  }),
 
   // ── Sem projeto de manutenção (apenas inspeção — inventário completo) ────
   // Área herdada da convenção de TAG já usada pelos tanques acima (1222 →
@@ -450,7 +470,6 @@ export const TANKS_SEED: Tank[] = [
   buildNoProject({ tag: "TQ-1222-22", area: "ETO", product: "Petróleo — Lavagem a Quente", nextInternalInspection: "2034-02-06" }),
   buildNoProject({ tag: "TQ-1222-23", area: "ETO", nextInternalInspection: "2036-01-07" }),
   buildNoProject({ tag: "TQ-1222-24", area: "ETO", product: "Petróleo — Lavagem a Quente", nextInternalInspection: "2028-04-21" }),
-  buildNoProject({ tag: "TQ-1222-31", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2026-08-07" }),
   buildNoProject({ tag: "TQ-1222-32", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2035-09-02" }),
   buildNoProject({ tag: "TQ-1222-34", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2034-08-22" }),
   buildNoProject({ tag: "TQ-1222-37", area: "ETO", product: "Petróleo — Lavagem a Frio", nextInternalInspection: "2034-12-19" }),
