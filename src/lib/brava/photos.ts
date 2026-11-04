@@ -9,6 +9,17 @@
 
 export const TANK_PHOTOS: Record<string, string> = {
   "TQ-41008": "/images/brava/hero-tq-41008.jpg",
+  // Frames extracted from the real drone footage the user provided for
+  // these 8 tanks (same videos backing public/videos/brava/tanques/) — each
+  // one picked for a clear, well-framed shot of the tank itself.
+  "TQ-1222-25": "/images/brava/hero-tq-1222-25.jpg",
+  "TQ-1222-31": "/images/brava/hero-tq-1222-31.jpg",
+  "TQ-1222-33": "/images/brava/hero-tq-1222-33.jpg",
+  "TQ-1222-35": "/images/brava/hero-tq-1222-35.jpg",
+  "TQ-1222-36": "/images/brava/hero-tq-1222-36.jpg",
+  "TQ-41004": "/images/brava/hero-tq-41004.jpg",
+  "TQ-6313004": "/images/brava/hero-tq-6313004.jpg",
+  "TQ-6313005": "/images/brava/hero-tq-6313005.jpg",
 };
 
 export function getTankPhoto(tag: string): string | null {

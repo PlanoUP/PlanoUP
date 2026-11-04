@@ -1,8 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 import { TankWithDerived } from "@/lib/brava/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { formatDaysToInspection } from "@/lib/brava/inspection";
+import { getTankPhoto } from "@/lib/brava/photos";
 import StatusBadge from "./StatusBadge";
 import ProgressBar from "./ProgressBar";
 import TankIllustration from "./TankIllustration";
@@ -16,19 +18,29 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
   const stripeClass = STATUS_META[tank.status].dotClass;
   const daysToInspection = derived.daysToInternalInspection;
   const inspectionOverdue = daysToInspection !== null && daysToInspection < 0;
+  const photo = getTankPhoto(tank.tag);
 
   return (
     <Link
       href={`/brava/tanques/${tank.tag}`}
-      className="group relative flex cursor-pointer flex-col gap-4 overflow-hidden rounded-brava-lg border border-brava-border bg-brava-white p-5 shadow-brava-sm transition-all duration-200 hover:-translate-y-1 hover:border-brava-blue/25 hover:shadow-brava-lg"
+      className="group relative flex cursor-pointer flex-col gap-4 overflow-hidden rounded-brava-lg border border-brava-border bg-brava-white shadow-brava-sm transition-all duration-200 hover:-translate-y-1 hover:border-brava-blue/25 hover:shadow-brava-lg"
     >
-      <span className={cn("absolute inset-x-0 top-0 h-[3px]", stripeClass)} />
-      <TankIllustration
-        variant="mini"
-        className="pointer-events-none absolute -right-2 -top-1 h-16 w-16 text-brava-border opacity-70 transition-opacity duration-200 group-hover:opacity-100"
-      />
+      {photo ? (
+        <div className="relative h-28 w-full shrink-0 overflow-hidden">
+          <Image src={photo} alt={tank.tag} fill sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-200 group-hover:scale-105" />
+          <span className={cn("absolute inset-x-0 bottom-0 h-[3px]", stripeClass)} />
+        </div>
+      ) : (
+        <>
+          <span className={cn("absolute inset-x-0 top-0 h-[3px]", stripeClass)} />
+          <TankIllustration
+            variant="mini"
+            className="pointer-events-none absolute -right-2 -top-1 h-16 w-16 text-brava-border opacity-70 transition-opacity duration-200 group-hover:opacity-100"
+          />
+        </>
+      )}
 
-      <div className="relative flex items-start justify-between gap-2 pt-1">
+      <div className={cn("relative flex items-start justify-between gap-2 px-5", photo ? "pt-3" : "pt-5")}>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <p className="font-mono text-[16px] font-extrabold tracking-tight text-brava-blue-dark">{tank.tag}</p>
@@ -43,7 +55,7 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
         <StatusBadge status={tank.status} size="sm" />
       </div>
 
-      <div className="relative">
+      <div className="relative px-5">
         <div className="mb-1.5 flex items-center justify-between text-[11px] text-brava-text-secondary">
           <span className="truncate pr-2">
             {tank.status === "CONCLUIDO"
@@ -57,7 +69,7 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
         <ProgressBar value={derived.progress} accent={isActive} />
       </div>
 
-      <div className="relative grid grid-cols-2 gap-x-3 gap-y-2.5 border-t border-brava-border pt-3.5 text-[12px]">
+      <div className="relative grid grid-cols-2 gap-x-3 gap-y-2.5 border-t border-brava-border px-5 pt-3.5 text-[12px]">
         <Stat label="Início" value={formatShort(derived.plannedStart)} />
         <Stat label="Conclusão prevista" value={formatShort(derived.plannedEnd)} />
         <Stat
@@ -79,7 +91,7 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
         daysToInternalInspection={daysToInspection}
         criticality={derived.inspectionCriticality}
       >
-        <div className="relative flex w-full items-center justify-between gap-2 border-t border-brava-border pt-3 text-[11px]">
+        <div className="relative flex w-full items-center justify-between gap-2 border-t border-brava-border px-5 pb-5 pt-3 text-[11px]">
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wide text-brava-text-secondary">Próxima Interna</p>
             <p className={cn("truncate font-semibold", inspectionOverdue ? "text-brava-danger" : "text-brava-text")}>

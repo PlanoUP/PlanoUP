@@ -1,9 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { formatDaysToInspection } from "@/lib/brava/inspection";
 import { getMapByTank } from "@/lib/brava/maps/selectors";
+import { getTankPhoto } from "@/lib/brava/photos";
 import StatusBadge from "./StatusBadge";
 import InspectionCriticalityBadge from "./InspectionCriticalityBadge";
 import BlueprintGrid from "./BlueprintGrid";
@@ -24,9 +26,20 @@ export default function ExecutiveHeader({ tank }: { tank: TankWithDerived }) {
   const isActive = ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(tank.status);
   const deviation = derived.deviationDays;
   const onMap = getMapByTank(tank.tag) !== null;
+  const photo = getTankPhoto(tank.tag);
 
   return (
     <div className="overflow-hidden rounded-brava-lg border border-brava-border bg-brava-white shadow-brava-sm">
+      {/* Cover photo — only for tanks with a confirmed real photo on file (see
+          lib/brava/photos.ts); everything below still works the same without
+          one, so this is purely additive. */}
+      {photo && (
+        <div className="relative h-44 w-full overflow-hidden sm:h-56">
+          <Image src={photo} alt={tank.tag} fill sizes="(min-width: 1024px) 1024px, 100vw" className="object-cover" priority />
+          <div className="absolute inset-0 bg-gradient-to-t from-brava-white via-transparent to-transparent" />
+        </div>
+      )}
+
       {/* Identity block */}
       <div className="relative overflow-hidden px-6 pb-7 pt-7 sm:px-8">
         <BlueprintGrid className="pointer-events-none absolute inset-0 h-full w-full text-brava-blue opacity-50" />
