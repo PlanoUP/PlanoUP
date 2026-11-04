@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { Users, Clock, ShieldCheck, Leaf, ArrowRight, FileText, Map } from "lucide-react";
-import { useBravaData } from "@/lib/brava/context";
-import { STATUS_META } from "@/lib/brava/status-meta";
 import BlueprintGrid from "./BlueprintGrid";
 import TankIllustration from "./TankIllustration";
-
-const HERO_TANK_TAG = "TQ-41008";
 
 const BENEFITS = [
   { icon: Users, label: "Mais confiabilidade" },
@@ -17,14 +13,6 @@ const BENEFITS = [
 ];
 
 export default function HeroExecutive() {
-  const { tanks } = useBravaData();
-  const heroTank = tanks.find((t) => t.tag === HERO_TANK_TAG);
-  const heroStatusLabel = heroTank
-    ? heroTank.status === "CONCLUIDO"
-      ? "Manutenção Concluída"
-      : STATUS_META[heroTank.status].label
-    : "Ativo Industrial";
-
   return (
     <section className="relative overflow-hidden border-b border-brava-border bg-brava-white">
       <div className="grid grid-cols-1 lg:grid-cols-2">
@@ -94,8 +82,9 @@ export default function HeroExecutive() {
           </p>
         </div>
 
-        {/* Right — technical / photographic composition. Photo is the real
-            TQ-41008 tank (public/images/brava/hero-tq-41008.jpg). The white
+        {/* Right — technical / photographic composition. Photo is a generic
+            aerial view of the tank farm (public/images/brava/hero-overview.jpg),
+            not any one tank, so no asset caption is overlaid on it. The white
             wedge + soft mask reproduce the reference's angular, non-vertical
             transition instead of a hard split. */}
         <div className="relative hidden min-h-[560px] overflow-hidden lg:block">
@@ -127,19 +116,6 @@ export default function HeroExecutive() {
             </p>
           </div>
 
-          {/* Featured asset caption — real TAG + real status, nothing fabricated */}
-          <div className="absolute bottom-[38%] left-[42%] flex items-center gap-3">
-            <span className="h-10 w-[3px] rounded-full bg-brava-accent" />
-            <div>
-              <p className="font-mono text-lg font-extrabold leading-none text-brava-white [text-shadow:0_1px_8px_rgba(23,16,82,0.7)]">
-                {HERO_TANK_TAG}
-              </p>
-              <p className="mt-1 text-[10.5px] font-semibold uppercase tracking-wide text-brava-white/80 [text-shadow:0_1px_6px_rgba(23,16,82,0.7)]">
-                {heroStatusLabel}
-              </p>
-            </div>
-          </div>
-
           {/* Bottom-right institutional card */}
           <div className="absolute bottom-6 right-6 flex overflow-hidden rounded-brava-md bg-brava-blue-dark shadow-brava-lg">
             <span className="w-1 shrink-0 bg-brava-accent" />
@@ -150,16 +126,16 @@ export default function HeroExecutive() {
           </div>
         </div>
 
-        {/* Mobile — compact photo strip (image + asset caption, no HUD clutter) */}
+        {/* Mobile — compact photo strip (image + location caption, no HUD clutter) */}
         <div className="relative flex h-56 overflow-hidden border-t border-brava-border lg:hidden">
           <div className="brava-hero-photo absolute inset-0" />
           <div className="absolute inset-0 bg-gradient-to-t from-brava-blue-dark/50 via-transparent to-transparent" />
           <div className="relative z-10 mt-auto flex items-center gap-3 p-5">
             <span className="h-8 w-[3px] rounded-full bg-brava-accent" />
             <div>
-              <p className="font-mono text-base font-extrabold leading-none text-brava-white">{HERO_TANK_TAG}</p>
+              <p className="text-base font-extrabold leading-none text-brava-white">Guamaré / RN</p>
               <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-brava-white/75">
-                {heroStatusLabel} · Guamaré/RN
+                Energia que impulsiona desenvolvimento.
               </p>
             </div>
           </div>
