@@ -109,7 +109,8 @@ function buildScheduled(p: ScheduledParams): Tank {
 interface NoProjectParams {
   tag: string;
   area: string;
-  nextInternalInspection: string;
+  /** Omit when genuinely not on record — buildNoProject never invents one. */
+  nextInternalInspection?: string;
   /** Only set when confirmed by a real source (e.g. the asset map reference) — otherwise stays "A definir". */
   product?: string;
   /** Only set when already known from a prior real/scheduled entry — tankType is a physical trait of the tank, not of its project, so it doesn't stop being true just because there's no active maintenance plan right now. */
@@ -314,35 +315,9 @@ export const TANKS_SEED: Tank[] = [
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
-  buildActive({
-    tag: "TQ-1222-62",
-    area: "ETO",
-    product: "Sequestrante de H2S",
-    tankType: "Teto Fixo",
-    status: "ATRASADO",
-    baselineStart: "2026-07-01",
-    currentOrder: 3,
-    currentProgress: 40,
-    startOffsetDays: 19,
-    // Sem registro de "PRÓXIMA INTERNA" na planilha de referência — não inventar data.
-    responsible: "Coordenação de Manutenção ETO",
-    notes: "Início de execução com 19 dias de atraso em relação ao planejado. " + SERVICOS_LAVAGEM,
-  }),
-  buildActive({
-    tag: "TQ-27010",
-    area: "UTE",
-    product: "Diesel",
-    tankType: "Teto Fixo/Flutuante",
-    status: "CRITICO",
-    baselineStart: "2026-02-01",
-    currentOrder: 1,
-    currentProgress: 0,
-    startOffsetDays: 190,
-    nextInternalInspection: "2028-07-20",
-    responsible: "Coordenação de Manutenção UTE",
-    notes:
-      "Início da manutenção com 190 dias de atraso em relação ao planejado. Liberação da unidade pendente — prioridade máxima.",
-  }),
+  // TQ-1222-62 e TQ-27010 eram ATRASADO/CRITICO aqui — usuário confirmou que
+  // também não estão de fato em manutenção; voltam para "Sem Projeto" junto
+  // com TQ-1222-21/44 e TQ-27001/27009 (ver essas TAGs mais abaixo).
   // Manutenção lançada em 14/10/2026 — tanques que estavam "Sem Projeto"
   // (apenas inventário de inspeção) e passam a ter um projeto ativo.
   // Real do relatório rev. 13: 32,2% físico real x 38,9% previsto
@@ -447,6 +422,10 @@ export const TANKS_SEED: Tank[] = [
   buildNoProject({ tag: "TQ-1222-43", area: "ETO", product: "Petróleo — Carga", nextInternalInspection: "2027-07-01" }),
   // Voltou de "Programado" — era um placeholder sem parada real confirmada.
   buildNoProject({ tag: "TQ-1222-44", area: "ETO", product: "Petróleo — Carga", tankType: "Teto Flutuante", nextInternalInspection: "2035-04-14" }),
+  // Voltou de "Em execução" (ATRASADO) — usuário confirmou que não está de
+  // fato em manutenção. Sem "PRÓXIMA INTERNA" na planilha de referência —
+  // não inventar data.
+  buildNoProject({ tag: "TQ-1222-62", area: "ETO", product: "Sequestrante de H2S", tankType: "Teto Fixo" }),
   // Idem para a Área 270 — produto confirmado pelo mapa interativo.
   // Voltou de "Programado" — era um placeholder sem parada real confirmada.
   buildNoProject({ tag: "TQ-27001", area: "UTE", product: "QAV", tankType: "Teto Fixo/Flutuante", nextInternalInspection: "2027-06-01" }),
@@ -455,6 +434,9 @@ export const TANKS_SEED: Tank[] = [
   buildNoProject({ tag: "TQ-27004", area: "UTE", product: "QAV", nextInternalInspection: "2033-06-17" }),
   // Voltou de "Programado" — era um placeholder sem parada real confirmada.
   buildNoProject({ tag: "TQ-27009", area: "UTE", product: "Diesel", tankType: "Teto Fixo/Flutuante", nextInternalInspection: "2027-12-25" }),
+  // Voltou de "Em execução" (CRITICO) — usuário confirmou que não está de
+  // fato em manutenção.
+  buildNoProject({ tag: "TQ-27010", area: "UTE", product: "Diesel", tankType: "Teto Fixo/Flutuante", nextInternalInspection: "2028-07-20" }),
   buildNoProject({ tag: "TQ-27011", area: "UTE", product: "Diesel", nextInternalInspection: "2028-06-08" }),
   buildNoProject({ tag: "TQ-27015", area: "UTE", product: "Gasolina", nextInternalInspection: "2030-10-28" }),
   // TQ-27016: ver buildConcluded acima, campanha 2026 já entregue.

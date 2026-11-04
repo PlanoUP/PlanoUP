@@ -131,23 +131,34 @@ async function reconcileTq6313005Reclassification(): Promise<void> {
 
 /**
  * TQ-1222-21/44 and TQ-27001/27009 were briefly PROGRAMADO (placeholder
- * 2026/2027 baseline dates, no real confirmed stop) — the user clarified
- * that only the 8 tanks with real video evidence are actually scheduled or
- * active this cycle, so TANKS_SEED now has these 4 back as SEM_PROJETO.
- * Adopts the seed wholesale (same reasoning as reconcileTq6313005Reclassification:
- * these rows only ever carried placeholder scope-text notes, nothing worth
- * preserving over a clean reset). Self-terminating: once a row is
- * SEM_PROJETO again, `stillStale` no longer matches it.
+ * 2026/2027 baseline dates, no real confirmed stop); TQ-1222-62/27010 were
+ * ATRASADO/CRITICO. User confirmed none of the 6 are actually scheduled or
+ * in maintenance this cycle — only the 8 tanks with real video evidence
+ * are — so TANKS_SEED now has all 6 back as SEM_PROJETO. Adopts the seed
+ * wholesale (same reasoning as reconcileTq6313005Reclassification: these
+ * rows never carried anything beyond placeholder scope-text notes, nothing
+ * worth preserving over a clean reset). Each entry's own `stillStale`
+ * check is the exact status it needs to still have to need fixing, so this
+ * is self-terminating per tank — once a row is SEM_PROJETO again, it no
+ * longer matches and this never touches it a second time, same idiom as
+ * reconcileOctober2026ReportSync above.
  */
-const DEMOTED_TO_NO_PROJECT_IDS = ["tq-1222-21", "tq-1222-44", "tq-27001", "tq-27009"];
+const DEMOTED_TO_NO_PROJECT: { tankId: string; stillStale: (tank: Tank) => boolean }[] = [
+  { tankId: "tq-1222-21", stillStale: (t) => t.status === "PROGRAMADO" },
+  { tankId: "tq-1222-44", stillStale: (t) => t.status === "PROGRAMADO" },
+  { tankId: "tq-27001", stillStale: (t) => t.status === "PROGRAMADO" },
+  { tankId: "tq-27009", stillStale: (t) => t.status === "PROGRAMADO" },
+  { tankId: "tq-1222-62", stillStale: (t) => t.status === "ATRASADO" },
+  { tankId: "tq-27010", stillStale: (t) => t.status === "CRITICO" },
+];
 
 async function reconcileDemotedToNoProject(): Promise<void> {
   const seedById = new Map(TANKS_SEED.map((t) => [t.id, t]));
-  for (const tankId of DEMOTED_TO_NO_PROJECT_IDS) {
+  for (const { tankId, stillStale } of DEMOTED_TO_NO_PROJECT) {
     const seed = seedById.get(tankId);
     if (!seed) continue;
     const tank = await getTank(tankId);
-    if (!tank || tank.status !== "PROGRAMADO") continue;
+    if (!tank || !stillStale(tank)) continue;
     await saveTank(seed);
   }
 }
