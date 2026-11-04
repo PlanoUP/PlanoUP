@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { List } from "lucide-react";
+import { List, Play, Pause } from "lucide-react";
 import Image from "next/image";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
@@ -11,6 +11,7 @@ import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSum
 import { computeCalloutLayout } from "@/lib/brava/maps/calloutLayout";
 import { TankStatus } from "@/lib/brava/types";
 import { sortByInspectionPriority } from "@/lib/brava/inspection";
+import { cn } from "@/lib/brava/cn";
 import MapAreaSelector from "./MapAreaSelector";
 import MapFilterBar from "./MapFilterBar";
 import MapLegend from "./MapLegend";
@@ -20,6 +21,7 @@ import MapHotspot from "./MapHotspot";
 import MapAssetDrawer from "./MapAssetDrawer";
 import MapAssetListPanel from "./MapAssetListPanel";
 import MapCalibrationPanel from "./MapCalibrationPanel";
+import MapTourPanel from "./MapTourPanel";
 
 const IS_DEV = process.env.NODE_ENV === "development";
 // Every status with a real, dated maintenance plan to show on the map — a
@@ -53,6 +55,12 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   // raw pointer-movement px into the (unscaled) layer space the offset
   // itself is expressed in; see MapHotspot's onBoxPointerMove.
   const [mapScale, setMapScale] = useState(1);
+  // Auto-tour: cycles the map's zoom through each in-maintenance tank, in
+  // lockstep with MapTourPanel's media (video, then photo, then a plain
+  // status card) — one index, shared, so the zoom and the panel can never
+  // drift out of sync with each other.
+  const [tourActive, setTourActive] = useState(false);
+  const [tourIndex, setTourIndex] = useState(0);
 
   const zoomPanRef = useRef<MapZoomPanHandle>(null);
   const lastAutoJumpRef = useRef<string | null>(null);
@@ -99,11 +107,12 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visibleEntries, layoutWidth, layoutHeight, calloutOffsetOverrides, activeMapId]);
 
-  // Independent of the quick-filter chips/search — the fullscreen video
-  // carousel always cycles every tank in maintenance on this area, not just
-  // whatever's currently filtered into view.
+  // Independent of the quick-filter chips/search — the auto-tour always
+  // cycles every tank in maintenance on this area, not just whatever's
+  // currently filtered into view.
   const maintenanceEntries = entries.filter((e) => e.tank && MAINTENANCE_STATUSES.includes(e.tank.status) && e.coordinate);
-  const maintenanceVideoTags = maintenanceEntries.map((e) => e.tag).sort();
+  const tourTags = maintenanceEntries.map((e) => e.tag).sort();
+  const tanksByTag = useMemo(() => new Map(tanks.map((t) => [t.tag, t])), [tanks]);
 
   // Fullscreen control-bar KPIs — also independent of the quick-filter
   // chips, same reasoning as the video carousel above.
@@ -116,6 +125,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   };
 
   function jumpTo(tag: string) {
+    setTourActive(false);
     const targetMap = getMapByTank(tag, overrides);
     if (!targetMap) return;
     if (targetMap.id !== activeMapId) setActiveMapId(targetMap.id);
@@ -127,6 +137,39 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
       requestAnimationFrame(() => zoomPanRef.current?.focusOn(coord.x, coord.y));
     }
   }
+
+  function startTour() {
+    if (tourTags.length === 0) return;
+    setSelectedTag(null);
+    setTourIndex(0);
+    setTourActive(true);
+  }
+
+  function stopTour() {
+    setTourActive(false);
+    setHighlightedTag(null);
+    zoomPanRef.current?.reset();
+  }
+
+  // Keeps the zoom locked onto whichever tank the tour is currently sitting
+  // on — MapTourPanel only advances tourIndex, this is what actually moves
+  // the map, so the two can never fall out of sync with each other.
+  useEffect(() => {
+    if (!tourActive) return;
+    const tag = tourTags[tourIndex];
+    if (!tag) return;
+    setHighlightedTag(tag);
+    const coord = getTankCoordinates(activeMapId, tag, overrides);
+    if (coord) zoomPanRef.current?.focusOn(coord.x, coord.y);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourActive, tourIndex, activeMapId]);
+
+  // The tour's tank list can shrink mid-cycle (a tank wraps up, a filter...
+  // no, filters don't affect it — but the underlying maintenance set can
+  // still change as statuses update) — keep the index valid.
+  useEffect(() => {
+    if (tourIndex >= tourTags.length) setTourIndex(0);
+  }, [tourTags.length, tourIndex]);
 
   // Deep link from /brava/mapa?tank=TAG
   useEffect(() => {
@@ -155,6 +198,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   }, [search, tanks, overrides]);
 
   function handleAreaChange(id: AssetMapId) {
+    setTourActive(false);
     setActiveMapId(id);
     setSearch("");
     setQuickFilter("TODOS");
@@ -177,14 +221,31 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <MapAreaSelector activeMapId={activeMapId} onChange={handleAreaChange} />
-        <button
-          type="button"
-          onClick={() => setListOpen((v) => !v)}
-          className="inline-flex items-center gap-1.5 self-start rounded-brava-sm border border-brava-border bg-brava-white px-3 py-1.5 text-[12px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-text sm:self-auto"
-        >
-          <List className="h-3.5 w-3.5" />
-          Lista de Ativos
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => (tourActive ? stopTour() : startTour())}
+            disabled={tourTags.length === 0}
+            title={tourTags.length === 0 ? "Nenhum ativo em manutenção neste mapa" : undefined}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-brava-sm border px-3 py-1.5 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+              tourActive
+                ? "border-brava-blue bg-brava-blue text-brava-white"
+                : "border-brava-border bg-brava-white text-brava-text-secondary hover:border-brava-blue/30 hover:text-brava-text"
+            )}
+          >
+            {tourActive ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {tourActive ? "Pausar Tour" : "Tour Automático"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setListOpen((v) => !v)}
+            className="inline-flex items-center gap-1.5 rounded-brava-sm border border-brava-border bg-brava-white px-3 py-1.5 text-[12px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-text"
+          >
+            <List className="h-3.5 w-3.5" />
+            Lista de Ativos
+          </button>
+        </div>
       </div>
 
       <MapSummaryCard map={map} summary={summary} />
@@ -200,9 +261,21 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
           backgroundSrc={map.image}
           fullscreenLabel="Paradas de Manutenção - Tanques"
           fullscreenSummary={fullscreenSummary}
-          maintenanceVideoTags={maintenanceVideoTags}
           onViewportSizeChange={setViewportSize}
           onScaleChange={setMapScale}
+          tourSlot={
+            tourActive && tourTags.length > 0 ? (
+              <MapTourPanel
+                tags={tourTags}
+                activeIndex={tourIndex}
+                tanksByTag={tanksByTag}
+                onAdvance={() => setTourIndex((i) => (i + 1) % tourTags.length)}
+                onPrev={() => setTourIndex((i) => (i - 1 + tourTags.length) % tourTags.length)}
+                onNext={() => setTourIndex((i) => (i + 1) % tourTags.length)}
+                onStop={stopTour}
+              />
+            ) : undefined
+          }
         >
           <Image src={map.image} alt={map.name} fill sizes="100vw" className="pointer-events-none select-none object-cover" priority />
           {visibleEntries.map((e) => (
@@ -215,6 +288,7 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
               highlighted={highlightedTag === e.tag}
               calloutOffset={calloutLayout[e.tag]}
               onSelect={() => {
+                setTourActive(false);
                 setSelectedTag(e.tag);
                 setHighlightedTag(e.tag);
               }}

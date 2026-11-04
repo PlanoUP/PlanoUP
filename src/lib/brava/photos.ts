@@ -14,3 +14,13 @@ export const TANK_PHOTOS: Record<string, string> = {
 export function getTankPhoto(tag: string): string | null {
   return TANK_PHOTOS[tag.toUpperCase()] ?? null;
 }
+
+// Convention-based fallback photo for the map's auto-tour panel, mirroring
+// the video convention below: a fixed path per TAG, no table to maintain.
+// Unlike getTankPhoto above (which backs <Image>, no onError handling),
+// callers of this one are expected to probe it with a plain <img onError>
+// and fall back gracefully — so, unlike TANK_PHOTOS, a tag with nothing at
+// this path is the normal case, not an omission.
+export function getTankTourPhotoSrc(tag: string): string {
+  return `/images/brava/tanques/${tag.toUpperCase()}/1.jpg`;
+}

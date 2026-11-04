@@ -4,7 +4,6 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import Image from "next/image";
 import { Plus, Minus, Maximize, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/brava/cn";
-import MaintenanceVideoCarousel from "./MaintenanceVideoCarousel";
 import FullscreenControlBar, { FullscreenSummary } from "./FullscreenControlBar";
 import HudCorners from "./HudCorners";
 import BlueprintGrid from "../BlueprintGrid";
@@ -49,8 +48,12 @@ const MapZoomPan = forwardRef<
     /** Shown as a top-centered control bar only while in fullscreen — e.g. "PARADAS DE MANUTENÇÃO - TANQUES". Requires fullscreenSummary too. */
     fullscreenLabel?: string;
     fullscreenSummary?: FullscreenSummary;
-    /** TAGs cycled through the bottom-right maintenance video carousel, only while in fullscreen. */
-    maintenanceVideoTags?: string[];
+    /**
+     * Rendered bottom-right, inside the zoomable container so it keeps
+     * showing whether the map is embedded or fullscreen — e.g. the
+     * auto-tour's media panel. MapZoomPan doesn't know or care what it is.
+     */
+    tourSlot?: React.ReactNode;
     /**
      * Reports the map's actual rendered CSS pixel size whenever it changes
      * (mount, fullscreen toggle, window resize) — callers that position
@@ -71,7 +74,7 @@ const MapZoomPan = forwardRef<
     backgroundSrc,
     fullscreenLabel,
     fullscreenSummary,
-    maintenanceVideoTags,
+    tourSlot,
     onViewportSizeChange,
     onScaleChange,
   },
@@ -257,9 +260,7 @@ const MapZoomPan = forwardRef<
             <ZoomButton icon={Maximize} label="Tela cheia" onClick={toggleFullscreen} />
           </div>
 
-          {isFullscreen && maintenanceVideoTags && maintenanceVideoTags.length > 0 && (
-            <MaintenanceVideoCarousel tags={maintenanceVideoTags} />
-          )}
+          {tourSlot}
         </div>
       </div>
     );
