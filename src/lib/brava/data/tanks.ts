@@ -112,6 +112,8 @@ interface NoProjectParams {
   nextInternalInspection: string;
   /** Only set when confirmed by a real source (e.g. the asset map reference) — otherwise stays "A definir". */
   product?: string;
+  /** Only set when already known from a prior real/scheduled entry — tankType is a physical trait of the tank, not of its project, so it doesn't stop being true just because there's no active maintenance plan right now. */
+  tankType?: string;
   notes?: string;
 }
 
@@ -131,7 +133,7 @@ function buildNoProject(p: NoProjectParams): Tank {
     tag: p.tag,
     area: p.area,
     product: p.product ?? "A definir",
-    tankType: "A definir",
+    tankType: p.tankType ?? "A definir",
     status: "SEM_PROJETO",
     nextInternalInspection: p.nextInternalInspection,
     notes: p.notes ?? CADASTRO_PENDENTE_NOTES,
@@ -389,46 +391,11 @@ export const TANKS_SEED: Tank[] = [
   }),
 
   // ── Programado ─────────────────────────────────────────────────────────
-  buildScheduled({
-    tag: "TQ-1222-21",
-    area: "ETO",
-    product: "Petróleo — Lavagem a Quente",
-    tankType: "Teto Fixo",
-    baselineStart: "2026-10-05",
-    nextInternalInspection: "2025-10-21",
-    responsible: "Coordenação de Manutenção ETO",
-    notes: SERVICOS_LAVAGEM,
-  }),
-  buildScheduled({
-    tag: "TQ-1222-44",
-    area: "ETO",
-    product: "Petróleo — Carga",
-    tankType: "Teto Flutuante",
-    baselineStart: "2027-01-15",
-    nextInternalInspection: "2035-04-14",
-    responsible: "Coordenação de Manutenção ETO",
-    notes: SERVICOS_TETO_FLUTUANTE,
-  }),
-  buildScheduled({
-    tag: "TQ-27001",
-    area: "UTE",
-    product: "QAV",
-    tankType: "Teto Fixo/Flutuante",
-    baselineStart: "2027-03-01",
-    nextInternalInspection: "2027-06-01",
-    responsible: "Coordenação de Manutenção UTE",
-    notes: SERVICOS_TETO_FIXO_FLUTUANTE,
-  }),
-  buildScheduled({
-    tag: "TQ-27009",
-    area: "UTE",
-    product: "Diesel",
-    tankType: "Teto Fixo/Flutuante",
-    baselineStart: "2027-06-01",
-    nextInternalInspection: "2027-12-25",
-    responsible: "Coordenação de Manutenção UTE",
-    notes: SERVICOS_TETO_FIXO_FLUTUANTE,
-  }),
+  // TQ-1222-21/44, TQ-27001/27009 eram PROGRAMADO aqui (datas de 2026/2027),
+  // mas o usuário confirmou que os únicos tanques realmente programados para
+  // 2027 (ou já em manutenção) são os 8 com vídeo real cadastrado — os
+  // demais voltam para "Sem Projeto" (ver essas 4 TAGs mais abaixo) até
+  // terem uma parada de fato confirmada.
   // Ciclo 2022–2023 concluído (histórico preservado nas notas abaixo, já que
   // o progresso geral do tanque é uma média ponderada por duração de TODAS
   // as atividades do array — reencadear uma nova parada depois das antigas
@@ -467,6 +434,8 @@ export const TANKS_SEED: Tank[] = [
   // Produto confirmado pelo mapa interativo de ativos (referência oficial da
   // Brava) para os tanques da Área 1222 — TQ-1222-23 não está identificado no
   // mapa, então permanece "A definir" (não inventar).
+  // Voltou de "Programado" — era um placeholder sem parada real confirmada.
+  buildNoProject({ tag: "TQ-1222-21", area: "ETO", product: "Petróleo — Lavagem a Quente", tankType: "Teto Fixo", nextInternalInspection: "2025-10-21" }),
   buildNoProject({ tag: "TQ-1222-22", area: "ETO", product: "Petróleo — Lavagem a Quente", nextInternalInspection: "2034-02-06" }),
   buildNoProject({ tag: "TQ-1222-23", area: "ETO", nextInternalInspection: "2036-01-07" }),
   buildNoProject({ tag: "TQ-1222-24", area: "ETO", product: "Petróleo — Lavagem a Quente", nextInternalInspection: "2028-04-21" }),
@@ -476,10 +445,16 @@ export const TANKS_SEED: Tank[] = [
   buildNoProject({ tag: "TQ-1222-41", area: "ETO", product: "Petróleo — Carga", nextInternalInspection: "2031-05-29" }),
   buildNoProject({ tag: "TQ-1222-42", area: "ETO", product: "Petróleo — Carga", nextInternalInspection: "2034-06-19" }),
   buildNoProject({ tag: "TQ-1222-43", area: "ETO", product: "Petróleo — Carga", nextInternalInspection: "2027-07-01" }),
+  // Voltou de "Programado" — era um placeholder sem parada real confirmada.
+  buildNoProject({ tag: "TQ-1222-44", area: "ETO", product: "Petróleo — Carga", tankType: "Teto Flutuante", nextInternalInspection: "2035-04-14" }),
   // Idem para a Área 270 — produto confirmado pelo mapa interativo.
+  // Voltou de "Programado" — era um placeholder sem parada real confirmada.
+  buildNoProject({ tag: "TQ-27001", area: "UTE", product: "QAV", tankType: "Teto Fixo/Flutuante", nextInternalInspection: "2027-06-01" }),
   buildNoProject({ tag: "TQ-27002", area: "UTE", product: "QAV", nextInternalInspection: "2027-08-10" }),
   buildNoProject({ tag: "TQ-27003", area: "UTE", product: "QAV", nextInternalInspection: "2027-12-20" }),
   buildNoProject({ tag: "TQ-27004", area: "UTE", product: "QAV", nextInternalInspection: "2033-06-17" }),
+  // Voltou de "Programado" — era um placeholder sem parada real confirmada.
+  buildNoProject({ tag: "TQ-27009", area: "UTE", product: "Diesel", tankType: "Teto Fixo/Flutuante", nextInternalInspection: "2027-12-25" }),
   buildNoProject({ tag: "TQ-27011", area: "UTE", product: "Diesel", nextInternalInspection: "2028-06-08" }),
   buildNoProject({ tag: "TQ-27015", area: "UTE", product: "Gasolina", nextInternalInspection: "2030-10-28" }),
   // TQ-27016: ver buildConcluded acima, campanha 2026 já entregue.

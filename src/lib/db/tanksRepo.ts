@@ -129,12 +129,36 @@ async function reconcileTq6313005Reclassification(): Promise<void> {
   await saveTank(seed);
 }
 
+/**
+ * TQ-1222-21/44 and TQ-27001/27009 were briefly PROGRAMADO (placeholder
+ * 2026/2027 baseline dates, no real confirmed stop) — the user clarified
+ * that only the 8 tanks with real video evidence are actually scheduled or
+ * active this cycle, so TANKS_SEED now has these 4 back as SEM_PROJETO.
+ * Adopts the seed wholesale (same reasoning as reconcileTq6313005Reclassification:
+ * these rows only ever carried placeholder scope-text notes, nothing worth
+ * preserving over a clean reset). Self-terminating: once a row is
+ * SEM_PROJETO again, `stillStale` no longer matches it.
+ */
+const DEMOTED_TO_NO_PROJECT_IDS = ["tq-1222-21", "tq-1222-44", "tq-27001", "tq-27009"];
+
+async function reconcileDemotedToNoProject(): Promise<void> {
+  const seedById = new Map(TANKS_SEED.map((t) => [t.id, t]));
+  for (const tankId of DEMOTED_TO_NO_PROJECT_IDS) {
+    const seed = seedById.get(tankId);
+    if (!seed) continue;
+    const tank = await getTank(tankId);
+    if (!tank || tank.status !== "PROGRAMADO") continue;
+    await saveTank(seed);
+  }
+}
+
 export async function listTanks(): Promise<Tank[]> {
   await ensureSchema();
   await ensureSeeded();
   await reconcilePlaceholderMetadata();
   await reconcileOctober2026ReportSync();
   await reconcileTq6313005Reclassification();
+  await reconcileDemotedToNoProject();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks ORDER BY id");
   return rows.map((r: Record<string, unknown>) => r.data as Tank);
