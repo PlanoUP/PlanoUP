@@ -1,16 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TankStatus, TankWithDerived } from "@/lib/brava/types";
+import { TankWithDerived } from "@/lib/brava/types";
 import { INSPECTION_CRITICALITY_META, formatDaysToInspection } from "@/lib/brava/inspection";
-import { STATUS_META } from "@/lib/brava/status-meta";
+import { mapStatusLabel, mapStatusDotClass } from "@/lib/brava/maps/statusLabel";
 import { CalloutOffset, hashTag } from "@/lib/brava/maps/calloutLayout";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
-
-// Work has actually started on the tank — the map pin goes red for these,
-// gray for everything else (PROGRAMADO, SEM_PROJETO, no tank record at all).
-const MAINTENANCE_ACTIVE_STATUSES: TankStatus[] = ["EM_EXECUCAO", "ATRASADO", "CRITICO"];
 
 export default function MapHotspot({
   tag,
@@ -58,19 +54,15 @@ export default function MapHotspot({
   // The map pin itself only answers one question at a glance — is this tank
   // being worked on right now, or not yet — rather than the finer
   // inspection-criticality scale (still shown, spelled out in words, in the
-  // hover tooltip below). ATRASADO/CRITICO count as "in maintenance" too:
-  // work has started, it just needs attention, which the callout card and
-  // tooltip already cover in more detail than a dot color could.
-  const isInMaintenance = tank ? MAINTENANCE_ACTIVE_STATUSES.includes(tank.status) : false;
-  const dotColorClass = isInMaintenance ? "bg-brava-danger" : "bg-brava-text-secondary";
+  // hover tooltip below).
+  const dotColorClass = tank ? mapStatusDotClass(tank.status) : "bg-brava-text-secondary";
   // Statuses with a real, dated maintenance plan — a meaningful progress
   // number to show at a glance, 0% included (PROGRAMADO: scheduled, next up,
   // nothing started yet). Excludes SEM_PROJETO, which has no plan at all.
   const showsProgress = tank
     ? ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"].includes(tank.status)
     : false;
-  const statusMeta = tank ? STATUS_META[tank.status] : null;
-  const statusFillClass = tank ? STATUS_FILL_CLASS[tank.status] : undefined;
+  const statusLabel = tank ? mapStatusLabel(tank.status) : null;
   const effectiveOffset = dragOffset ?? calloutOffset;
   const callout = effectiveOffset ? toSvgGeometry(effectiveOffset) : null;
   // Staggered so dozens of dots don't all blink in lockstep — a cheap,
@@ -135,7 +127,7 @@ export default function MapHotspot({
         )}
       />
 
-      {tank && showsProgress && statusMeta && callout && (
+      {tank && showsProgress && callout && (
         <>
           {/*
             One quadratic curve through the same corner the old two-segment
@@ -180,7 +172,7 @@ export default function MapHotspot({
           >
             <span className="flex items-center justify-between gap-1.5 whitespace-nowrap">
               <span className="flex items-center gap-1.5">
-                <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", statusFillClass)} />
+                <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dotColorClass)} />
                 <span className="font-mono text-[10px] font-bold text-white">{tag}</span>
               </span>
               <span className="text-[10px] font-extrabold text-brava-accent">{tank.derived.progress}%</span>
@@ -201,10 +193,11 @@ export default function MapHotspot({
         {tank ? (
           <>
             <span className="mt-0.5 block text-[10.5px] text-brava-white/80">{tank.product}</span>
-            <span className="mt-1 block text-[10.5px] font-semibold text-brava-white">
-              {STATUS_LABEL[tank.status] ?? tank.status}
+            <span className="mt-1 flex items-center gap-1.5 text-[10.5px] font-semibold text-brava-white">
+              <span className={cn("h-1.5 w-1.5 rounded-full", dotColorClass)} />
+              {statusLabel}
             </span>
-            {showsProgress && statusMeta && (
+            {showsProgress && (
               <span className="mt-1.5 flex items-center gap-1.5">
                 <span className="relative h-[4px] flex-1 overflow-hidden rounded-full bg-brava-white/25">
                   <span
@@ -232,26 +225,6 @@ export default function MapHotspot({
     </button>
   );
 }
-
-const STATUS_LABEL: Record<string, string> = {
-  PROGRAMADO: "Programado",
-  EM_EXECUCAO: "Em Manutenção",
-  CONCLUIDO: "Manutenção Concluída",
-  ATRASADO: "Atrasado",
-  CRITICO: "Crítico",
-  SEM_PROJETO: "Sem Projeto de Manutenção",
-};
-
-// Literal class names (not built dynamically) so Tailwind's content scanner
-// keeps them in the production build. The maintenance-status legend, shown
-// as the small dot inside the callout card next to the tag.
-const STATUS_FILL_CLASS: Record<string, string> = {
-  PROGRAMADO: "bg-brava-text-secondary",
-  EM_EXECUCAO: "bg-brava-blue",
-  ATRASADO: "bg-brava-warning",
-  CRITICO: "bg-brava-danger",
-  CONCLUIDO: "bg-brava-success",
-};
 
 /** Converts a pre-computed {dx, dy} offset into the local SVG box/path the elbow leader line is drawn in. */
 function toSvgGeometry(offset: CalloutOffset) {

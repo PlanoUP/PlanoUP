@@ -9,6 +9,7 @@ import { useMapCoordinatesData, useMapCalloutOffsetsData } from "@/lib/brava/map
 import { AssetMapId, MapQuickFilter } from "@/lib/brava/maps/types";
 import { getAssetMap, getMapByTank, getTankCoordinates, getTanksByMap, getMapSummary, matchesMapFilter, findTankAcrossMaps } from "@/lib/brava/maps/selectors";
 import { computeCalloutLayout } from "@/lib/brava/maps/calloutLayout";
+import { isMapActive } from "@/lib/brava/maps/statusLabel";
 import { TankStatus } from "@/lib/brava/types";
 import { sortByInspectionPriority } from "@/lib/brava/inspection";
 import { cn } from "@/lib/brava/cn";
@@ -124,12 +125,12 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   // Fullscreen control-bar KPIs — also independent of the quick-filter
   // chips, same reasoning as the video carousel above. No "concluído" count
   // here: concluded tanks are filtered out of `entries` above, so it would
-  // always read 0 — misleading rather than informative.
+  // always read 0 — misleading rather than informative. Kept to just two
+  // buckets (same simplification as the map pin's red/gray dot and
+  // mapStatusLabel): ATRASADO/CRITICO count as "Em Execução" too.
   const fullscreenSummary = {
     programado: maintenanceEntries.filter((e) => e.tank!.status === "PROGRAMADO").length,
-    emExecucao: maintenanceEntries.filter((e) => e.tank!.status === "EM_EXECUCAO").length,
-    atrasado: maintenanceEntries.filter((e) => e.tank!.status === "ATRASADO").length,
-    critico: maintenanceEntries.filter((e) => e.tank!.status === "CRITICO").length,
+    emExecucao: maintenanceEntries.filter((e) => isMapActive(e.tank!.status)).length,
   };
 
   function jumpTo(tag: string) {

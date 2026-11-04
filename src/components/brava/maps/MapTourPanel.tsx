@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Pause, Play, ImageOff, ArrowUpRight, CalendarRange } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
-import { STATUS_META } from "@/lib/brava/status-meta";
-import { getTankTourPhotoSrc } from "@/lib/brava/photos";
+import { mapStatusLabel, mapStatusDotClass } from "@/lib/brava/maps/statusLabel";
+import { getTankTourPhotoSrc, getTankGalleryPhotoSrcs } from "@/lib/brava/photos";
 import { cn } from "@/lib/brava/cn";
 
 // Driven by AssetMapExplorer's own tourIndex — this component only renders
@@ -106,7 +106,8 @@ export default function MapTourPanel({
   const tag = tags[displayedIndex];
   if (!tag) return null;
   const tank = tanksByTag.get(tag) ?? null;
-  const statusMeta = tank ? STATUS_META[tank.status] : null;
+  const statusLabel = tank ? mapStatusLabel(tank.status) : null;
+  const statusDotClass = tank ? mapStatusDotClass(tank.status) : null;
 
   function handleTimeUpdate(e: React.SyntheticEvent<HTMLVideoElement>) {
     const el = e.currentTarget;
@@ -155,10 +156,10 @@ export default function MapTourPanel({
       <div className="relative aspect-video w-full overflow-hidden bg-black">
         {media === "none" ? (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-white/70 animate-video-fade-in">
-            {statusMeta ? (
+            {statusLabel ? (
               <>
-                <span className={cn("h-2.5 w-2.5 rounded-full", statusMeta.dotClass)} />
-                <p className="text-[11px] font-semibold text-white">{statusMeta.label}</p>
+                <span className={cn("h-2.5 w-2.5 rounded-full", statusDotClass)} />
+                <p className="text-[11px] font-semibold text-white">{statusLabel}</p>
                 {tank && (
                   <p className="font-mono text-[18px] font-extrabold text-white">{tank.derived.progress}%</p>
                 )}
@@ -225,11 +226,17 @@ export default function MapTourPanel({
         <div className="px-3 py-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-brava-text">
-              {statusMeta && <span className={cn("h-1.5 w-1.5 rounded-full", statusMeta.dotClass)} />}
-              {statusMeta?.label ?? tank.status}
+              {statusDotClass && <span className={cn("h-1.5 w-1.5 rounded-full", statusDotClass)} />}
+              {statusLabel}
             </span>
             <span className="font-mono text-[14px] font-extrabold text-brava-blue-dark">{tank.derived.progress}%</span>
           </div>
+
+          {tank.notes && (
+            <p className="mt-1.5 line-clamp-2 text-[11px] leading-snug text-brava-text-secondary">{tank.notes}</p>
+          )}
+
+          <PhotoGalleryStrip key={tag} tag={tag} />
 
           <div className="mt-2 grid grid-cols-2 gap-1.5">
             <Link
@@ -248,6 +255,32 @@ export default function MapTourPanel({
             </Link>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+// Small photo gallery for the mini dashboard — probes each conventional
+// path and quietly drops whichever ones don't exist yet (see the tanques
+// photos README). Keyed by tag at the call site, so switching tanks starts
+// a fresh probe instead of carrying over the previous tank's failures.
+function PhotoGalleryStrip({ tag }: { tag: string }) {
+  const srcs = getTankGalleryPhotoSrcs(tag);
+  const [failed, setFailed] = useState<Set<number>>(new Set());
+  if (failed.size === srcs.length) return null;
+  return (
+    <div className="mt-2 flex gap-1.5">
+      {srcs.map((src, i) =>
+        failed.has(i) ? null : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={src}
+            src={src}
+            alt=""
+            onError={() => setFailed((prev) => new Set(prev).add(i))}
+            className="h-10 flex-1 rounded-brava-sm border border-brava-border object-cover"
+          />
+        )
       )}
     </div>
   );

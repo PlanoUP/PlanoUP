@@ -24,3 +24,14 @@ export function getTankPhoto(tag: string): string | null {
 export function getTankTourPhotoSrc(tag: string): string {
   return `/images/brava/tanques/${tag.toUpperCase()}/1.jpg`;
 }
+
+// Small gallery convention for the map's per-tank mini dashboard — up to
+// MAX_TOUR_GALLERY_PHOTOS numbered files per tag. Same graceful-degradation
+// contract as getTankTourPhotoSrc: callers probe each with <img onError> and
+// a tag with nothing beyond 1.jpg (or nothing at all) is the normal case.
+export const MAX_TOUR_GALLERY_PHOTOS = 4;
+
+export function getTankGalleryPhotoSrcs(tag: string): string[] {
+  const upper = tag.toUpperCase();
+  return Array.from({ length: MAX_TOUR_GALLERY_PHOTOS }, (_, i) => `/images/brava/tanques/${upper}/${i + 1}.jpg`);
+}
