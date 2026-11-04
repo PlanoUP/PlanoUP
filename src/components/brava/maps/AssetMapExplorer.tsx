@@ -29,7 +29,7 @@ const IS_DEV = process.env.NODE_ENV === "development";
 // is included: it has confirmed dates and 0% progress is itself meaningful
 // information ("next up"), unlike SEM_PROJETO, which has no plan at all to
 // show anything about.
-const MAINTENANCE_STATUSES: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO", "CONCLUIDO"];
+const MAINTENANCE_STATUSES: TankStatus[] = ["PROGRAMADO", "EM_EXECUCAO", "ATRASADO", "CRITICO"];
 
 export default function AssetMapExplorer({ initialTag }: { initialTag?: string }) {
   const { tanks, today } = useBravaData();
@@ -67,7 +67,11 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const didInitialFocusRef = useRef(false);
 
   const map = getAssetMap(activeMapId);
-  const entries = getTanksByMap(activeMapId, tanks, overrides);
+  // Concluded tanks stay off the map entirely (dot included, not just the
+  // callout/progress card) — they're still accompanied on their own
+  // dashboard page for historical record, just not as an active-tracking
+  // element here.
+  const entries = getTanksByMap(activeMapId, tanks, overrides).filter((e) => e.tank?.status !== "CONCLUIDO");
   const summary = getMapSummary(activeMapId, tanks);
   const selectedTank = selectedTag ? entries.find((e) => e.tag === selectedTag)?.tank ?? null : null;
 
@@ -115,13 +119,14 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
   const tanksByTag = useMemo(() => new Map(tanks.map((t) => [t.tag, t])), [tanks]);
 
   // Fullscreen control-bar KPIs — also independent of the quick-filter
-  // chips, same reasoning as the video carousel above.
+  // chips, same reasoning as the video carousel above. No "concluído" count
+  // here: concluded tanks are filtered out of `entries` above, so it would
+  // always read 0 — misleading rather than informative.
   const fullscreenSummary = {
     programado: maintenanceEntries.filter((e) => e.tank!.status === "PROGRAMADO").length,
     emExecucao: maintenanceEntries.filter((e) => e.tank!.status === "EM_EXECUCAO").length,
     atrasado: maintenanceEntries.filter((e) => e.tank!.status === "ATRASADO").length,
     critico: maintenanceEntries.filter((e) => e.tank!.status === "CRITICO").length,
-    concluido: maintenanceEntries.filter((e) => e.tank!.status === "CONCLUIDO").length,
   };
 
   function jumpTo(tag: string) {

@@ -65,10 +65,46 @@ async function reconcilePlaceholderMetadata(): Promise<void> {
   }
 }
 
+/**
+ * One-time sync of the 2026 program's 9 tanks to the real figures from the
+ * "Relatório de Acompanhamento de Tanques" (Centro de Intervenções ATI/TAG
+ * Guamaré, rev. 13, corte 21/10/2026) — these rows already existed with
+ * generic placeholder dates/progress from before that report was available
+ * (e.g. 2023 completion dates, or a just-launched 0%/day-one state), which
+ * ensureSeeded/reconcilePlaceholderMetadata don't touch since the rows
+ * aren't SEM_PROJETO and their area/product fields aren't the placeholder
+ * value. Each check targets the exact stale value being replaced, so this
+ * is self-terminating per tank: once overwritten with the corrected
+ * TANKS_SEED record, the condition no longer matches and it never fires
+ * again for that tank (same idiom as reconcilePlaceholderMetadata above).
+ */
+const OCT_2026_REPORT_SYNC: { tankId: string; stillStale: (tank: Tank) => boolean }[] = [
+  { tankId: "tq-41002", stillStale: (t) => t.activities[0]?.actualStart === "2023-01-04" },
+  { tankId: "tq-6313002", stillStale: (t) => t.activities[0]?.actualStart === "2024-05-27" },
+  { tankId: "tq-6313006", stillStale: (t) => t.activities[0]?.actualStart === "2024-12-01" },
+  { tankId: "tq-41005", stillStale: (t) => t.activities[0]?.actualStart === "2023-02-01" },
+  { tankId: "tq-1222-25", stillStale: (t) => t.activities[0]?.baselineStart === "2026-10-14" },
+  { tankId: "tq-1222-33", stillStale: (t) => t.activities[0]?.baselineStart === "2026-10-14" },
+  { tankId: "tq-6313004", stillStale: (t) => t.activities[0]?.baselineStart === "2026-10-14" },
+  { tankId: "tq-1222-36", stillStale: (t) => t.activities[0]?.baselineStart === "2026-08-03" },
+];
+
+async function reconcileOctober2026ReportSync(): Promise<void> {
+  const seedById = new Map(TANKS_SEED.map((t) => [t.id, t]));
+  for (const { tankId, stillStale } of OCT_2026_REPORT_SYNC) {
+    const seed = seedById.get(tankId);
+    if (!seed) continue;
+    const tank = await getTank(tankId);
+    if (!tank || !stillStale(tank)) continue;
+    await saveTank({ ...seed, notes: tank.notes ?? seed.notes });
+  }
+}
+
 export async function listTanks(): Promise<Tank[]> {
   await ensureSchema();
   await ensureSeeded();
   await reconcilePlaceholderMetadata();
+  await reconcileOctober2026ReportSync();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks ORDER BY id");
   return rows.map((r: Record<string, unknown>) => r.data as Tank);

@@ -198,13 +198,16 @@ export const TANKS_SEED: Tank[] = [
     nextInternalInspection: "2035-06-18",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
+  // Datas reais do Relatório de Acompanhamento de Tanques (Centro de
+  // Intervenções ATI/TAG Guamaré, rev. 13, corte 21/10/2026) — substituem o
+  // placeholder anterior (que usava 2023, incorreto para esta campanha).
   buildConcluded({
     tag: "TQ-41002",
     area: "Tancagem de Petróleo",
     product: "Petróleo",
     tankType: "Teto Flutuante",
-    actualStart: "2023-01-04",
-    actualEnd: "2023-09-04",
+    actualStart: "2026-01-05",
+    actualEnd: "2026-06-17",
     nextInternalInspection: "2028-06-17",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
@@ -228,13 +231,15 @@ export const TANKS_SEED: Tank[] = [
     nextInternalInspection: "2025-11-24",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
+  // Datas reais do relatório (rev. 13) — concluído 41 dias antes da linha de
+  // base (01/12/2026), em 21/10/2026.
   buildConcluded({
     tag: "TQ-41005",
     area: "Tancagem de Petróleo",
     product: "Petróleo",
     tankType: "Teto Flutuante",
-    actualStart: "2023-02-01",
-    actualEnd: "2023-10-01",
+    actualStart: "2026-07-06",
+    actualEnd: "2026-10-21",
     nextInternalInspection: "2025-12-29",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
@@ -248,13 +253,14 @@ export const TANKS_SEED: Tank[] = [
     nextInternalInspection: "2035-08-13",
     notes: SERVICOS_TETO_FLUTUANTE,
   }),
+  // Datas reais do relatório (rev. 13).
   buildConcluded({
     tag: "TQ-6313002",
     area: "Tancagem de Nafta",
     product: "Nafta",
     tankType: "Teto Fixo/Flutuante",
-    actualStart: "2024-05-27",
-    actualEnd: "2024-12-27",
+    actualStart: "2025-11-01",
+    actualEnd: "2026-03-03",
     nextInternalInspection: "2036-03-03",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
@@ -263,9 +269,21 @@ export const TANKS_SEED: Tank[] = [
     area: "Tancagem de S-10",
     product: "Diesel S-10",
     tankType: "Teto Fixo/Flutuante",
-    actualStart: "2024-12-01",
-    actualEnd: "2025-07-01",
+    actualStart: "2025-09-24",
+    actualEnd: "2026-04-27",
     nextInternalInspection: "2036-04-27",
+    notes: SERVICOS_TETO_FIXO_FLUTUANTE,
+  }),
+  // Lançado como concluído direto (não havia projeto algum antes) — real do
+  // relatório rev. 13.
+  buildConcluded({
+    tag: "TQ-27016",
+    area: "UTE",
+    product: "Gasolina",
+    tankType: "Teto Fixo/Flutuante",
+    actualStart: "2026-01-05",
+    actualEnd: "2026-08-19",
+    nextInternalInspection: "2036-08-19",
     notes: SERVICOS_TETO_FIXO_FLUTUANTE,
   }),
 
@@ -283,16 +301,23 @@ export const TANKS_SEED: Tank[] = [
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
+  // Real do relatório rev. 13 (corte 21/10/2026): 78,6% físico real contra
+  // 83,4% previsto (-4,8 p.p.), entrega prevista 31/01/2027 (+153 dias sobre
+  // a base). O estágio/etapa "atual" abaixo é uma aproximação sobre o
+  // template padrão de 11 etapas — o relatório usa um framework de
+  // marcos diferente (liberação/limpeza/plano de inspeção/atendimento às
+  // recomendações/fechamento/entrega) que não mapeia 1:1 para cá; o número
+  // de avanço geral é o que bate com o relatório, a etapa nomeada é só uma
+  // posição equivalente no template.
   buildActive({
     tag: "TQ-1222-36",
     area: "ETO",
     product: "Petróleo — Lavagem a Frio",
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-08-03",
-    currentOrder: 4,
-    currentProgress: 30,
-    startOffsetDays: 7,
+    baselineStart: "2026-04-04",
+    currentOrder: 10,
+    currentProgress: 16,
     nextInternalInspection: "2026-01-25",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
@@ -328,41 +353,48 @@ export const TANKS_SEED: Tank[] = [
   }),
   // Manutenção lançada em 14/10/2026 — tanques que estavam "Sem Projeto"
   // (apenas inventário de inspeção) e passam a ter um projeto ativo.
+  // Real do relatório rev. 13: 32,2% físico real x 38,9% previsto
+  // (-6,7 p.p.), entrega prevista 28/02/2027 (+151 dias). Mesma ressalva de
+  // TQ-1222-36 acima sobre a etapa nomeada ser aproximada.
   buildActive({
     tag: "TQ-1222-25",
     area: "ETO",
     product: "Petróleo — Lavagem a Quente",
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-10-14",
-    currentOrder: 1,
-    currentProgress: 0,
+    baselineStart: "2026-04-22",
+    currentOrder: 6,
+    currentProgress: 33,
     nextInternalInspection: "2025-12-22",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
+  // Real do relatório rev. 13: 50,5% físico real x 56,9% previsto
+  // (-6,4 p.p.), entrega prevista 31/01/2027 (+93 dias).
   buildActive({
     tag: "TQ-1222-33",
     area: "ETO",
     product: "Petróleo — Lavagem a Frio",
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-10-14",
-    currentOrder: 1,
-    currentProgress: 0,
+    baselineStart: "2026-05-04",
+    currentOrder: 7,
+    currentProgress: 58,
     nextInternalInspection: "2024-10-25",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
+  // Real do relatório rev. 13: 33,1% físico real x 37,4% previsto
+  // (-4,3 p.p.), entrega prevista 27/01/2027 (+12 dias).
   buildActive({
     tag: "TQ-6313004",
     area: "Tancagem 6313",
     product: "A definir",
     tankType: "A definir",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-10-14",
-    currentOrder: 1,
-    currentProgress: 0,
+    baselineStart: "2026-08-03",
+    currentOrder: 6,
+    currentProgress: 44,
     nextInternalInspection: "2026-02-27",
   }),
 
@@ -431,7 +463,7 @@ export const TANKS_SEED: Tank[] = [
   buildNoProject({ tag: "TQ-27004", area: "UTE", product: "QAV", nextInternalInspection: "2033-06-17" }),
   buildNoProject({ tag: "TQ-27011", area: "UTE", product: "Diesel", nextInternalInspection: "2028-06-08" }),
   buildNoProject({ tag: "TQ-27015", area: "UTE", product: "Gasolina", nextInternalInspection: "2030-10-28" }),
-  buildNoProject({ tag: "TQ-27016", area: "UTE", product: "Gasolina", nextInternalInspection: "2036-08-19" }),
+  // TQ-27016: ver buildConcluded acima, campanha 2026 já entregue.
   buildNoProject({ tag: "TQ-28001", area: "A definir", nextInternalInspection: "2027-07-02" }),
   buildNoProject({ tag: "TQ-28002", area: "A definir", nextInternalInspection: "2027-07-02" }),
   buildNoProject({ tag: "TQ-28003", area: "A definir", nextInternalInspection: "2027-07-02" }),

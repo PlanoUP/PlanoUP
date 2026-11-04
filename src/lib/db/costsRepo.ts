@@ -25,9 +25,37 @@ async function ensureSeeded(): Promise<void> {
   }
 }
 
+/**
+ * One-time fill-in of "realizado" (actual spend) for the 2026 period, from
+ * the "Relatório de Acompanhamento de Tanques" (rev. 13, corte 21/10/2026) —
+ * the CAPEX sheet itself only ever had "orçado" (budget), realizado stayed
+ * null until this real figure became available. Only touches an entry
+ * still at null, so it's self-terminating (a later real edit, even to 0,
+ * is never overwritten) and never touches any other period's entries.
+ */
+const OCT_2026_CAPEX_REALIZADO: { tag: string; period: CostEntry["period"]; realizado: number }[] = [
+  { tag: "TQ-41005", period: "2026", realizado: 2.86 },
+  { tag: "TQ-6313004", period: "2026", realizado: 0.38 },
+  { tag: "TQ-1222-36", period: "2026", realizado: 0.68 },
+  { tag: "TQ-1222-33", period: "2026", realizado: 2.59 },
+  { tag: "TQ-1222-25", period: "2026", realizado: 0.74 },
+];
+
+async function reconcileOctober2026CapexRealizado(): Promise<void> {
+  const sql = getSql();
+  const rows = await sql.query("SELECT data FROM cost_entries WHERE data->>'realizado' IS NULL");
+  for (const row of rows as Record<string, unknown>[]) {
+    const entry = row.data as CostEntry;
+    const match = OCT_2026_CAPEX_REALIZADO.find((m) => m.tag === entry.tag && m.period === entry.period);
+    if (!match) continue;
+    await saveCost({ ...entry, realizado: match.realizado });
+  }
+}
+
 export async function listCosts(): Promise<CostEntry[]> {
   await ensureSchema();
   await ensureSeeded();
+  await reconcileOctober2026CapexRealizado();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM cost_entries ORDER BY id");
   return rows.map((r: Record<string, unknown>) => r.data as CostEntry);

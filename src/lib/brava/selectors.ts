@@ -83,9 +83,10 @@ export function computeFleetKpis(tanks: TankWithDerived[], todayISO: string): Fl
   const active = tanks.filter((t) => t.status !== "CONCLUIDO");
 
   // Assets with no maintenance project yet (inspection-only) have no physical
-  // progress to speak of — excluded here so they don't drag down the average
-  // for the tanks actually under an active/completed project.
-  const withProject = tanks.filter((t) => t.status !== "SEM_PROJETO");
+  // progress to speak of, and a finished project no longer belongs in an
+  // "advance" metric either — both excluded so neither drags the average
+  // down nor artificially pads it for the tanks actually under execution.
+  const withProject = tanks.filter((t) => t.status !== "SEM_PROJETO" && t.status !== "CONCLUIDO");
   const avancoFisicoGeral =
     withProject.length === 0
       ? 0

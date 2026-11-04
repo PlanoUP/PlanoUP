@@ -6,7 +6,6 @@ export interface FullscreenSummary {
   emExecucao: number;
   atrasado: number;
   critico: number;
-  concluido: number;
 }
 
 export default function FullscreenControlBar({ title, summary }: { title: string; summary: FullscreenSummary }) {
@@ -27,7 +26,6 @@ export default function FullscreenControlBar({ title, summary }: { title: string
         <KpiChip label="Em Execução" value={summary.emExecucao} dotClass="bg-brava-blue" />
         <KpiChip label="Atrasados" value={summary.atrasado} dotClass="bg-brava-warning" />
         <KpiChip label="Críticos" value={summary.critico} dotClass="bg-brava-danger" />
-        <KpiChip label="Concluídos" value={summary.concluido} dotClass="bg-brava-success" />
       </div>
     </div>
   );

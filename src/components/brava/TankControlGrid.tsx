@@ -17,7 +17,12 @@ const FAMILY_TITLES: Record<string, string> = {
 
 export default function TankControlGrid() {
   const { tanks, filter, familyView } = useBravaData();
-  const byStatusAndSearch = filterTanks(tanks, filter);
+  // A finished project no longer belongs in active progress control — still
+  // shown on its own dashboard page, just not here. See FilterBar: the
+  // "Concluído" status chip was removed to match, since it would otherwise
+  // always land on an empty grid now.
+  const activeTanks = tanks.filter((t) => t.status !== "CONCLUIDO");
+  const byStatusAndSearch = filterTanks(activeTanks, filter);
   const byFamily =
     familyView === "CRITICIDADE"
       ? byStatusAndSearch
@@ -32,7 +37,7 @@ export default function TankControlGrid() {
       <SectionHeading
         eyebrow="Operação"
         title={FAMILY_TITLES[familyView]}
-        subtitle={`${filtered.length} de ${tanks.length} tanques · ordenado pela próxima inspeção interna`}
+        subtitle={`${filtered.length} de ${activeTanks.length} tanques · ordenado pela próxima inspeção interna`}
         actions={<FilterBar />}
       />
 

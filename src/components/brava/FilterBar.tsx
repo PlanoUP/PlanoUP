@@ -6,13 +6,16 @@ import { TankStatus } from "@/lib/brava/types";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { cn } from "@/lib/brava/cn";
 
+// No "Concluído" chip: both consumers of this filter (Tank Control grid,
+// Consolidado Gantt) already exclude finished tanks from the set they
+// filter over, so that option would always land empty — a finished tank's
+// record lives on its own dashboard page instead.
 const FILTER_OPTIONS: { value: "TODOS" | TankStatus; label: string }[] = [
   { value: "TODOS", label: "Todos" },
   { value: "EM_EXECUCAO", label: "Em Execução" },
   { value: "PROGRAMADO", label: "Programado" },
   { value: "ATRASADO", label: "Atrasado" },
   { value: "CRITICO", label: "Crítico" },
-  { value: "CONCLUIDO", label: "Concluído" },
   { value: "SEM_PROJETO", label: "Sem Projeto" },
 ];
 
