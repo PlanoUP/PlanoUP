@@ -281,6 +281,9 @@ export const TANKS_SEED: Tank[] = [
   }),
 
   // ── Em execução / desvios (campanha atual, referência 09/2026) ────────
+  // Avanço real atualizado pelo usuário em 05/11/2026: 10% (era 50%, derivado
+  // de order7/55%). Mesma ressalva de TQ-1222-36 abaixo sobre a etapa
+  // nomeada ser só uma posição equivalente no template, não a real.
   buildActive({
     tag: "TQ-1222-35",
     area: "ETO",
@@ -288,8 +291,8 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
     baselineStart: "2026-06-10",
-    currentOrder: 7,
-    currentProgress: 55,
+    currentOrder: 2,
+    currentProgress: 65,
     nextInternalInspection: "2026-01-15",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
@@ -302,6 +305,8 @@ export const TANKS_SEED: Tank[] = [
   // recomendações/fechamento/entrega) que não mapeia 1:1 para cá; o número
   // de avanço geral é o que bate com o relatório, a etapa nomeada é só uma
   // posição equivalente no template.
+  // Avanço real atualizado pelo usuário em 05/11/2026: 52% (era 78,6%,
+  // derivado de order10/16%).
   buildActive({
     tag: "TQ-1222-36",
     area: "ETO",
@@ -309,8 +314,8 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
     baselineStart: "2026-04-04",
-    currentOrder: 10,
-    currentProgress: 16,
+    currentOrder: 7,
+    currentProgress: 64,
     nextInternalInspection: "2026-01-25",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
@@ -323,6 +328,8 @@ export const TANKS_SEED: Tank[] = [
   // Real do relatório rev. 13: 32,2% físico real x 38,9% previsto
   // (-6,7 p.p.), entrega prevista 28/02/2027 (+151 dias). Mesma ressalva de
   // TQ-1222-36 acima sobre a etapa nomeada ser aproximada.
+  // Avanço real atualizado pelo usuário em 05/11/2026: 30% (era 32,2%,
+  // derivado de order6/33% — ajuste fino, não muda de etapa).
   buildActive({
     tag: "TQ-1222-25",
     area: "ETO",
@@ -331,13 +338,15 @@ export const TANKS_SEED: Tank[] = [
     status: "EM_EXECUCAO",
     baselineStart: "2026-04-22",
     currentOrder: 6,
-    currentProgress: 33,
+    currentProgress: 7,
     nextInternalInspection: "2025-12-22",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
   // Real do relatório rev. 13: 50,5% físico real x 56,9% previsto
   // (-6,4 p.p.), entrega prevista 31/01/2027 (+93 dias).
+  // Avanço real atualizado pelo usuário em 05/11/2026: 60% (era 50,5%,
+  // derivado de order7/58%).
   buildActive({
     tag: "TQ-1222-33",
     area: "ETO",
@@ -345,14 +354,16 @@ export const TANKS_SEED: Tank[] = [
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
     baselineStart: "2026-05-04",
-    currentOrder: 7,
-    currentProgress: 58,
+    currentOrder: 8,
+    currentProgress: 0,
     nextInternalInspection: "2024-10-25",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
   }),
   // Real do relatório rev. 13: 33,1% físico real x 37,4% previsto
   // (-4,3 p.p.), entrega prevista 27/01/2027 (+12 dias).
+  // Avanço real atualizado pelo usuário em 05/11/2026: 20% (era 33,1%,
+  // derivado de order6/44%).
   buildActive({
     tag: "TQ-6313004",
     area: "Tancagem 6313",
@@ -360,8 +371,8 @@ export const TANKS_SEED: Tank[] = [
     tankType: "A definir",
     status: "EM_EXECUCAO",
     baselineStart: "2026-08-03",
-    currentOrder: 6,
-    currentProgress: 44,
+    currentOrder: 4,
+    currentProgress: 30,
     nextInternalInspection: "2026-02-27",
   }),
 

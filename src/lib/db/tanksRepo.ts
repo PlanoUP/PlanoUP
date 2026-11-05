@@ -163,6 +163,38 @@ async function reconcileDemotedToNoProject(): Promise<void> {
   }
 }
 
+/**
+ * Physical-progress update the user gave directly on 05/11/2026 for 5 of
+ * the 8 real tanks (a fuller cronograma is coming separately later — this
+ * is just the headline % for now). Each `currentOrder`/`currentProgress`
+ * pair in TANKS_SEED was picked so weightedProgress() lands on exactly the
+ * number given, same "equivalent template position" approach as the rev.
+ * 13 report figures above — the stage name isn't claimed to be the real
+ * one, only the overall percentage. `stillStale` checks the ATUAL
+ * activity's own progress field against its previous value, since that's
+ * what uniquely marks a row as not yet carrying this update (unlike
+ * baselineStart or notes, which this change doesn't touch) — self-
+ * terminating the same way once the row has the new progress.
+ */
+const PROGRESS_UPDATE_NOV_2026: { tankId: string; stillStale: (tank: Tank) => boolean }[] = [
+  { tankId: "tq-1222-25", stillStale: (t) => t.activities.find((a) => a.status === "ATUAL")?.progress === 33 },
+  { tankId: "tq-1222-33", stillStale: (t) => t.activities.find((a) => a.status === "ATUAL")?.progress === 58 },
+  { tankId: "tq-1222-36", stillStale: (t) => t.activities.find((a) => a.status === "ATUAL")?.progress === 16 },
+  { tankId: "tq-6313004", stillStale: (t) => t.activities.find((a) => a.status === "ATUAL")?.progress === 44 },
+  { tankId: "tq-1222-35", stillStale: (t) => t.activities.find((a) => a.status === "ATUAL")?.progress === 55 },
+];
+
+async function reconcileProgressUpdateNov2026(): Promise<void> {
+  const seedById = new Map(TANKS_SEED.map((t) => [t.id, t]));
+  for (const { tankId, stillStale } of PROGRESS_UPDATE_NOV_2026) {
+    const seed = seedById.get(tankId);
+    if (!seed) continue;
+    const tank = await getTank(tankId);
+    if (!tank || !stillStale(tank)) continue;
+    await saveTank({ ...seed, notes: tank.notes ?? seed.notes });
+  }
+}
+
 export async function listTanks(): Promise<Tank[]> {
   await ensureSchema();
   await ensureSeeded();
@@ -170,6 +202,7 @@ export async function listTanks(): Promise<Tank[]> {
   await reconcileOctober2026ReportSync();
   await reconcileTq6313005Reclassification();
   await reconcileDemotedToNoProject();
+  await reconcileProgressUpdateNov2026();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks ORDER BY id");
   return rows.map((r: Record<string, unknown>) => r.data as Tank);
