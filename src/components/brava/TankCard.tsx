@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CalendarRange } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { STATUS_META } from "@/lib/brava/status-meta";
 import { formatDaysToInspection } from "@/lib/brava/inspection";
 import { getTankPhoto } from "@/lib/brava/photos";
+import { getTankCronogramaLink } from "@/lib/brava/cronogramaLinks";
 import StatusBadge from "./StatusBadge";
 import ProgressBar from "./ProgressBar";
 import TankIllustration from "./TankIllustration";
@@ -19,12 +21,20 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
   const daysToInspection = derived.daysToInternalInspection;
   const inspectionOverdue = daysToInspection !== null && daysToInspection < 0;
   const photo = getTankPhoto(tank.tag);
+  const cronogramaLink = getTankCronogramaLink(tank.tag);
 
   return (
-    <Link
-      href={`/brava/tanques/${tank.tag}`}
-      className="group relative flex cursor-pointer flex-col gap-4 overflow-hidden rounded-brava-lg border border-brava-border bg-brava-white shadow-brava-sm transition-all duration-200 hover:-translate-y-1 hover:border-brava-blue/25 hover:shadow-brava-lg"
-    >
+    <div className="group relative flex flex-col gap-4 overflow-hidden rounded-brava-lg border border-brava-border bg-brava-white shadow-brava-sm transition-all duration-200 hover:-translate-y-1 hover:border-brava-blue/25 hover:shadow-brava-lg">
+      {/* Full-card click target for the tank's own dashboard — sits behind the
+          visible content (which is pointer-events-none below) so it still
+          catches clicks anywhere except on the cronograma link itself,
+          without nesting an <a> inside another <a>. */}
+      <Link
+        href={`/brava/tanques/${tank.tag}`}
+        aria-label={`Ver detalhes do tanque ${tank.tag}`}
+        className="absolute inset-0 z-0 cursor-pointer"
+      />
+      <div className="pointer-events-none relative z-10 flex flex-1 flex-col gap-4">
       {photo ? (
         <div className="relative h-28 w-full shrink-0 overflow-hidden">
           <Image src={photo} alt={tank.tag} fill sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-200 group-hover:scale-105" />
@@ -91,7 +101,7 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
         daysToInternalInspection={daysToInspection}
         criticality={derived.inspectionCriticality}
       >
-        <div className="relative flex w-full items-center justify-between gap-2 border-t border-brava-border px-5 pb-5 pt-3 text-[11px]">
+        <div className={cn("relative flex w-full items-center justify-between gap-2 border-t border-brava-border px-5 pt-3 text-[11px]", cronogramaLink ? "pb-3" : "pb-5")}>
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wide text-brava-text-secondary">Próxima Interna</p>
             <p className={cn("truncate font-semibold", inspectionOverdue ? "text-brava-danger" : "text-brava-text")}>
@@ -104,7 +114,20 @@ export default function TankCard({ tank }: { tank: TankWithDerived }) {
           <InspectionCriticalityBadge criticality={derived.inspectionCriticality} size="sm" className="shrink-0" />
         </div>
       </InspectionTooltip>
-    </Link>
+
+      {cronogramaLink && (
+        <a
+          href={cronogramaLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pointer-events-auto relative flex items-center justify-center gap-1.5 border-t border-brava-border px-5 py-2.5 text-[11.5px] font-semibold text-brava-blue transition-colors hover:bg-brava-bg hover:text-brava-blue-dark"
+        >
+          <CalendarRange className="h-3.5 w-3.5" />
+          Ver cronograma
+        </a>
+      )}
+      </div>
+    </div>
   );
 }
 

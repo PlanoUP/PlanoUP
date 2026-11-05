@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Pause, Play, ImageOff, ArrowUpRight, Calenda
 import { TankWithDerived } from "@/lib/brava/types";
 import { mapStatusLabel, mapStatusDotClass } from "@/lib/brava/maps/statusLabel";
 import { getTankTourPhotoSrc, getTankGalleryPhotoSrcs } from "@/lib/brava/photos";
+import { getTankCronogramaLink } from "@/lib/brava/cronogramaLinks";
 import { cn } from "@/lib/brava/cn";
 
 // Driven by AssetMapExplorer's own tourIndex — this component only renders
@@ -246,13 +247,28 @@ export default function MapTourPanel({
               Ver mais detalhes
               <ArrowUpRight className="h-3 w-3" />
             </Link>
-            <Link
-              href={`/brava/tanques/${encodeURIComponent(tag)}?tab=PLANEJAMENTO`}
-              className="flex items-center justify-center gap-1 rounded-brava-sm border border-brava-border px-2 py-1.5 text-[11.5px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-blue-dark"
-            >
-              <CalendarRange className="h-3 w-3" />
-              Ver cronograma
-            </Link>
+            {(() => {
+              const cronogramaLink = getTankCronogramaLink(tag);
+              return cronogramaLink ? (
+                <a
+                  href={cronogramaLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1 rounded-brava-sm border border-brava-border px-2 py-1.5 text-[11.5px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-blue-dark"
+                >
+                  <CalendarRange className="h-3 w-3" />
+                  Ver cronograma
+                </a>
+              ) : (
+                <Link
+                  href={`/brava/tanques/${encodeURIComponent(tag)}?tab=PLANEJAMENTO`}
+                  className="flex items-center justify-center gap-1 rounded-brava-sm border border-brava-border px-2 py-1.5 text-[11.5px] font-semibold text-brava-text-secondary transition-colors hover:border-brava-blue/30 hover:text-brava-blue-dark"
+                >
+                  <CalendarRange className="h-3 w-3" />
+                  Ver cronograma
+                </Link>
+              );
+            })()}
           </div>
         </div>
       )}
