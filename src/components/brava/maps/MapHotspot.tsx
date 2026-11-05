@@ -18,6 +18,7 @@ export default function MapHotspot({
   onSelect,
   draggable,
   mapScale,
+  layoutSize,
   onCalloutOffsetChange,
 }: {
   tag: string;
@@ -32,8 +33,10 @@ export default function MapHotspot({
   draggable?: boolean;
   /** Current map zoom factor, to convert pointer-movement px into the (unscaled) layer space the offset itself is expressed in. */
   mapScale?: number;
-  /** Fired once on drop, with the final {dx, dy} to persist — not during the drag itself. */
-  onCalloutOffsetChange?: (dx: number, dy: number) => void;
+  /** AssetMapExplorer's current rendered map size (CSS px) — saved alongside a drag's {dx, dy} so it can be rescaled correctly on a different viewport later; see MapCalloutOffsetOverride. */
+  layoutSize: { width: number; height: number };
+  /** Fired once on drop, with the final {dx, dy} (plus the map size it was measured against) to persist — not during the drag itself. */
+  onCalloutOffsetChange?: (dx: number, dy: number, refWidth: number, refHeight: number) => void;
 }) {
   // While dragging (or just after dropping, until the parent's own
   // calloutOffset — recomputed from the saved override — catches up),
@@ -91,7 +94,7 @@ export default function MapHotspot({
     setIsDragging(false);
     if (moved > 4 && dragOffset) {
       e.stopPropagation(); // was an actual drag — don't let the click bubble into onSelect
-      onCalloutOffsetChange?.(dragOffset.dx, dragOffset.dy);
+      onCalloutOffsetChange?.(dragOffset.dx, dragOffset.dy, layoutSize.width, layoutSize.height);
     } else {
       setDragOffset(null); // negligible movement — treat as a plain click and let it bubble as before
     }

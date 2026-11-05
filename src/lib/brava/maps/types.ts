@@ -52,11 +52,17 @@ export type MapCoordinateOverrideInput = Pick<MapCoordinateOverride, "mapId" | "
  * persisted to the database the same way as MapCoordinateOverride, so it
  * takes effect immediately for everyone. Overrides calloutLayout.ts's
  * auto-computed fan-out for that one tag. Stored as a CSS-pixel {dx, dy}
- * offset from the tank's own dot — the same unit computeCalloutLayout
- * itself produces, with the same already-accepted imprecision: it doesn't
- * rescale between very different rendered viewport sizes (e.g. saved while
- * fullscreen, then viewed embedded), which the auto layout doesn't solve
- * for either.
+ * offset from the tank's own dot, together with the rendered map size
+ * (refWidth/refHeight — the same viewportSize AssetMapExplorer measures)
+ * the drag was captured against. {dx, dy} alone wouldn't track a screen
+ * resize or a different monitor — the same pixel offset drawn over a much
+ * bigger or smaller rendered photo lands at a different spot relative to
+ * the image. The ref size lets the offset be rescaled proportionally
+ * (dx * currentWidth/refWidth, same for y) before it's applied, so the
+ * callout keeps the same relative position to its dot regardless of
+ * viewport. refWidth/refHeight are optional only for rows saved before
+ * this field existed — those fall back to no rescaling (scale factor 1)
+ * until re-dragged.
  */
 export interface MapCalloutOffsetOverride {
   id: string; // `${mapId}:${TAG}`
@@ -64,11 +70,13 @@ export interface MapCalloutOffsetOverride {
   tag: string;
   dx: number;
   dy: number;
+  refWidth?: number;
+  refHeight?: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export type MapCalloutOffsetOverrideInput = Pick<MapCalloutOffsetOverride, "mapId" | "tag" | "dx" | "dy">;
+export type MapCalloutOffsetOverrideInput = Pick<MapCalloutOffsetOverride, "mapId" | "tag" | "dx" | "dy" | "refWidth" | "refHeight">;
 
 export interface AssetMapConfig {
   id: AssetMapId;

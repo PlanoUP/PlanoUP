@@ -113,8 +113,23 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
     // decides every OTHER box, which don't know to avoid a dragged box in
     // return, same tradeoff the obstacle pass already accepts for ordinary
     // tank icons that have no callout of their own.
+    //
+    // A dragged {dx, dy} is a raw CSS-pixel offset, captured against
+    // whatever size the map happened to be rendered at that moment
+    // (o.refWidth/refHeight). Replayed as-is on a differently sized
+    // screen — a different monitor, a maximized vs. embedded window — that
+    // same pixel distance lands at a different spot relative to the photo,
+    // which is exactly the "the dots don't follow the screen" bug this
+    // scaling fixes: rescale by how much the map's rendered size has
+    // changed since the drag, so the callout keeps the same relative
+    // position to its dot. Rows saved before refWidth/refHeight existed
+    // fall back to scale 1 (old behavior) until re-dragged.
     for (const o of calloutOffsetOverrides) {
-      if (o.mapId === activeMapId && o.tag in layout) layout[o.tag] = { dx: o.dx, dy: o.dy };
+      if (o.mapId === activeMapId && o.tag in layout) {
+        const scaleX = o.refWidth ? layoutWidth / o.refWidth : 1;
+        const scaleY = o.refHeight ? layoutHeight / o.refHeight : 1;
+        layout[o.tag] = { dx: o.dx * scaleX, dy: o.dy * scaleY };
+      }
     }
     return layout;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -362,7 +377,10 @@ export default function AssetMapExplorer({ initialTag }: { initialTag?: string }
             }}
             draggable={IS_DEV || isEditor}
             mapScale={mapScale}
-            onCalloutOffsetChange={(dx, dy) => saveCalloutOffset({ mapId: activeMapId, tag: e.tag, dx, dy })}
+            layoutSize={{ width: layoutWidth, height: layoutHeight }}
+            onCalloutOffsetChange={(dx, dy, refWidth, refHeight) =>
+              saveCalloutOffset({ mapId: activeMapId, tag: e.tag, dx, dy, refWidth, refHeight })
+            }
           />
         ))}
       </MapZoomPan>
