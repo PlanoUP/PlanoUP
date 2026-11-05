@@ -195,6 +195,35 @@ async function reconcileProgressUpdateNov2026(): Promise<void> {
   }
 }
 
+/**
+ * Real .mpp cronograma import (05/11/2026) for the same 5 tanks as
+ * PROGRESS_UPDATE_NOV_2026 above — supersedes that quick headline-%
+ * update with the actual project schedule (14-15 real phases per tank,
+ * via buildFromSchedule, instead of the 11-stage generic template). A row
+ * still on the old template always has exactly 11 activities; once it's
+ * replaced by the real schedule it has 14 or 15, so the length itself is
+ * what tells this apart — self-terminating the same way as every other
+ * reconciliation here.
+ */
+const SCHEDULE_IMPORT_NOV_2026: { tankId: string; expectedLength: number }[] = [
+  { tankId: "tq-1222-25", expectedLength: 14 },
+  { tankId: "tq-1222-33", expectedLength: 14 },
+  { tankId: "tq-1222-36", expectedLength: 14 },
+  { tankId: "tq-1222-35", expectedLength: 14 },
+  { tankId: "tq-6313004", expectedLength: 15 },
+];
+
+async function reconcileScheduleImportNov2026(): Promise<void> {
+  const seedById = new Map(TANKS_SEED.map((t) => [t.id, t]));
+  for (const { tankId, expectedLength } of SCHEDULE_IMPORT_NOV_2026) {
+    const seed = seedById.get(tankId);
+    if (!seed) continue;
+    const tank = await getTank(tankId);
+    if (!tank || tank.activities.length === expectedLength) continue;
+    await saveTank({ ...seed, notes: tank.notes ?? seed.notes });
+  }
+}
+
 export async function listTanks(): Promise<Tank[]> {
   await ensureSchema();
   await ensureSeeded();
@@ -203,6 +232,7 @@ export async function listTanks(): Promise<Tank[]> {
   await reconcileTq6313005Reclassification();
   await reconcileDemotedToNoProject();
   await reconcileProgressUpdateNov2026();
+  await reconcileScheduleImportNov2026();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks ORDER BY id");
   return rows.map((r: Record<string, unknown>) => r.data as Tank);

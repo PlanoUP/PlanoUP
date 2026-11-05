@@ -14,7 +14,10 @@ export function deriveTank(tank: Tank, todayISO: string): TankDerived {
   const nextMilestone =
     activities.find((a) => a.isMilestone && a.status !== "CONCLUIDO") ?? null;
 
-  const progress = tank.status === "CONCLUIDO" ? 100 : weightedProgress(activities);
+  const progress =
+    tank.status === "CONCLUIDO"
+      ? 100
+      : tank.progressOverride ?? weightedProgress(activities);
   const plannedEnd = last?.plannedEnd ?? "";
   // Nothing has actually begun while the tank is still PROGRAMADO (or has no
   // project at all) — any actualStart sitting on an activity at that point

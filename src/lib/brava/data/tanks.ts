@@ -1,4 +1,4 @@
-import { Tank, TankStatus } from "../types";
+import { Activity, Tank, TankStatus } from "../types";
 import {
   buildActivitiesFromTemplate,
   applyExecutionState,
@@ -75,6 +75,60 @@ function buildActive(p: ActiveParams): Tank {
     responsible: p.responsible,
     notes: p.notes,
     activities,
+  };
+}
+
+type RealActivityInput = Omit<Activity, "id" | "tankId" | "dependsOn">;
+
+interface FromScheduleParams {
+  tag: string;
+  area: string;
+  product: string;
+  tankType: string;
+  status: Extract<TankStatus, "EM_EXECUCAO" | "ATRASADO" | "CRITICO">;
+  activities: RealActivityInput[];
+  nextInternalInspection?: string;
+  responsible?: string;
+  notes?: string;
+  /**
+   * The cronograma's own root % complete (work-hour based), used when it
+   * diverges materially from the app's calendar-day weightedProgress over
+   * these activities. See Tank.progressOverride.
+   */
+  progressOverride?: number;
+}
+
+/**
+ * Builds a tank straight from a real, already-dated activity list — e.g.
+ * imported from the project's own .mpp cronograma — instead of generating
+ * one from STAGE_TEMPLATE's fixed sequential durations. Unlike buildActive,
+ * this doesn't assume a single non-overlapping chain: a real cronograma's
+ * phases legitimately run in parallel (SERVIÇOS DE MANUTENÇÃO starts while
+ * LIBERAÇÃO OPERACIONAL is still open, for instance), so each activity
+ * carries its own real dates instead of being cursor-walked from the
+ * previous one. dependsOn is intentionally left empty for the same reason —
+ * a recalculateSchedule cascade assuming strict sequential dependency would
+ * misdate real parallel phases.
+ */
+function buildFromSchedule(p: FromScheduleParams): Tank {
+  const id = slug(p.tag);
+  return {
+    id,
+    tag: p.tag,
+    area: p.area,
+    product: p.product,
+    tankType: p.tankType,
+    status: p.status,
+    nextInternalInspection: p.nextInternalInspection,
+    responsible: p.responsible,
+    notes: p.notes,
+    progressOverride: p.progressOverride,
+    activities: p.activities.map((a) => ({
+      ...a,
+      id: `${id}__${a.stageKey}`,
+      tankId: id,
+      dependsOn: [],
+    })),
   };
 }
 
@@ -281,99 +335,164 @@ export const TANKS_SEED: Tank[] = [
   }),
 
   // ── Em execução / desvios (campanha atual, referência 09/2026) ────────
-  // Avanço real atualizado pelo usuário em 05/11/2026: 10% (era 50%, derivado
-  // de order7/55%). Mesma ressalva de TQ-1222-36 abaixo sobre a etapa
-  // nomeada ser só uma posição equivalente no template, não a real.
-  buildActive({
+  // Cronograma real (.mpp oficial, rev. enviada pelo usuário em 05/11/2026) —
+  // substitui o template genérico de 11 etapas pelas 14 fases reais do
+  // projeto (PRÉ-PARADA/PARADA/PÓS-PARADA), com datas e avanço reais por fase.
+  // Avanço geral (raiz do cronograma): 9%.
+  buildFromSchedule({
     tag: "TQ-1222-35",
     area: "ETO",
     product: "Petróleo — Lavagem a Frio",
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-06-10",
-    currentOrder: 2,
-    currentProgress: 65,
     nextInternalInspection: "2026-01-15",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
+    progressOverride: 9,
+    activities: [
+      { order: 1, stageKey: "INICIO_PRE_PARADA", name: "Início da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-10-01", baselineEnd: "2026-10-01", plannedStart: "2026-10-01", plannedEnd: "2026-10-01", actualStart: "2026-10-01", actualEnd: "2026-10-01", progress: 100, status: "CONCLUIDO" },
+      { order: 2, stageKey: "MATERIAIS", name: "MATERIAIS", durationDays: 12, isMilestone: false, baselineStart: "2026-10-05", baselineEnd: "2026-10-16", plannedStart: "2026-10-05", plannedEnd: "2026-10-16", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 3, stageKey: "TERMINO_PRE_PARADA", name: "Término da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-10-05", baselineEnd: "2026-10-05", plannedStart: "2026-10-05", plannedEnd: "2026-10-05", actualStart: "2026-10-05", actualEnd: "2026-10-05", progress: 100, status: "CONCLUIDO" },
+      { order: 4, stageKey: "INICIO_PARADA", name: "Início da Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-10-05", baselineEnd: "2026-10-05", plannedStart: "2026-10-05", plannedEnd: "2026-10-05", actualStart: "2026-10-05", actualEnd: "2026-10-05", progress: 100, status: "CONCLUIDO" },
+      { order: 5, stageKey: "LIBERACAO_OPERACIONAL", name: "LIBERAÇÃO OPERACIONAL", durationDays: 65, isMilestone: false, baselineStart: "2026-10-05", baselineEnd: "2026-12-08", plannedStart: "2026-10-05", plannedEnd: "2026-12-08", actualStart: "2026-10-05", actualEnd: undefined, progress: 52, status: "ATUAL" },
+      { order: 6, stageKey: "SERVICOS_MANUTENCAO", name: "SERVIÇOS DE MANUTENÇÃO", durationDays: 74, isMilestone: false, baselineStart: "2026-11-09", baselineEnd: "2027-01-21", plannedStart: "2026-11-09", plannedEnd: "2027-01-21", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 7, stageKey: "MELHORIAS", name: "MELHORIAS", durationDays: 20, isMilestone: false, baselineStart: "2026-12-16", baselineEnd: "2027-01-04", plannedStart: "2026-12-16", plannedEnd: "2027-01-04", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 8, stageKey: "RETORNO_OPERACIONAL", name: "RETORNO OPERACIONAL", durationDays: 11, isMilestone: false, baselineStart: "2027-01-15", baselineEnd: "2027-01-25", plannedStart: "2027-01-15", plannedEnd: "2027-01-25", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 9, stageKey: "TERMINO_PARADA", name: "Término da Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-01-25", baselineEnd: "2027-01-25", plannedStart: "2027-01-25", plannedEnd: "2027-01-25", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 10, stageKey: "INICIO_POS_PARADA", name: "Início da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-01-25", baselineEnd: "2027-01-25", plannedStart: "2027-01-25", plannedEnd: "2027-01-25", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 11, stageKey: "COMISSIONAMENTO", name: "Comissionamento", durationDays: 2, isMilestone: false, baselineStart: "2027-01-25", baselineEnd: "2027-01-26", plannedStart: "2027-01-25", plannedEnd: "2027-01-26", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 12, stageKey: "TESTES_PRODUTO", name: "Testes com produto (durante o comissionamento)", durationDays: 2, isMilestone: false, baselineStart: "2027-01-26", baselineEnd: "2027-01-27", plannedStart: "2027-01-26", plannedEnd: "2027-01-27", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 13, stageKey: "DOCUMENTACAO_FINAL", name: "Documentação final", durationDays: 2, isMilestone: false, baselineStart: "2027-01-27", baselineEnd: "2027-01-28", plannedStart: "2027-01-27", plannedEnd: "2027-01-28", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 14, stageKey: "TERMINO_POS_PARADA", name: "Término da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-01-28", baselineEnd: "2027-01-28", plannedStart: "2027-01-28", plannedEnd: "2027-01-28", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+    ],
   }),
-  // Real do relatório rev. 13 (corte 21/10/2026): 78,6% físico real contra
-  // 83,4% previsto (-4,8 p.p.), entrega prevista 31/01/2027 (+153 dias sobre
-  // a base). O estágio/etapa "atual" abaixo é uma aproximação sobre o
-  // template padrão de 11 etapas — o relatório usa um framework de
-  // marcos diferente (liberação/limpeza/plano de inspeção/atendimento às
-  // recomendações/fechamento/entrega) que não mapeia 1:1 para cá; o número
-  // de avanço geral é o que bate com o relatório, a etapa nomeada é só uma
-  // posição equivalente no template.
-  // Avanço real atualizado pelo usuário em 05/11/2026: 52% (era 78,6%,
-  // derivado de order10/16%).
-  buildActive({
+  // Cronograma real (.mpp oficial, rev. enviada pelo usuário em 05/11/2026) —
+  // substitui o template genérico de 11 etapas pelas 14 fases reais do
+  // projeto (PRÉ-PARADA/PARADA/PÓS-PARADA), com datas e avanço reais por fase.
+  // Avanço geral (raiz do cronograma): 52%.
+  buildFromSchedule({
     tag: "TQ-1222-36",
     area: "ETO",
     product: "Petróleo — Lavagem a Frio",
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-04-04",
-    currentOrder: 7,
-    currentProgress: 64,
     nextInternalInspection: "2026-01-25",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
+    progressOverride: 52,
+    activities: [
+      { order: 1, stageKey: "INICIO_PRE_PARADA", name: "Início da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-02-12", baselineEnd: "2026-02-12", plannedStart: "2026-02-12", plannedEnd: "2026-02-12", actualStart: "2026-02-12", actualEnd: "2026-02-12", progress: 100, status: "CONCLUIDO" },
+      { order: 2, stageKey: "MATERIAIS", name: "MATERIAIS", durationDays: 289, isMilestone: false, baselineStart: "2026-02-12", baselineEnd: "2026-11-27", plannedStart: "2026-02-12", plannedEnd: "2026-11-27", actualStart: "2026-02-12", actualEnd: undefined, progress: 42, status: "ATUAL" },
+      { order: 3, stageKey: "TERMINO_PRE_PARADA", name: "Término da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-02-12", baselineEnd: "2026-02-12", plannedStart: "2026-02-12", plannedEnd: "2026-02-12", actualStart: "2026-02-12", actualEnd: "2026-02-12", progress: 100, status: "CONCLUIDO" },
+      { order: 4, stageKey: "INICIO_PARADA", name: "Início da Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-02-12", baselineEnd: "2026-02-12", plannedStart: "2026-02-12", plannedEnd: "2026-02-12", actualStart: "2026-02-12", actualEnd: "2026-02-12", progress: 100, status: "CONCLUIDO" },
+      { order: 5, stageKey: "LIBERACAO_OPERACIONAL", name: "LIBERAÇÃO OPERACIONAL", durationDays: 348, isMilestone: false, baselineStart: "2026-01-30", baselineEnd: "2027-01-12", plannedStart: "2026-01-30", plannedEnd: "2027-01-12", actualStart: "2026-01-30", actualEnd: undefined, progress: 65, status: "ATUAL" },
+      { order: 6, stageKey: "SERVICOS_MANUTENCAO", name: "SERVIÇOS DE MANUTENÇÃO", durationDays: 419, isMilestone: false, baselineStart: "2026-02-12", baselineEnd: "2027-04-06", plannedStart: "2026-02-12", plannedEnd: "2027-04-06", actualStart: "2026-02-12", actualEnd: undefined, progress: 55, status: "ATUAL" },
+      { order: 7, stageKey: "MELHORIAS", name: "MELHORIAS", durationDays: 16, isMilestone: false, baselineStart: "2027-01-14", baselineEnd: "2027-01-29", plannedStart: "2027-01-14", plannedEnd: "2027-01-29", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 8, stageKey: "RETORNO_OPERACIONAL", name: "RETORNO OPERACIONAL", durationDays: 10, isMilestone: false, baselineStart: "2027-04-06", baselineEnd: "2027-04-15", plannedStart: "2027-04-06", plannedEnd: "2027-04-15", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 9, stageKey: "TERMINO_PARADA", name: "Término da Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-04-15", baselineEnd: "2027-04-15", plannedStart: "2027-04-15", plannedEnd: "2027-04-15", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 10, stageKey: "INICIO_POS_PARADA", name: "Início da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-04-15", baselineEnd: "2027-04-15", plannedStart: "2027-04-15", plannedEnd: "2027-04-15", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 11, stageKey: "COMISSIONAMENTO", name: "Comissionamento", durationDays: 5, isMilestone: false, baselineStart: "2027-04-15", baselineEnd: "2027-04-19", plannedStart: "2027-04-15", plannedEnd: "2027-04-19", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 12, stageKey: "TESTES_PRODUTO", name: "Testes com produto (durante o comissionamento)", durationDays: 2, isMilestone: false, baselineStart: "2027-04-19", baselineEnd: "2027-04-20", plannedStart: "2027-04-19", plannedEnd: "2027-04-20", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 13, stageKey: "DOCUMENTACAO_FINAL", name: "Documentação final", durationDays: 2, isMilestone: false, baselineStart: "2027-04-20", baselineEnd: "2027-04-21", plannedStart: "2027-04-20", plannedEnd: "2027-04-21", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 14, stageKey: "TERMINO_POS_PARADA", name: "Término da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-04-21", baselineEnd: "2027-04-21", plannedStart: "2027-04-21", plannedEnd: "2027-04-21", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+    ],
   }),
   // TQ-1222-62 e TQ-27010 eram ATRASADO/CRITICO aqui — usuário confirmou que
   // também não estão de fato em manutenção; voltam para "Sem Projeto" junto
   // com TQ-1222-21/44 e TQ-27001/27009 (ver essas TAGs mais abaixo).
   // Manutenção lançada em 14/10/2026 — tanques que estavam "Sem Projeto"
   // (apenas inventário de inspeção) e passam a ter um projeto ativo.
-  // Real do relatório rev. 13: 32,2% físico real x 38,9% previsto
-  // (-6,7 p.p.), entrega prevista 28/02/2027 (+151 dias). Mesma ressalva de
-  // TQ-1222-36 acima sobre a etapa nomeada ser aproximada.
-  // Avanço real atualizado pelo usuário em 05/11/2026: 30% (era 32,2%,
-  // derivado de order6/33% — ajuste fino, não muda de etapa).
-  buildActive({
+  // Cronograma real (.mpp oficial, rev. enviada pelo usuário em 05/11/2026) —
+  // substitui o template genérico de 11 etapas pelas 14 fases reais do
+  // projeto (PRÉ-PARADA/PARADA/PÓS-PARADA), com datas e avanço reais por fase.
+  // Avanço geral (raiz do cronograma): 28%.
+  buildFromSchedule({
     tag: "TQ-1222-25",
     area: "ETO",
     product: "Petróleo — Lavagem a Quente",
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-04-22",
-    currentOrder: 6,
-    currentProgress: 7,
     nextInternalInspection: "2025-12-22",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
+    progressOverride: 28,
+    activities: [
+      { order: 1, stageKey: "INICIO_PRE_PARADA", name: "Início da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-04-22", baselineEnd: "2026-04-22", plannedStart: "2026-04-22", plannedEnd: "2026-04-22", actualStart: "2026-04-22", actualEnd: "2026-04-22", progress: 100, status: "CONCLUIDO" },
+      { order: 2, stageKey: "MATERIAIS", name: "MATERIAIS", durationDays: 300, isMilestone: false, baselineStart: "2026-04-22", baselineEnd: "2027-02-15", plannedStart: "2026-04-22", plannedEnd: "2027-02-15", actualStart: "2026-04-22", actualEnd: undefined, progress: 12, status: "ATUAL" },
+      { order: 3, stageKey: "TERMINO_PRE_PARADA", name: "Término da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-04-22", baselineEnd: "2026-04-22", plannedStart: "2026-04-22", plannedEnd: "2026-04-22", actualStart: "2026-04-22", actualEnd: "2026-04-22", progress: 100, status: "CONCLUIDO" },
+      { order: 4, stageKey: "INICIO_PARADA", name: "Início da Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-04-22", baselineEnd: "2026-04-22", plannedStart: "2026-04-22", plannedEnd: "2026-04-22", actualStart: "2026-04-22", actualEnd: "2026-04-22", progress: 100, status: "CONCLUIDO" },
+      { order: 5, stageKey: "LIBERACAO_OPERACIONAL", name: "LIBERAÇÃO OPERACIONAL", durationDays: 324, isMilestone: false, baselineStart: "2026-04-22", baselineEnd: "2027-03-11", plannedStart: "2026-04-22", plannedEnd: "2027-03-11", actualStart: "2026-04-22", actualEnd: undefined, progress: 66, status: "ATUAL" },
+      { order: 6, stageKey: "SERVICOS_MANUTENCAO", name: "SERVIÇOS DE MANUTENÇÃO", durationDays: 332, isMilestone: false, baselineStart: "2026-05-06", baselineEnd: "2027-04-02", plannedStart: "2026-05-06", plannedEnd: "2027-04-02", actualStart: "2026-05-06", actualEnd: undefined, progress: 19, status: "ATUAL" },
+      { order: 7, stageKey: "MELHORIAS", name: "MELHORIAS", durationDays: 18, isMilestone: false, baselineStart: "2027-01-15", baselineEnd: "2027-02-01", plannedStart: "2027-01-15", plannedEnd: "2027-02-01", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 8, stageKey: "RETORNO_OPERACIONAL", name: "RETORNO OPERACIONAL", durationDays: 11, isMilestone: false, baselineStart: "2027-03-23", baselineEnd: "2027-04-02", plannedStart: "2027-03-23", plannedEnd: "2027-04-02", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 9, stageKey: "TERMINO_PARADA", name: "Término da Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-04-02", baselineEnd: "2027-04-02", plannedStart: "2027-04-02", plannedEnd: "2027-04-02", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 10, stageKey: "INICIO_POS_PARADA", name: "Início da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-04-02", baselineEnd: "2027-04-02", plannedStart: "2027-04-02", plannedEnd: "2027-04-02", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 11, stageKey: "COMISSIONAMENTO", name: "Comissionamento", durationDays: 1, isMilestone: false, baselineStart: "2027-04-05", baselineEnd: "2027-04-05", plannedStart: "2027-04-05", plannedEnd: "2027-04-05", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 12, stageKey: "TESTES_PRODUTO", name: "Testes com produto (durante o comissionamento)", durationDays: 2, isMilestone: false, baselineStart: "2027-04-06", baselineEnd: "2027-04-07", plannedStart: "2027-04-06", plannedEnd: "2027-04-07", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 13, stageKey: "DOCUMENTACAO_FINAL", name: "Documentação final", durationDays: 1, isMilestone: false, baselineStart: "2027-04-07", baselineEnd: "2027-04-07", plannedStart: "2027-04-07", plannedEnd: "2027-04-07", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 14, stageKey: "TERMINO_POS_PARADA", name: "Término da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-04-07", baselineEnd: "2027-04-07", plannedStart: "2027-04-07", plannedEnd: "2027-04-07", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+    ],
   }),
-  // Real do relatório rev. 13: 50,5% físico real x 56,9% previsto
-  // (-6,4 p.p.), entrega prevista 31/01/2027 (+93 dias).
-  // Avanço real atualizado pelo usuário em 05/11/2026: 60% (era 50,5%,
-  // derivado de order7/58%).
-  buildActive({
+  // Cronograma real (.mpp oficial, rev. enviada pelo usuário em 05/11/2026) —
+  // substitui o template genérico de 11 etapas pelas 14 fases reais do
+  // projeto (PRÉ-PARADA/PARADA/PÓS-PARADA), com datas e avanço reais por fase.
+  // Avanço geral (raiz do cronograma): 45%.
+  buildFromSchedule({
     tag: "TQ-1222-33",
     area: "ETO",
     product: "Petróleo — Lavagem a Frio",
     tankType: "Teto Fixo",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-05-04",
-    currentOrder: 8,
-    currentProgress: 0,
     nextInternalInspection: "2024-10-25",
     responsible: "Coordenação de Manutenção ETO",
     notes: SERVICOS_LAVAGEM,
+    progressOverride: 45,
+    activities: [
+      { order: 1, stageKey: "INICIO_PRE_PARADA", name: "Início da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-05-11", baselineEnd: "2026-05-11", plannedStart: "2026-05-11", plannedEnd: "2026-05-11", actualStart: "2026-05-11", actualEnd: "2026-05-11", progress: 100, status: "CONCLUIDO" },
+      { order: 2, stageKey: "MATERIAIS", name: "MATERIAIS", durationDays: 194, isMilestone: false, baselineStart: "2026-05-11", baselineEnd: "2026-11-20", plannedStart: "2026-05-11", plannedEnd: "2026-11-20", actualStart: "2026-05-11", actualEnd: undefined, progress: 84, status: "ATUAL" },
+      { order: 3, stageKey: "TERMINO_PRE_PARADA", name: "Término da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-05-11", baselineEnd: "2026-05-11", plannedStart: "2026-05-11", plannedEnd: "2026-05-11", actualStart: "2026-05-11", actualEnd: "2026-05-11", progress: 100, status: "CONCLUIDO" },
+      { order: 4, stageKey: "INICIO_PARADA", name: "Início da Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-05-11", baselineEnd: "2026-05-11", plannedStart: "2026-05-11", plannedEnd: "2026-05-11", actualStart: "2026-05-11", actualEnd: "2026-05-11", progress: 100, status: "CONCLUIDO" },
+      { order: 5, stageKey: "LIBERACAO_OPERACIONAL", name: "LIBERAÇÃO OPERACIONAL", durationDays: 99, isMilestone: false, baselineStart: "2026-05-11", baselineEnd: "2026-08-17", plannedStart: "2026-05-11", plannedEnd: "2026-08-17", actualStart: "2026-05-11", actualEnd: "2026-08-17", progress: 100, status: "CONCLUIDO" },
+      { order: 6, stageKey: "SERVICOS_MANUTENCAO", name: "SERVIÇOS DE MANUTENÇÃO", durationDays: 309, isMilestone: false, baselineStart: "2026-05-11", baselineEnd: "2027-03-15", plannedStart: "2026-05-11", plannedEnd: "2027-03-15", actualStart: "2026-05-11", actualEnd: undefined, progress: 36, status: "ATUAL" },
+      { order: 7, stageKey: "MELHORIAS", name: "MELHORIAS", durationDays: 19, isMilestone: false, baselineStart: "2026-12-03", baselineEnd: "2026-12-21", plannedStart: "2026-12-03", plannedEnd: "2026-12-21", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 8, stageKey: "RETORNO_OPERACIONAL", name: "RETORNO OPERACIONAL", durationDays: 16, isMilestone: false, baselineStart: "2027-03-15", baselineEnd: "2027-03-30", plannedStart: "2027-03-15", plannedEnd: "2027-03-30", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 9, stageKey: "TERMINO_PARADA", name: "Término da Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-03-30", baselineEnd: "2027-03-30", plannedStart: "2027-03-30", plannedEnd: "2027-03-30", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 10, stageKey: "INICIO_POS_PARADA", name: "Início da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-03-30", baselineEnd: "2027-03-30", plannedStart: "2027-03-30", plannedEnd: "2027-03-30", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 11, stageKey: "COMISSIONAMENTO", name: "Comissionamento", durationDays: 2, isMilestone: false, baselineStart: "2027-03-30", baselineEnd: "2027-03-31", plannedStart: "2027-03-30", plannedEnd: "2027-03-31", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 12, stageKey: "TESTES_PRODUTO", name: "Testes com produto (durante o comissionamento)", durationDays: 3, isMilestone: false, baselineStart: "2027-03-31", baselineEnd: "2027-04-02", plannedStart: "2027-03-31", plannedEnd: "2027-04-02", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 13, stageKey: "DOCUMENTACAO_FINAL", name: "Documentação final", durationDays: 4, isMilestone: false, baselineStart: "2027-04-02", baselineEnd: "2027-04-05", plannedStart: "2027-04-02", plannedEnd: "2027-04-05", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 14, stageKey: "TERMINO_POS_PARADA", name: "Término da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-04-05", baselineEnd: "2027-04-05", plannedStart: "2027-04-05", plannedEnd: "2027-04-05", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+    ],
   }),
-  // Real do relatório rev. 13: 33,1% físico real x 37,4% previsto
-  // (-4,3 p.p.), entrega prevista 27/01/2027 (+12 dias).
-  // Avanço real atualizado pelo usuário em 05/11/2026: 20% (era 33,1%,
-  // derivado de order6/44%).
-  buildActive({
+  // Cronograma real (.mpp oficial, rev. enviada pelo usuário em 05/11/2026) —
+  // substitui o template genérico de 11 etapas pelas 15 fases reais do
+  // projeto (PRÉ-PARADA/PARADA/PÓS-PARADA), com datas e avanço reais por fase.
+  // Avanço geral (raiz do cronograma): 26%.
+  buildFromSchedule({
     tag: "TQ-6313004",
     area: "Tancagem 6313",
     product: "A definir",
     tankType: "A definir",
     status: "EM_EXECUCAO",
-    baselineStart: "2026-08-03",
-    currentOrder: 4,
-    currentProgress: 30,
     nextInternalInspection: "2026-02-27",
+    progressOverride: 26,
+    activities: [
+      { order: 1, stageKey: "INICIO_PRE_PARADA", name: "Início da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-08-03", baselineEnd: "2026-08-03", plannedStart: "2026-08-03", plannedEnd: "2026-08-03", actualStart: "2026-08-03", actualEnd: "2026-08-03", progress: 100, status: "CONCLUIDO" },
+      { order: 2, stageKey: "DOCUMENTACAO_NECESSARIA", name: "DOCUMENTAÇÃO NECESSÁRIA", durationDays: 3, isMilestone: false, baselineStart: "2026-08-03", baselineEnd: "2026-08-05", plannedStart: "2026-08-03", plannedEnd: "2026-08-05", actualStart: "2026-08-03", actualEnd: "2026-08-05", progress: 100, status: "CONCLUIDO" },
+      { order: 3, stageKey: "MATERIAIS", name: "MATERIAIS", durationDays: 164, isMilestone: false, baselineStart: "2026-08-03", baselineEnd: "2027-01-13", plannedStart: "2026-08-03", plannedEnd: "2027-01-13", actualStart: "2026-08-03", actualEnd: undefined, progress: 47, status: "ATUAL" },
+      { order: 4, stageKey: "TERMINO_PRE_PARADA", name: "Término da Pré-Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-08-04", baselineEnd: "2026-08-04", plannedStart: "2026-08-04", plannedEnd: "2026-08-04", actualStart: "2026-08-04", actualEnd: "2026-08-04", progress: 100, status: "CONCLUIDO" },
+      { order: 5, stageKey: "INICIO_PARADA", name: "Início da Parada", durationDays: 1, isMilestone: true, baselineStart: "2026-08-03", baselineEnd: "2026-08-03", plannedStart: "2026-08-03", plannedEnd: "2026-08-03", actualStart: "2026-08-03", actualEnd: "2026-08-03", progress: 100, status: "CONCLUIDO" },
+      { order: 6, stageKey: "LIBERACAO_OPERACIONAL", name: "LIBERAÇÃO OPERACIONAL", durationDays: 17, isMilestone: false, baselineStart: "2026-08-04", baselineEnd: "2026-08-20", plannedStart: "2026-08-04", plannedEnd: "2026-08-20", actualStart: "2026-08-04", actualEnd: "2026-08-20", progress: 100, status: "CONCLUIDO" },
+      { order: 7, stageKey: "SERVICOS_MANUTENCAO", name: "SERVIÇOS DE MANUTENÇÃO", durationDays: 206, isMilestone: false, baselineStart: "2026-08-03", baselineEnd: "2027-02-24", plannedStart: "2026-08-03", plannedEnd: "2027-02-24", actualStart: "2026-08-03", actualEnd: undefined, progress: 22, status: "ATUAL" },
+      { order: 8, stageKey: "MELHORIAS", name: "MELHORIAS", durationDays: 68, isMilestone: false, baselineStart: "2026-11-30", baselineEnd: "2027-02-05", plannedStart: "2026-11-30", plannedEnd: "2027-02-05", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 9, stageKey: "RETORNO_OPERACIONAL", name: "RETORNO OPERACIONAL", durationDays: 17, isMilestone: false, baselineStart: "2027-02-24", baselineEnd: "2027-03-12", plannedStart: "2027-02-24", plannedEnd: "2027-03-12", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 10, stageKey: "TERMINO_PARADA", name: "Término da Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-03-12", baselineEnd: "2027-03-12", plannedStart: "2027-03-12", plannedEnd: "2027-03-12", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 11, stageKey: "INICIO_POS_PARADA", name: "Início da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-03-12", baselineEnd: "2027-03-12", plannedStart: "2027-03-12", plannedEnd: "2027-03-12", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 12, stageKey: "COMISSIONAMENTO", name: "Comissionamento", durationDays: 2, isMilestone: false, baselineStart: "2027-03-15", baselineEnd: "2027-03-16", plannedStart: "2027-03-15", plannedEnd: "2027-03-16", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 13, stageKey: "TESTES_PRODUTO", name: "Testes com produto (durante o comissionamento)", durationDays: 2, isMilestone: false, baselineStart: "2027-03-17", baselineEnd: "2027-03-18", plannedStart: "2027-03-17", plannedEnd: "2027-03-18", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 14, stageKey: "DOCUMENTACAO_FINAL", name: "Documentação final", durationDays: 6, isMilestone: false, baselineStart: "2027-03-18", baselineEnd: "2027-03-23", plannedStart: "2027-03-18", plannedEnd: "2027-03-23", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+      { order: 15, stageKey: "TERMINO_POS_PARADA", name: "Término da Pós-Parada", durationDays: 1, isMilestone: true, baselineStart: "2027-03-23", baselineEnd: "2027-03-23", plannedStart: "2027-03-23", plannedEnd: "2027-03-23", actualStart: undefined, actualEnd: undefined, progress: 0, status: "FUTURO" },
+    ],
   }),
 
   // ── Programado ─────────────────────────────────────────────────────────

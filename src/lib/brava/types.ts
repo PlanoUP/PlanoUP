@@ -71,6 +71,15 @@ export interface Tank {
    * activities' own planned/actual dates.
    */
   nextInternalInspection?: string;
+  /**
+   * Pins the tank's headline "Avanço Físico" to an externally authoritative
+   * percentage (e.g. a MS Project file's own root rollup, computed from
+   * resource work-hours) instead of the app's calendar-day-weighted
+   * `weightedProgress(activities)`. Only set when that figure materially
+   * diverges from the simple duration-weighted estimate — the per-activity
+   * progress values stay real either way.
+   */
+  progressOverride?: number;
   activities: Activity[];
 }
 
