@@ -8,8 +8,6 @@ import { INSPECTION_INVENTORY } from "@/lib/brava/data/inspection-inventory";
 import SectionHeading from "./SectionHeading";
 import { cn } from "@/lib/brava/cn";
 
-const MONTHS_PT = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-
 interface Group {
   key: string;
   label: string;
@@ -44,16 +42,15 @@ export default function UpcomingInspectionsTimeline() {
   if (overdue.length > 0) {
     groups.push({ key: "overdue", label: "Vencidos", overdue: true, assets: overdue });
   }
-  const byMonth = new Map<string, InspectionFleetAsset[]>();
+  const byYear = new Map<string, InspectionFleetAsset[]>();
   for (const a of upcoming) {
-    const d = parseISO(a.nextInternalInspection!);
-    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth()).padStart(2, "0")}`;
-    if (!byMonth.has(key)) byMonth.set(key, []);
-    byMonth.get(key)!.push(a);
+    const year = parseISO(a.nextInternalInspection!).getUTCFullYear();
+    const key = String(year);
+    if (!byYear.has(key)) byYear.set(key, []);
+    byYear.get(key)!.push(a);
   }
-  for (const [key, assets] of [...byMonth.entries()].sort()) {
-    const [year, month] = key.split("-").map(Number);
-    groups.push({ key, label: `${MONTHS_PT[month]} ${year}`, overdue: false, assets });
+  for (const [key, assets] of [...byYear.entries()].sort()) {
+    groups.push({ key, label: key, overdue: false, assets });
   }
 
   const untrackedCount = dated.filter((a) => !a.tracked).length;
@@ -66,27 +63,35 @@ export default function UpcomingInspectionsTimeline() {
         subtitle={`Linha do tempo completa da próxima inspeção interna de todo o parque de tanques (${dated.length} ativos) — não substitui o cronograma de manutenção`}
       />
       <div className="rounded-brava-lg border border-brava-border bg-brava-white p-5 shadow-brava-sm sm:p-6">
-        <div className="brava-scrollbar flex gap-0 overflow-x-auto pb-2">
-          {groups.map((group, i) => (
-            <div key={group.key} className="flex shrink-0 items-start">
-              <div className="flex min-w-[132px] max-w-[176px] flex-col gap-2 px-4">
-                <div className="flex items-center gap-2">
+        <div className="brava-scrollbar overflow-x-auto pb-1">
+          <div className="flex w-max divide-x divide-brava-border rounded-brava-md border border-brava-border">
+            {groups.map((group) => (
+              <div key={group.key} className="flex w-[148px] shrink-0 flex-col">
+                <div
+                  className={cn(
+                    "flex items-center justify-between gap-2 border-b border-brava-border px-3 py-2",
+                    group.overdue ? "bg-brava-danger-bg" : "bg-brava-bg"
+                  )}
+                >
                   <span
                     className={cn(
-                      "h-2.5 w-2.5 shrink-0 rounded-full",
-                      group.overdue ? "bg-brava-danger" : "bg-brava-blue"
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "text-[11px] font-bold uppercase tracking-wide",
+                      "flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide",
                       group.overdue ? "text-brava-danger" : "text-brava-text"
                     )}
                   >
+                    <span
+                      className={cn(
+                        "h-2.5 w-2.5 shrink-0 rounded-full",
+                        group.overdue ? "bg-brava-danger" : "bg-brava-blue"
+                      )}
+                    />
                     {group.label}
                   </span>
+                  <span className={cn("font-mono text-[10.5px] font-bold", group.overdue ? "text-brava-danger" : "text-brava-text-secondary")}>
+                    {group.assets.length}
+                  </span>
                 </div>
-                <div className="flex flex-col gap-1.5 border-l-2 border-brava-border pl-3.5">
+                <div className="flex flex-col gap-1.5 p-2.5">
                   {group.assets.map((asset) =>
                     asset.tracked ? (
                       <Link
@@ -118,9 +123,8 @@ export default function UpcomingInspectionsTimeline() {
                   )}
                 </div>
               </div>
-              {i < groups.length - 1 && <span className="mt-1 h-px w-8 shrink-0 bg-brava-border" />}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {untrackedCount > 0 && (
