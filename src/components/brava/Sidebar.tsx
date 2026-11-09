@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Boxes, GanttChartSquare, LayoutList, Package, Map, Wallet, Lock, Unlock, KeyRound, ClipboardCheck } from "lucide-react";
+import { LayoutGrid, Boxes, GanttChartSquare, LayoutList, Package, Map, Wallet, Lock, Unlock, KeyRound, ClipboardCheck, FileText } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { formatShort } from "@/lib/brava/date-utils";
@@ -13,6 +13,7 @@ const TANQUES_NAV_ITEMS = [
   { href: "/brava/mapa", label: "Mapa", icon: Map, matchExact: true },
   { href: "/brava/campo", label: "Campo", icon: ClipboardCheck, matchExact: true },
   { href: "/brava/consolidado", label: "Consolidado", icon: GanttChartSquare, matchExact: true },
+  { href: "/brava/reports", label: "Relatório Executivo", icon: FileText, matchExact: true },
 ];
 
 const UNIDADES_NAV_ITEMS = [
