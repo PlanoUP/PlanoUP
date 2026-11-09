@@ -697,3 +697,73 @@ describe('modalidade corretor (perfil público, imóveis, depoimentos)', () => {
     await as('anon', () => rejects(q(`select public.submit_broker_lead('nao-existe', 'form', null, 'X', '84988887777')`), /invalid broker/))
   })
 })
+
+describe('clientes em processo (cadastro, documentos e histórico)', () => {
+  let brokerRow
+  let mine
+  let other
+
+  before(async () => {
+    ;[{ id: brokerRow }] = await as('server', () => q(`select id from public.brokers where tenant_id = $1 and user_id = $2`, [tenantA, U.brokerA]))
+  })
+
+  test('CPF precisa ser válido e único na imobiliária', async () => {
+    await as('ownerA', () =>
+      rejects(q(`insert into public.clients (tenant_id, full_name, cpf, phone) values ($1, 'Ana Souza', '12345678900', '84999990000')`, [tenantA]), /check constraint/),
+    )
+    ;[{ id: other }] = await as('ownerA', () =>
+      q(`insert into public.clients (tenant_id, full_name, cpf, phone) values ($1, 'Ana Souza', '52998224725', '84999990000') returning id`, [tenantA]),
+    )
+    await as('ownerA', () =>
+      rejects(q(`insert into public.clients (tenant_id, full_name, cpf, phone) values ($1, 'Outra Ana', '52998224725', '84999990001')`, [tenantA]), /duplicate key|unique/),
+    )
+  })
+
+  test('corretor cadastra só em nome próprio e vê só os dele', async () => {
+    await as('brokerA', () =>
+      rejects(q(`insert into public.clients (tenant_id, full_name, cpf, phone) values ($1, 'Sem dono', '11144477735', '84999990002')`, [tenantA]), /row-level security/),
+    )
+    ;[{ id: mine }] = await as('brokerA', () =>
+      q(`insert into public.clients (tenant_id, broker_id, full_name, cpf, phone, income_type) values ($1, $2, 'Bruno Lima', '11144477735', '84999990002', 'informal') returning id`, [tenantA, brokerRow]),
+    )
+    const seen = await as('brokerA', () => q(`select id from public.clients where tenant_id = $1`, [tenantA]))
+    assert.deepEqual(seen.map((r) => r.id), [mine])
+    await as('brokerA', () => rejects(q(`update public.clients set broker_id = null where id = $1`, [mine]), /reassign/))
+    await as('brokerA', () => rejects(q(`delete from public.clients where id = $1 returning id`, [mine]).then((r) => assert.equal(r.length, 1)), /./))
+    assert.equal((await as('ownerB', () => q(`select id from public.clients`))).length, 0)
+    await as('anon', () => rejects(q(`select id from public.clients`), /permission denied/))
+  })
+
+  test('etapa: muda a data e registra histórico', async () => {
+    await as('brokerA', () => q(`update public.clients set stage = 'in_review' where id = $1`, [mine]))
+    const events = await as('brokerA', () => q(`select kind, detail from public.client_events where client_id = $1 order by id`, [mine]))
+    assert.deepEqual(events.map((e) => e.kind), ['created', 'stage'])
+    assert.deepEqual(events[1].detail, { from: 'docs_pending', to: 'in_review' })
+    assert.equal((await as('brokerA', () => q(`select id from public.client_events where client_id = $1`, [other]))).length, 0)
+  })
+
+  test('documentos: arquivo na pasta do cliente; só quem acessa o cliente envia/lê; gerente aprova', async () => {
+    const path = `${tenantA}/${mine}/rg.pdf`
+    await as('brokerA', () => q(`insert into storage.objects (bucket_id, name) values ('client-documents', $1)`, [path]))
+    await as('brokerA', () =>
+      rejects(q(`insert into storage.objects (bucket_id, name) values ('client-documents', $1)`, [`${tenantA}/${other}/x.pdf`]), /row-level security/),
+    )
+    await as('ownerB', () => rejects(q(`insert into storage.objects (bucket_id, name) values ('client-documents', $1)`, [`${tenantA}/${mine}/y.pdf`]), /row-level security/))
+    assert.equal((await as('ownerB', () => q(`select name from storage.objects where bucket_id = 'client-documents'`))).length, 0)
+
+    const [{ id: doc }] = await as('brokerA', () =>
+      q(`insert into public.client_documents (tenant_id, client_id, kind, storage_path, file_name) values ($1, $2, 'identidade', $3, 'rg.pdf') returning id`, [tenantA, mine, path]),
+    )
+    const notChanged = await as('brokerA', () => q(`update public.client_documents set status = 'accepted' where id = $1 returning id`, [doc]))
+    assert.equal(notChanged.length, 0)
+    await as('ownerA', () => q(`update public.client_documents set status = 'accepted' where id = $1`, [doc]))
+    const kinds = await as('ownerA', () => q(`select kind from public.client_events where client_id = $1 order by id`, [mine]))
+    assert.deepEqual(kinds.map((e) => e.kind), ['created', 'stage', 'document_added', 'document_status'])
+  })
+
+  test('gerente exclui o cliente e tudo dele vai junto', async () => {
+    await as('ownerA', () => q(`delete from public.clients where id = $1`, [mine]))
+    assert.equal((await as('server', () => q(`select id from public.client_documents where client_id = $1`, [mine]))).length, 0)
+    assert.equal((await as('server', () => q(`select id from public.client_events where client_id = $1`, [mine]))).length, 0)
+  })
+})
