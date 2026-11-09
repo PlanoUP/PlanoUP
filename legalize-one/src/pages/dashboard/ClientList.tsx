@@ -1,4 +1,4 @@
-import { Columns3, List, Plus, Search } from 'lucide-react'
+import { BarChart3, Columns3, List, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { ButtonLink } from '@/components/ui/Button'
@@ -83,8 +83,12 @@ export default function ClientList() {
             {manager ? 'Compradores em processo, de todos os corretores.' : 'Seus compradores: cadastro, documentos e cada etapa.'}
           </p>
         </div>
-        <div className="hidden sm:block">
-          <ButtonLink to="/dashboard/clientes/novo">
+        <div className="flex flex-wrap gap-2">
+          <ButtonLink to="/dashboard/clientes/aprovados" variant="outline">
+            <BarChart3 className="size-4" aria-hidden="true" />
+            Relatório de aprovados
+          </ButtonLink>
+          <ButtonLink to="/dashboard/clientes/novo" className="max-sm:hidden">
             <Plus className="size-4" aria-hidden="true" />
             Novo cliente
           </ButtonLink>

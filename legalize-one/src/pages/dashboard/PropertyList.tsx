@@ -18,7 +18,11 @@ import { usePageTitle } from '@/hooks/usePageTitle'
 import { cn } from '@/utils/cn'
 import { formatPrice, normalizeText } from '@/utils/format'
 
-const FILTERS: (PropertyStatus | 'all')[] = ['all', 'published', 'draft', 'sold', 'rented', 'archived']
+type Filter = PropertyStatus | 'all' | 'available' | 'reserved'
+const FILTERS: Filter[] = ['all', 'available', 'reserved', 'published', 'draft', 'sold', 'rented', 'archived']
+const FILTER_LABELS: Record<Filter, string> = { ...STATUS_LABELS, all: 'Todos', available: 'Disponíveis', reserved: 'Reservados' }
+const inFilter = (p: PropertySummary, f: Filter) =>
+  f === 'all' ? true : f === 'available' ? p.status === 'published' && !p.reserved : f === 'reserved' ? p.reserved : p.status === f
 
 function matches(p: PropertySummary, query: string) {
   if (!query) return true
@@ -33,11 +37,11 @@ export default function PropertyList() {
   const ws = useWorkspace()
   const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState('')
-  const status = (params.get('status') as PropertyStatus | null) ?? 'all'
+  const status = (params.get('status') as Filter | null) ?? 'all'
   const { data, loading, error } = useAsyncData(() => listProperties(ws.tenantId), ws.tenantId)
 
   const all = data ?? []
-  const visible = all.filter((p) => (status === 'all' || p.status === status) && matches(p, query))
+  const visible = all.filter((p) => inFilter(p, status) && matches(p, query))
   function exportProperties() {
     const csv = toCsv(all, [
       { header: 'Código', value: (p) => p.code },
@@ -46,6 +50,8 @@ export default function PropertyList() {
       { header: 'Finalidade', value: (p) => PURPOSE_LABELS[p.purpose] },
       { header: 'Status', value: (p) => STATUS_LABELS[p.status] },
       { header: 'Preço (R$)', value: (p) => p.price },
+      { header: 'Laudo (R$)', value: (p) => p.appraisal_value },
+      { header: 'Reservado', value: (p) => (p.reserved ? 'Sim' : '') },
       { header: 'Bairro', value: (p) => p.neighborhood },
       { header: 'Cidade', value: (p) => p.city },
       { header: 'Link no site', value: (p) => (p.status === 'published' ? `${window.location.origin}/imovel/${p.slug}` : '') },
@@ -53,7 +59,7 @@ export default function PropertyList() {
     ])
     downloadCsv(`imoveis-${ws.tenantSlug}-${today()}.csv`, csv)
   }
-  const countOf = (s: PropertyStatus | 'all') => (s === 'all' ? all.length : all.filter((p) => p.status === s).length)
+  const countOf = (f: Filter) => all.filter((p) => inFilter(p, f)).length
 
   return (
     <div>
@@ -98,7 +104,7 @@ export default function PropertyList() {
                 status === f ? 'bg-navy-950 text-white' : 'bg-white text-navy-950 hover:bg-sand-200',
               )}
             >
-              {f === 'all' ? 'Todos' : STATUS_LABELS[f]}
+              {FILTER_LABELS[f]}
               {data && <span className="ml-1.5 opacity-60 tabular-nums">{countOf(f)}</span>}
             </button>
           ))}
@@ -141,6 +147,7 @@ export default function PropertyList() {
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-2">
                       <StatusBadge status={p.status} />
+                      {p.reserved && <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[12px] font-semibold text-amber-900">Reservado</span>}
                       {p.code && <span className="text-[12.5px] font-semibold text-slate">{p.code}</span>}
                       {mine && <span className="text-[12.5px] font-semibold text-gold-600">Seu imóvel</span>}
                     </span>
@@ -153,12 +160,14 @@ export default function PropertyList() {
                       <span className="mt-0.5 block text-[14px] font-semibold text-navy-950 tabular-nums sm:hidden">
                         {formatPrice(p.price)}
                         {p.purpose === 'aluguel' && <span className="text-[12px] font-normal text-slate">/mês</span>}
+                        {p.appraisal_value !== null && <span className="ml-2 text-[12px] font-medium text-slate">Laudo: {formatPrice(p.appraisal_value)}</span>}
                       </span>
                     )}
                   </span>
                   <span className="hidden shrink-0 text-right text-[15px] font-semibold text-navy-950 tabular-nums sm:block">
                     {p.price !== null ? formatPrice(p.price) : '—'}
                     {p.purpose === 'aluguel' && p.price !== null && <span className="text-[12px] text-slate">/mês</span>}
+                    {p.appraisal_value !== null && <span className="block text-[12px] font-medium text-slate">Laudo: {formatPrice(p.appraisal_value)}</span>}
                   </span>
                 </Link>
               </li>

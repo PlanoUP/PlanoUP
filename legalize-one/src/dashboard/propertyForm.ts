@@ -5,7 +5,7 @@ import type { PropertyInput } from './propertiesApi'
  * Números aceitam o formato brasileiro ("1.450.000,50") e o simples ("1450000").
  */
 
-const NUMBER_FIELDS = ['price', 'condo_fee', 'iptu', 'built_area', 'total_area', 'floor', 'bedrooms', 'suites', 'bathrooms', 'parking'] as const
+const NUMBER_FIELDS = ['price', 'condo_fee', 'iptu', 'built_area', 'total_area', 'floor', 'bedrooms', 'suites', 'bathrooms', 'parking', 'appraisal_value'] as const
 type NumberField = (typeof NUMBER_FIELDS)[number]
 
 export type PropertyFormValues = Omit<PropertyInput, NumberField> & Record<NumberField, string>

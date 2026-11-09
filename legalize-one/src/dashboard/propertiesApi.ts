@@ -75,6 +75,10 @@ export interface PropertyInput {
   featured: boolean
   documentation_verified: boolean
   broker_id: string | null
+  /** Reservado para um cliente (uso interno da equipe; o site não muda). */
+  reserved: boolean
+  /** Valor de avaliação do banco (laudo), uso interno. */
+  appraisal_value: number | null
 }
 
 export interface PropertyRecord extends PropertyInput {
@@ -101,6 +105,8 @@ export interface PropertySummary {
   city: string | null
   cover_image_url: string | null
   broker_id: string | null
+  reserved: boolean
+  appraisal_value: number | null
   updated_at: string
 }
 
@@ -140,11 +146,13 @@ export const EMPTY_PROPERTY: PropertyInput = {
   featured: false,
   documentation_verified: false,
   broker_id: null,
+  reserved: false,
+  appraisal_value: null,
 }
 
 const INPUT_COLUMNS = Object.keys(EMPTY_PROPERTY) as (keyof PropertyInput)[]
 const SUMMARY_COLUMNS =
-  'id, code, title, slug, type, purpose, status, price, neighborhood, city, cover_image_url, broker_id, updated_at'
+  'id, code, title, slug, type, purpose, status, price, neighborhood, city, cover_image_url, broker_id, reserved, appraisal_value, updated_at'
 
 const toNumber = (v: unknown) => (v === null || v === undefined || v === '' ? null : Number(v))
 
@@ -174,7 +182,7 @@ function pickInput(row: Record<string, unknown>): PropertyInput {
   for (const key of INPUT_COLUMNS) {
     if (row[key] !== undefined) (input as Record<string, unknown>)[key] = row[key]
   }
-  for (const key of ['price', 'condo_fee', 'iptu', 'built_area', 'total_area'] as const) input[key] = toNumber(row[key])
+  for (const key of ['price', 'condo_fee', 'iptu', 'built_area', 'total_area', 'appraisal_value'] as const) input[key] = toNumber(row[key])
   input.amenities = (row.amenities as string[] | null) ?? []
   return input
 }
@@ -187,7 +195,7 @@ export async function listProperties(tenantId: string): Promise<PropertySummary[
     .eq('tenant_id', tenantId)
     .order('updated_at', { ascending: false })
   if (error) fail(error)
-  return (data ?? []).map((r) => ({ ...r, price: toNumber(r.price) }) as PropertySummary)
+  return (data ?? []).map((r) => ({ ...r, price: toNumber(r.price), appraisal_value: toNumber(r.appraisal_value) }) as PropertySummary)
 }
 
 export async function getProperty(tenantId: string, id: string): Promise<PropertyRecord | null> {

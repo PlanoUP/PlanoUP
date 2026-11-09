@@ -281,6 +281,18 @@ function Editor({ record }: { record: PropertyRecord | null }) {
             <Field label="IPTU (R$/ano)" error={errors.iptu}>
               <input {...text('iptu')} inputMode="decimal" className={input} />
             </Field>
+            <Field label="Valor de avaliação — laudo (R$)" error={errors.appraisal_value} hint="Uso interno da equipe; não aparece no site.">
+              <input {...text('appraisal_value')} inputMode="decimal" className={input} />
+            </Field>
+          </div>
+          <div className="mt-3">
+            <Toggle
+              checked={values.reserved}
+              onChange={(v) => set('reserved', v)}
+              disabled={!editable}
+              label="Reservado para um cliente"
+              hint="Marca o imóvel como reservado no painel da equipe. O anúncio no site continua como está."
+            />
           </div>
         </Section>
 

@@ -1,4 +1,4 @@
-import { BarChart3, Building2, Contact, Home, Inbox, LayoutDashboard, Network, Users, type LucideIcon } from 'lucide-react'
+import { BarChart3, BookOpenCheck, Building2, Contact, Home, Inbox, LayoutDashboard, Network, Users, type LucideIcon } from 'lucide-react'
 import { hasPermission, type Permission, type Role } from '@/lib/permissions'
 
 export interface NavItem {
@@ -19,6 +19,7 @@ export const NAV: NavItem[] = [
   { to: '/dashboard/imoveis', label: 'Imóveis', icon: Home },
   { to: '/dashboard/contatos', label: 'Contatos', icon: Inbox, badge: true },
   { to: '/dashboard/clientes', label: 'Clientes', icon: Contact },
+  { to: '/dashboard/materiais', label: 'Materiais', icon: BookOpenCheck, secondary: true },
   { to: '/dashboard/resultados', label: 'Resultados', icon: BarChart3, permission: 'analytics.view', secondary: true },
   { to: '/dashboard/equipe', label: 'Equipe', icon: Users, permission: 'tenant.users.manage', secondary: true },
   { to: '/dashboard/imobiliaria', label: 'Minha imobiliária', icon: Building2, permission: 'tenant.settings.edit', secondary: true },
