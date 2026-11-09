@@ -256,6 +256,25 @@ const MapZoomPan = forwardRef<
                   // object-cover would), and the other works out to match.
                   width: `max(100vw, calc(100vh * ${aspectRatio}))`,
                   height: `max(100vh, calc(100vw / ${aspectRatio}))`,
+                  // fullscreenRef (the parent) is a flex container, and a
+                  // flex item's explicit width is only a starting point —
+                  // by default flexbox still shrinks it to fit the main
+                  // axis (flex-shrink: 1), which silently overrides the
+                  // "overflow and crop" width above back down to the
+                  // viewport's own width whenever that width would have
+                  // overflowed (any map wider than the viewport's own
+                  // aspect ratio — most real monitors, since every map
+                  // photo here is panoramic). That breaks the container's
+                  // locked aspect ratio, which breaks object-cover's crop
+                  // window, which is what actually made the hotspots'
+                  // %-based dots land off their tanks on a resize or a
+                  // different monitor — not the dots' own math, which was
+                  // already correct. flex-shrink: 0 (and flex-grow: 0, for
+                  // the same reason in the other direction) makes this an
+                  // explicit, never-shrunk size the way a non-flex block
+                  // box would already have behaved.
+                  flexShrink: 0,
+                  flexGrow: 0,
                 }
               : { aspectRatio: String(aspectRatio), width: "100%" }
           }
