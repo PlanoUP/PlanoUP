@@ -217,7 +217,7 @@ const MapZoomPan = forwardRef<
     return (
       <div
         ref={fullscreenRef}
-        className={cn(showChrome && "relative flex h-full w-full items-center justify-center overflow-hidden bg-black")}
+        className={cn("relative", showChrome && "flex h-full w-full items-center justify-center overflow-hidden bg-black")}
       >
         {showChrome && backgroundSrc && (
           <Image
@@ -297,16 +297,27 @@ const MapZoomPan = forwardRef<
           {showChrome && (
             <BlueprintGrid className="pointer-events-none absolute inset-0 h-full w-full text-white opacity-[0.07]" />
           )}
-
-          <div className="absolute bottom-3 right-3 z-20 flex flex-col gap-1 rounded-brava-md border border-brava-border bg-brava-white/95 p-1 shadow-brava-md backdrop-blur">
-            <ZoomButton icon={Plus} label="Ampliar" onClick={() => zoomBy(1.4)} />
-            <ZoomButton icon={Minus} label="Reduzir" onClick={() => zoomBy(1 / 1.4)} />
-            <ZoomButton icon={RotateCcw} label="Reset" onClick={reset} />
-            <ZoomButton icon={Maximize} label="Tela cheia" onClick={toggleFullscreen} />
-          </div>
-
-          {tourSlot}
         </div>
+
+        {/*
+          Anchored to fullscreenRef, not containerRef: in showChrome mode
+          containerRef is deliberately oversized (it covers the viewport by
+          overflowing one axis, centered, with fullscreenRef clipping the
+          overflow — see the note above) so its own corners can sit off-screen.
+          fullscreenRef's box always matches the visible area exactly (the
+          real viewport in showChrome mode; identical to containerRef's own
+          box in the plain embedded case, since fullscreenRef then just
+          shrink-wraps it) — anchoring here keeps these controls reachable
+          either way instead of drifting off-screen with containerRef.
+        */}
+        <div className="absolute bottom-3 right-3 z-20 flex flex-col gap-1 rounded-brava-md border border-brava-border bg-brava-white/95 p-1 shadow-brava-md backdrop-blur">
+          <ZoomButton icon={Plus} label="Ampliar" onClick={() => zoomBy(1.4)} />
+          <ZoomButton icon={Minus} label="Reduzir" onClick={() => zoomBy(1 / 1.4)} />
+          <ZoomButton icon={RotateCcw} label="Reset" onClick={reset} />
+          <ZoomButton icon={Maximize} label="Tela cheia" onClick={toggleFullscreen} />
+        </div>
+
+        {tourSlot}
       </div>
     );
   }
