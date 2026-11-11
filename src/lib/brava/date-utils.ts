@@ -71,3 +71,10 @@ export function formatMonthYear(iso: string): string {
   const d = parseISO(iso);
   return `${MONTHS_PT[d.getUTCMonth()]}/${String(d.getUTCFullYear()).slice(2)}`;
 }
+
+/** "09 NOV 2026" — the compact all-caps form used on the executive report slides' header. */
+export function formatShortMonth(iso?: string): string {
+  if (!iso) return "—";
+  const d = parseISO(iso);
+  return `${String(d.getUTCDate()).padStart(2, "0")} ${MONTHS_PT[d.getUTCMonth()].toUpperCase()} ${d.getUTCFullYear()}`;
+}

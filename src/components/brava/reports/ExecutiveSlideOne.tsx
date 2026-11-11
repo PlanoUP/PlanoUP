@@ -1,26 +1,32 @@
 "use client";
 
-import { Boxes, Wrench, CheckCircle2, AlertTriangle, TrendingUp, Wallet } from "lucide-react";
 import SlideFrame from "./SlideFrame";
+import SlideHeader from "./SlideHeader";
+import SlideFooter from "./SlideFooter";
+import SlidePanel from "./SlidePanel";
+import DonutGauge from "./DonutGauge";
 import EditableList from "./EditableList";
-import { ReportKpis, ReportPhysicalProgress, ReportFinancialSummary, ReportHighlight } from "@/lib/brava/reports/types";
-import { formatShort } from "@/lib/brava/date-utils";
+import {
+  ReportKpis,
+  ReportPhysicalProgress,
+  ReportFinancialSummary,
+  ReportHighlight,
+  ReportScope,
+} from "@/lib/brava/reports/types";
+import { AttentionSummary, formatPP, formatDeviationPhrase } from "@/lib/brava/reports/calculations";
 
-function fmtMM(value: number): string {
-  return `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MM`;
-}
-
-function fmtPP(value: number): string {
-  return `${value > 0 ? "+" : ""}${value} p.p.`;
+function fmtMi(value: number): string {
+  return `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} mi`;
 }
 
 export default function ExecutiveSlideOne({
+  scope,
   scopeLabel,
-  weekLabel,
   cutoffDateISO,
   kpis,
   physicalProgress,
   financial,
+  attention,
   avancosSemana,
   riscos,
   decisoes,
@@ -29,12 +35,13 @@ export default function ExecutiveSlideOne({
   onChangeRiscos,
   onChangeDecisoes,
 }: {
+  scope: ReportScope;
   scopeLabel: string;
-  weekLabel: string;
   cutoffDateISO: string;
   kpis: ReportKpis;
   physicalProgress: ReportPhysicalProgress;
   financial: ReportFinancialSummary;
+  attention: AttentionSummary;
   avancosSemana: ReportHighlight[];
   riscos: ReportHighlight[];
   decisoes: ReportHighlight[];
@@ -43,178 +50,178 @@ export default function ExecutiveSlideOne({
   onChangeRiscos: (items: ReportHighlight[]) => void;
   onChangeDecisoes: (items: ReportHighlight[]) => void;
 }) {
+  const subtitle = scope === "CONSOLIDADO" ? "Ativo Industrial de Guamaré" : `${scopeLabel} · Ativo Industrial de Guamaré`;
+  const magnitude = Math.abs(physicalProgress.desvioPP);
+  const deviationWords =
+    physicalProgress.desvioPP === 0 ? "Dentro do previsto" : `pontos ${physicalProgress.desvioPP < 0 ? "abaixo" : "acima"} do previsto`;
+
+  const attentionHeadline = !attention.worst
+    ? attention.total === 0
+      ? "Nenhum tanque em execução no escopo selecionado."
+      : "Nenhum tanque em execução está abaixo do previsto."
+    : `${attention.belowPrevistoCount} de ${attention.total} em execução abaixo do previsto. Maior desvio no ${attention.worst.tag} (${formatPP(attention.worst.desvioPP)}).`;
+
+  const hasNarrative = avancosSemana.length > 0 || riscos.length > 0 || decisoes.length > 0;
+
   return (
     <SlideFrame label="Slide 1 — Visão Geral da Carteira">
-      <div className="flex h-full flex-col px-[56px] pt-[40px]">
-        {/* Header */}
-        <div className="flex items-start justify-between border-b-[3px] border-[color:var(--rp-blue)] pb-[18px]">
-          <div>
-            <p className="text-[13px] font-bold uppercase tracking-[0.16em] text-[color:var(--rp-blue)]">
-              {scopeLabel}
+      <div className="flex h-full flex-col">
+        <SlideHeader eyebrow="Relatório Semanal de Manutenção" title="Visão geral da carteira" subtitle={subtitle} cutoffDateISO={cutoffDateISO} />
+
+        <div className="flex min-h-0 flex-1 flex-col gap-[16px] px-[56px] py-[20px]">
+          {/* Bloco A — Indicadores de carteira */}
+          <div className="grid shrink-0 grid-cols-4 gap-[16px]">
+            <KpiTile label="Tanques na carteira" value={kpis.total} emphasis />
+            <KpiTile label="Em execução" value={kpis.emManutencao} />
+            <KpiTile label="Concluídos" value={kpis.concluidos} />
+            <KpiTile label="Inspeções internas vencidas" value={kpis.inspecoesVencidas} alert={kpis.inspecoesVencidas > 0} />
+          </div>
+
+          {/* Bloco B — Avanço físico + CAPEX */}
+          <div className="flex min-h-0 flex-[1.15] gap-[16px]">
+            <SlidePanel title="Avanço Físico Consolidado" className="w-[60%]">
+              <div className="flex h-full flex-col justify-between">
+                <div className="flex items-center gap-[22px]">
+                  <div className="flex flex-col items-center gap-1.5">
+                    <DonutGauge value={physicalProgress.previsto} color="var(--rp-blue)" size={118} strokeWidth={12} />
+                    <span className="text-[13px] font-bold" style={{ color: "var(--rp-blue)" }}>
+                      Previsto
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <DonutGauge value={physicalProgress.realizado} color="var(--rp-accent)" size={118} strokeWidth={12} />
+                    <span className="text-[13px] font-bold" style={{ color: "var(--rp-ink)" }}>
+                      Realizado
+                    </span>
+                  </div>
+                  <div
+                    className="flex flex-1 flex-col items-center justify-center gap-0.5 self-stretch rounded-[8px] px-[14px] py-[10px] text-center"
+                    style={{ background: "var(--rp-accent)" }}
+                    aria-label={formatDeviationPhrase(physicalProgress.desvioPP)}
+                  >
+                    <span className="font-mono text-[32px] font-extrabold leading-none" style={{ color: "var(--rp-blue)" }}>
+                      {magnitude}
+                    </span>
+                    <span className="text-[12px] font-bold leading-tight" style={{ color: "var(--rp-blue)" }}>
+                      {deviationWords}
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-2 text-[12.5px]" style={{ color: "var(--rp-gray)" }}>
+                  {physicalProgress.deltaSemanaAnterior === null
+                    ? "Sem semana anterior fechada para comparação."
+                    : `Evolução de ${formatPP(physicalProgress.deltaSemanaAnterior)} em relação à semana anterior.`}
+                </p>
+              </div>
+            </SlidePanel>
+
+            <SlidePanel title="CAPEX da Carteira" className="w-[40%]">
+              {financial.hasData ? (
+                <div className="flex h-full flex-col justify-between">
+                  <div className="divide-y" style={{ borderColor: "var(--rp-line)" }}>
+                    <CapexRow label="Orçado" value={fmtMi(financial.orcado)} />
+                    <CapexRow label="Realizado" value={fmtMi(financial.realizado)} />
+                    <CapexRow label="Saldo" value={fmtMi(financial.saldo)} alert={financial.saldo < 0} />
+                  </div>
+                  <p className="mt-2 text-[12px]" style={{ color: "var(--rp-gray)" }}>
+                    Custos cadastrados para {financial.tanksWithData} de {financial.tanksInScope} tanques.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex h-full items-center justify-center px-2 text-center text-[13px]" style={{ color: "var(--rp-gray)" }}>
+                  Dados financeiros indisponíveis — nenhum tanque do escopo tem custo cadastrado no sistema.
+                </div>
+              )}
+            </SlidePanel>
+          </div>
+
+          {/* Bloco C — Pontos de atenção */}
+          <SlidePanel title="Pontos de Atenção" className="min-h-0 flex-1">
+            <p className="text-[15px] font-bold leading-snug" style={{ color: "var(--rp-blue)" }}>
+              {attentionHeadline}
             </p>
-            <h1 className="mt-1 text-[38px] font-extrabold leading-none tracking-tight text-[color:var(--rp-blue)]">
-              GESTÃO DE TANQUES <span className="text-[color:var(--rp-ink)]">| RESUMO EXECUTIVO</span>
-            </h1>
-          </div>
-          <div className="pt-1 text-right">
-            <p className="text-[14px] font-bold uppercase tracking-wide text-[color:var(--rp-ink)]">{weekLabel}</p>
-            <p className="text-[12.5px] text-[color:var(--rp-gray)]">Data de corte: {formatShort(cutoffDateISO)}</p>
-          </div>
+
+            {editable ? (
+              <div className="mt-3 grid grid-cols-3 gap-[18px]">
+                <div>
+                  <p className="mb-1 text-[10.5px] font-bold uppercase tracking-wide" style={{ color: "var(--rp-gray)" }}>
+                    Avanços da Semana
+                  </p>
+                  <EditableList items={avancosSemana} onChange={onChangeAvancos} editable placeholder="Marco concluído ou evolução relevante" />
+                </div>
+                <div>
+                  <p className="mb-1 text-[10.5px] font-bold uppercase tracking-wide" style={{ color: "var(--rp-gray)" }}>
+                    Riscos e Restrições
+                  </p>
+                  <EditableList items={riscos} onChange={onChangeRiscos} editable placeholder="Impedimento que afeta prazo, custo ou segurança" />
+                </div>
+                <div>
+                  <p className="mb-1 text-[10.5px] font-bold uppercase tracking-wide" style={{ color: "var(--rp-gray)" }}>
+                    Decisões Necessárias
+                  </p>
+                  <EditableList items={decisoes} onChange={onChangeDecisoes} editable placeholder="Ação que depende de deliberação gerencial" />
+                </div>
+              </div>
+            ) : hasNarrative ? (
+              <div className="mt-2 flex flex-col gap-1 text-[13px]" style={{ color: "var(--rp-ink)" }}>
+                {avancosSemana.length > 0 && (
+                  <p>
+                    <span className="font-semibold">Avanços:</span> {avancosSemana.map((h) => h.text).join(" · ")}
+                  </p>
+                )}
+                {riscos.length > 0 && (
+                  <p>
+                    <span className="font-semibold">Riscos:</span> {riscos.map((h) => h.text).join(" · ")}
+                  </p>
+                )}
+                {decisoes.length > 0 && (
+                  <p>
+                    <span className="font-semibold">Decisões:</span> {decisoes.map((h) => h.text).join(" · ")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="mt-1 text-[13px]" style={{ color: "var(--rp-gray)" }}>
+                Sem avanços da semana, riscos ou decisões necessárias registrados no relatório.
+              </p>
+            )}
+          </SlidePanel>
         </div>
 
-        {/* Bloco A — Indicadores principais */}
-        <div className="mt-[22px] grid grid-cols-4 gap-[18px]">
-          <KpiTile icon={Boxes} label="Total da Carteira" value={kpis.total} />
-          <KpiTile icon={Wrench} label="Em Manutenção" value={kpis.emManutencao} accent />
-          <KpiTile icon={CheckCircle2} label="Concluídos" value={kpis.concluidos} />
-          <KpiTile icon={AlertTriangle} label="Atenção / Crítico" value={kpis.atencaoOuCritico} alert={kpis.atencaoOuCritico > 0} />
-        </div>
-
-        {/* Bloco B — Desempenho físico */}
-        <SectionLabel icon={TrendingUp} text="Desempenho Físico Consolidado" />
-        <div className="grid grid-cols-4 gap-[18px]">
-          <StatTile label="Avanço Previsto" value={`${physicalProgress.previsto}%`} />
-          <StatTile label="Avanço Realizado" value={`${physicalProgress.realizado}%`} strong />
-          <StatTile
-            label="Desvio Físico"
-            value={fmtPP(physicalProgress.desvioPP)}
-            alert={physicalProgress.desvioPP < 0}
-          />
-          <StatTile
-            label="Evolução vs. Semana Anterior"
-            value={physicalProgress.deltaSemanaAnterior === null ? "—" : fmtPP(physicalProgress.deltaSemanaAnterior)}
-            hint={physicalProgress.deltaSemanaAnterior === null ? "Sem semana fechada anterior" : undefined}
-          />
-        </div>
-
-        {/* Bloco C — Desempenho financeiro */}
-        <SectionLabel icon={Wallet} text="Desempenho Financeiro (CAPEX)" />
-        {financial.hasData ? (
-          <div className="grid grid-cols-4 gap-[18px]">
-            <StatTile label="CAPEX Orçado" value={fmtMM(financial.orcado)} />
-            <StatTile label="CAPEX Realizado" value={fmtMM(financial.realizado)} strong />
-            <StatTile label="Saldo" value={fmtMM(financial.saldo)} alert={financial.saldo < 0} />
-            <StatTile
-              label="Cobertura de Dados"
-              value={`${financial.tanksWithData}/${financial.tanksInScope}`}
-              hint="tanques com custo cadastrado"
-            />
-          </div>
-        ) : (
-          <div className="rounded-[10px] border border-dashed border-[color:var(--rp-line)] bg-[color:var(--rp-gray-bg)] px-[22px] py-[16px] text-[14.5px] text-[color:var(--rp-gray)]">
-            Dados financeiros indisponíveis para este escopo — nenhum tanque da seleção tem custo cadastrado no sistema.
-          </div>
-        )}
-
-        {/* Bloco D — Resumo executivo */}
-        <div className="mt-[22px] grid flex-1 grid-cols-3 gap-[22px] overflow-hidden border-t-2 border-[color:var(--rp-line)] pt-[18px]">
-          <SummaryColumn title="Avanços da Semana" tone="blue">
-            <EditableList items={avancosSemana} onChange={onChangeAvancos} editable={editable} placeholder="Marco concluído ou evolução relevante" />
-          </SummaryColumn>
-          <SummaryColumn title="Riscos e Restrições" tone="amber">
-            <EditableList items={riscos} onChange={onChangeRiscos} editable={editable} placeholder="Impedimento que afeta prazo, custo ou segurança" />
-          </SummaryColumn>
-          <SummaryColumn title="Decisões Necessárias" tone="blue">
-            <EditableList items={decisoes} onChange={onChangeDecisoes} editable={editable} placeholder="Ação que depende de deliberação gerencial" />
-          </SummaryColumn>
-        </div>
-
-        <p className="pb-[16px] pt-[10px] text-[11px] text-[color:var(--rp-gray)]">
-          BRAVA ENERGIA · SHUTDOWN CONTROL · EXECUTIVE REPORT — uso interno
-        </p>
+        <SlideFooter source="Fonte: Relatório Executivo e Consolidado de inspeções. Uso interno." page="01 / 02" />
       </div>
     </SlideFrame>
   );
 }
 
-function SectionLabel({ icon: Icon, text }: { icon: typeof TrendingUp; text: string }) {
+function KpiTile({ label, value, emphasis, alert }: { label: string; value: number; emphasis?: boolean; alert?: boolean }) {
   return (
-    <div className="mb-[10px] mt-[20px] flex items-center gap-2">
-      <Icon className="h-[16px] w-[16px] text-[color:var(--rp-blue)]" strokeWidth={2} />
-      <span className="text-[13px] font-bold uppercase tracking-[0.1em] text-[color:var(--rp-blue)]">{text}</span>
-    </div>
-  );
-}
-
-function KpiTile({
-  icon: Icon,
-  label,
-  value,
-  accent,
-  alert,
-}: {
-  icon: typeof Boxes;
-  label: string;
-  value: number;
-  accent?: boolean;
-  alert?: boolean;
-}) {
-  return (
-    <div className="flex flex-col gap-2 rounded-[10px] bg-[color:var(--rp-gray-bg)] px-[20px] py-[16px]">
-      <div className="flex items-center justify-between">
-        <span className="text-[12.5px] font-semibold uppercase tracking-wide text-[color:var(--rp-gray)]">{label}</span>
-        <Icon
-          className="h-[18px] w-[18px]"
-          strokeWidth={2}
-          style={{ color: alert ? "var(--rp-danger)" : accent ? "var(--rp-blue)" : "var(--rp-gray)" }}
-        />
-      </div>
+    <div
+      className="flex flex-col justify-center gap-1 px-[18px] py-[14px]"
+      style={emphasis ? { background: "var(--rp-blue)" } : { background: "var(--rp-white)", border: "1px solid var(--rp-line)" }}
+    >
       <span
-        className="font-mono text-[38px] font-extrabold leading-none"
-        style={{ color: alert ? "var(--rp-danger)" : "var(--rp-blue)" }}
+        className="font-mono text-[32px] font-extrabold leading-none"
+        style={{ color: emphasis ? "var(--rp-accent)" : alert ? "var(--rp-danger)" : "var(--rp-blue)" }}
       >
         {value}
+      </span>
+      <span className="text-[12px] font-semibold" style={{ color: emphasis ? "rgba(255,255,255,0.85)" : "var(--rp-gray)" }}>
+        {label}
       </span>
     </div>
   );
 }
 
-function StatTile({
-  label,
-  value,
-  strong,
-  alert,
-  hint,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-  alert?: boolean;
-  hint?: string;
-}) {
+function CapexRow({ label, value, alert }: { label: string; value: string; alert?: boolean }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-[10px] border border-[color:var(--rp-line)] px-[20px] py-[14px]">
-      <span className="text-[12px] font-semibold uppercase tracking-wide text-[color:var(--rp-gray)]">{label}</span>
-      <span
-        className="font-mono text-[26px] font-extrabold leading-none"
-        style={{ color: alert ? "var(--rp-danger)" : strong ? "var(--rp-blue)" : "var(--rp-ink)" }}
-      >
+    <div className="flex items-center justify-between py-[9px]">
+      <span className="text-[14px]" style={{ color: "var(--rp-ink)" }}>
+        {label}
+      </span>
+      <span className="font-mono text-[18px] font-extrabold" style={{ color: alert ? "var(--rp-danger)" : "var(--rp-blue)" }}>
         {value}
       </span>
-      {hint && <span className="text-[11px] text-[color:var(--rp-gray)]">{hint}</span>}
-    </div>
-  );
-}
-
-function SummaryColumn({
-  title,
-  tone,
-  children,
-}: {
-  title: string;
-  tone: "blue" | "amber";
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex min-h-0 flex-col overflow-hidden">
-      <div className="mb-[12px] flex items-center gap-2">
-        <span
-          className="h-[10px] w-[10px] rounded-full"
-          style={{ background: tone === "amber" ? "var(--rp-amber)" : "var(--rp-blue)" }}
-        />
-        <h3 className="text-[15px] font-bold uppercase tracking-wide text-[color:var(--rp-ink)]">{title}</h3>
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">{children}</div>
     </div>
   );
 }

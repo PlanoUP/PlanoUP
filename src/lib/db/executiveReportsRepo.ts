@@ -46,7 +46,7 @@ export async function upsertDraft(input: ExecutiveReportDraftInput): Promise<Exe
     weekStartISO: input.weekStartISO,
     cutoffDateISO: input.cutoffDateISO,
     closedAt: null,
-    kpis: existing?.kpis ?? { total: 0, emManutencao: 0, programados: 0, concluidos: 0, atencaoOuCritico: 0 },
+    kpis: existing?.kpis ?? { total: 0, emManutencao: 0, programados: 0, concluidos: 0, atencaoOuCritico: 0, inspecoesVencidas: 0 },
     physicalProgress: existing?.physicalProgress ?? { previsto: 0, realizado: 0, desvioPP: 0, deltaSemanaAnterior: null },
     financial: existing?.financial ?? { hasData: false, orcado: 0, realizado: 0, saldo: 0, tanksWithData: 0, tanksInScope: 0, lines: [] },
     tankMatrix: existing?.tankMatrix ?? [],

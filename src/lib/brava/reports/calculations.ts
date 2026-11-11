@@ -20,6 +20,16 @@ function inScopeForProgress(tanks: TankWithDerived[]): TankWithDerived[] {
   return tanks.filter((t) => t.status !== "SEM_PROJETO" && t.status !== "CONCLUIDO");
 }
 
+/** Tanks actually under execution right now — what Slide 2's matrix lists and what the "X de Y" summaries on both slides count against. */
+export function filterExecuting(tanks: TankWithDerived[]): TankWithDerived[] {
+  return tanks.filter((t) => ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(t.status));
+}
+
+/** Count of tanks whose next internal inspection date has already passed — reuses inspection.ts's own inspectionCriticality bucket, never a new rule. */
+export function countOverdueInspections(tanks: TankWithDerived[]): number {
+  return tanks.filter((t) => t.derived.inspectionCriticality === "CRITICO").length;
+}
+
 /**
  * Scopes selectable in the report — "Consolidado" (every tracked tank)
  * plus one per distinct Tank.area actually present among tanks with a real
@@ -42,10 +52,11 @@ export function filterByScope(tanks: TankWithDerived[], scope: ReportScope): Tan
 export function computeReportKpis(tanks: TankWithDerived[]): ReportKpis {
   return {
     total: tanks.length,
-    emManutencao: tanks.filter((t) => ["EM_EXECUCAO", "ATRASADO", "CRITICO"].includes(t.status)).length,
+    emManutencao: filterExecuting(tanks).length,
     programados: tanks.filter((t) => t.status === "PROGRAMADO").length,
     concluidos: tanks.filter((t) => t.status === "CONCLUIDO").length,
     atencaoOuCritico: tanks.filter((t) => t.status === "ATRASADO" || t.status === "CRITICO").length,
+    inspecoesVencidas: countOverdueInspections(tanks),
   };
 }
 
@@ -222,4 +233,62 @@ export function suggestCriticalPoints(tanks: TankWithDerived[]): ReportCriticalP
       responsavel: t.responsible ?? "",
       prazo: "",
     }));
+}
+
+/** "+3 p.p." / "−32 p.p." / "0 p.p." — the one place a deviation number gets its sign and unit, shared by the headline, the table and the KPI tile. */
+export function formatPP(n: number): string {
+  return `${n > 0 ? "+" : ""}${n} p.p.`;
+}
+
+/** "15 pontos abaixo do previsto" / "acima" / "dentro do previsto" — the one place this phrasing is built, so both slides read it the same way. */
+export function formatDeviationPhrase(desvioPP: number): string {
+  if (desvioPP === 0) return "Dentro do previsto";
+  const direction = desvioPP < 0 ? "abaixo" : "acima";
+  return `${Math.abs(desvioPP)} ponto${Math.abs(desvioPP) === 1 ? "" : "s"} ${direction} do previsto`;
+}
+
+export interface AttentionSummary {
+  total: number;
+  belowPrevistoCount: number;
+  worst: { tag: string; desvioPP: number } | null;
+}
+
+/** Drives the "Pontos de Atenção" headline — how many of the listed tanks are behind, and which one is furthest behind. rows is expected to already be the executing-only matrix (filterExecuting + buildTankMatrix). */
+export function computeAttentionSummary(rows: ReportTankRow[]): AttentionSummary {
+  const belowPrevistoCount = rows.filter((r) => r.desvioPP < 0).length;
+  const worst = rows.reduce<ReportTankRow | null>((acc, r) => (acc === null || r.desvioPP < acc.desvioPP ? r : acc), null);
+  return {
+    total: rows.length,
+    belowPrevistoCount,
+    worst: worst && worst.desvioPP < 0 ? { tag: worst.tag, desvioPP: worst.desvioPP } : null,
+  };
+}
+
+const CLASS_LABELS: Record<ReportTankRow["classificacao"], string> = {
+  CRITICO: "Crítico",
+  ATENCAO: "Atenção",
+  NO_PRAZO: "No Prazo",
+  CONCLUIDO: "Concluído",
+};
+
+/** "5 de 5 classificados como "No Prazo" pelo painel" when uniform, or a per-bucket breakdown ("2 Crítico · 2 Atenção · 1 No Prazo") when the rows land in more than one classification. Reads tankMatrix's own classificacao — never a new rule. */
+export function summarizeClassifications(rows: ReportTankRow[]): string {
+  if (rows.length === 0) return "Nenhum tanque no escopo";
+  const counts = new Map<ReportTankRow["classificacao"], number>();
+  for (const r of rows) counts.set(r.classificacao, (counts.get(r.classificacao) ?? 0) + 1);
+  if (counts.size === 1) {
+    const [only] = counts.keys();
+    return `${rows.length} de ${rows.length} classificados como "${CLASS_LABELS[only]}" pelo painel`;
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([cls, n]) => `${n} ${CLASS_LABELS[cls]}`)
+    .join(" · ");
+}
+
+/** The soonest previsaoEntrega among the given rows — undated rows never win. */
+export function findNextDelivery(rows: ReportTankRow[]): ReportTankRow | null {
+  const dated = rows.filter((r) => r.previsaoEntrega);
+  if (dated.length === 0) return null;
+  return dated.reduce((soonest, r) => (r.previsaoEntrega < soonest.previsaoEntrega ? r : soonest));
 }

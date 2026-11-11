@@ -36,6 +36,8 @@ export interface ReportKpis {
   programados: number;
   concluidos: number;
   atencaoOuCritico: number;
+  /** Count of in-scope tanks whose next internal inspection date has already passed — see inspection.ts's inspectionCriticality. */
+  inspecoesVencidas: number;
 }
 
 export interface ReportPhysicalProgress {

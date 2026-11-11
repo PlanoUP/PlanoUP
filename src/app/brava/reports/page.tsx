@@ -19,6 +19,9 @@ import {
   buildTankMatrix,
   buildMilestones,
   suggestCriticalPoints,
+  computeAttentionSummary,
+  summarizeClassifications,
+  findNextDelivery,
 } from "@/lib/brava/reports/calculations";
 import {
   ExecutiveReportSnapshot,
@@ -26,6 +29,7 @@ import {
   ReportHighlight,
   ReportCriticalPoint,
   ReportScope,
+  ReportTankRow,
 } from "@/lib/brava/reports/types";
 import { todayISO, formatShort } from "@/lib/brava/date-utils";
 
@@ -82,6 +86,9 @@ function ReportsPageContent() {
   );
   const financial = useMemo(() => computeFinancialSummary(scopedTanks, costs), [scopedTanks, costs]);
   const tankMatrix = useMemo(() => buildTankMatrix(scopedTanks, cutoffDateISO), [scopedTanks, cutoffDateISO]);
+  // Not shown on the revised slides (Etapa 1 drops the "Próximos Marcos" block
+  // per the new reference), but still computed and frozen on close so a
+  // future stage can bring it back without a schema change.
   const milestones = useMemo(() => buildMilestones(scopedTanks, cutoffDateISO, 14), [scopedTanks, cutoffDateISO]);
 
   // Seed the narrative fields (the only part a draft actually persists)
@@ -221,8 +228,33 @@ function ReportsPageContent() {
   };
 
   const scopeLabel = scopes.find((s) => s.value === activeSnapshot.scope)?.label ?? activeSnapshot.scope;
-  const weekLabel = `Semana de ${formatShort(activeSnapshot.weekStartISO)}`;
   const editable = editing && !viewingHistory;
+
+  // Slide 2 lists only tanks actually under execution — derived from the
+  // snapshot's own tankMatrix (works the same for a live draft or a frozen
+  // historical one) by excluding the two non-executing faseAtual sentinels
+  // buildTankMatrix uses, then sorted by the worst physical deviation first.
+  const executingRows = useMemo(() => {
+    return activeSnapshot.tankMatrix
+      .filter((r) => r.faseAtual !== "Concluído" && r.faseAtual !== "Aguardando início")
+      .slice()
+      .sort((a: ReportTankRow, b: ReportTankRow) => a.desvioPP - b.desvioPP);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSnapshot.tankMatrix]);
+
+  const attention = useMemo(() => computeAttentionSummary(executingRows), [executingRows]);
+  const classificationSummary = useMemo(() => summarizeClassifications(executingRows), [executingRows]);
+  const nextDelivery = useMemo(() => findNextDelivery(executingRows), [executingRows]);
+
+  // Inspection status isn't part of the frozen snapshot schema (that's a
+  // closing/history concern left for a later stage), so this always reads
+  // the CURRENT live inspection status for whichever tanks are shown —
+  // exact for a live draft, a reasonable "as of today" approximation when
+  // looking at a historical week.
+  const inspecoesVencidasExecuting = useMemo(() => {
+    const executingTags = new Set(executingRows.map((r) => r.tag.toUpperCase()));
+    return tanks.filter((t) => executingTags.has(t.tag.toUpperCase()) && t.derived.inspectionCriticality === "CRITICO").length;
+  }, [executingRows, tanks]);
 
   return (
     <>
@@ -266,12 +298,13 @@ function ReportsPageContent() {
 
         <div className="flex flex-col gap-6">
           <ExecutiveSlideOne
+            scope={activeSnapshot.scope}
             scopeLabel={scopeLabel}
-            weekLabel={weekLabel}
             cutoffDateISO={activeSnapshot.cutoffDateISO}
             kpis={activeSnapshot.kpis}
             physicalProgress={activeSnapshot.physicalProgress}
             financial={activeSnapshot.financial}
+            attention={attention}
             avancosSemana={activeSnapshot.avancosSemana}
             riscos={activeSnapshot.riscos}
             decisoes={activeSnapshot.decisoes}
@@ -281,11 +314,15 @@ function ReportsPageContent() {
             onChangeDecisoes={handleChangeDecisoes}
           />
           <ExecutiveSlideTwo
+            scope={activeSnapshot.scope}
             scopeLabel={scopeLabel}
-            weekLabel={weekLabel}
-            tankMatrix={activeSnapshot.tankMatrix}
+            cutoffDateISO={activeSnapshot.cutoffDateISO}
+            rows={executingRows}
+            attention={attention}
+            classificationSummary={classificationSummary}
+            nextDelivery={nextDelivery}
+            inspecoesVencidas={inspecoesVencidasExecuting}
             criticalPoints={activeSnapshot.criticalPoints}
-            milestones={activeSnapshot.milestones}
             editable={editable}
             onChangeCriticalPoints={handleChangeCriticalPoints}
             onShowAllTanks={() => setShowAllTanks((v) => !v)}
