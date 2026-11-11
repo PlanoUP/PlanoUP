@@ -1,0 +1,18 @@
+{
+  "0": "lucide-react",
+  "1": "calculations.ts",
+  "2": "store.ts",
+  "3": "[activityId]/page.tsx",
+  "4": "package.json",
+  "5": "ActivityFormPanel.tsx",
+  "6": "ExecutiveReport.tsx",
+  "7": "authStore.ts",
+  "8": "app/layout.tsx",
+  "9": "compilerOptions",
+  "10": "CostSection.tsx",
+  "11": "excelExport.ts",
+  "12": "EquipmentArt.tsx",
+  "13": "ResponsibleFormModal.tsx",
+  "14": "next.config.mjs",
+  "15": "postcss.config.mjs"
+}
