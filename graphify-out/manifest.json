@@ -1,0 +1,1556 @@
+{
+  "legalize-one/.oxlintrc.json": {
+    "mtime": 1794412734.6935298,
+    "seen": 1794412738.667959,
+    "ast_hash": "029f4905006c1fffd96bc863e2d98d3e",
+    "semantic_hash": ""
+  },
+  "legalize-one/api/_lib/share-meta.d.ts": {
+    "mtime": 1794412734.693871,
+    "seen": 1794412738.6679728,
+    "ast_hash": "d483bfdb0d8f465d7146c925429de0e9",
+    "semantic_hash": ""
+  },
+  "legalize-one/api/_lib/share-meta.js": {
+    "mtime": 1794412734.6939406,
+    "seen": 1794412738.667976,
+    "ast_hash": "250eb0cbf7998121ebbd6e4bd5df22e6",
+    "semantic_hash": ""
+  },
+  "legalize-one/api/keepalive.js": {
+    "mtime": 1794412734.6939406,
+    "seen": 1794412738.6679778,
+    "ast_hash": "5748b0a5615a376fc0afcef36b67500e",
+    "semantic_hash": ""
+  },
+  "legalize-one/api/share.js": {
+    "mtime": 1794412734.6939406,
+    "seen": 1794412738.667979,
+    "ast_hash": "39caa8cb668b467e0e911e68605c09de",
+    "semantic_hash": ""
+  },
+  "legalize-one/package.json": {
+    "mtime": 1794412734.6940827,
+    "seen": 1794412738.6679802,
+    "ast_hash": "5c8b41da7ee23a57dbcb81a83d9da6ec",
+    "semantic_hash": ""
+  },
+  "legalize-one/scripts/export-catalog.ts": {
+    "mtime": 1794412735.1632926,
+    "seen": 1794412738.6679816,
+    "ast_hash": "a9215d4f2d49afb2f6fe6d5241f584ca",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/App.tsx": {
+    "mtime": 1794412735.1632926,
+    "seen": 1794412738.6679826,
+    "ast_hash": "af9a535d83f2f6ebf95d45008997aed6",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/access.test.ts": {
+    "mtime": 1794412735.1641974,
+    "seen": 1794412738.6679842,
+    "ast_hash": "630a5f8b8db5dc0cc767132810cac9f0",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/analytics.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679854,
+    "ast_hash": "a90b0a40e7046717013e923712c5b4a8",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/catalog.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679864,
+    "ast_hash": "55cb6be815f74eed6580adaf8416e933",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/clients.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679878,
+    "ast_hash": "33d408bc08ae7185f963ae2e49fd7aa8",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/conversion.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679885,
+    "ast_hash": "36691bd6e132fd79244f887a131a4021",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/exportCsv.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679893,
+    "ast_hash": "f90759b63f6c6df150e7efbd376901d2",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/notifyLead.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679902,
+    "ast_hash": "830de9f863eb176fc52151ce7d2ab405",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/platform.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679914,
+    "ast_hash": "644b2554b26e5d2ad0080b6c6fa420fe",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/properties.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679924,
+    "ast_hash": "87ffdbe3d46f93d48b049c5a8bb3fada",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/shareMeta.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679935,
+    "ast_hash": "3c9bdf92354bb0f78d462dfb0d366527",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/team.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.667995,
+    "ast_hash": "082e3a1e3be43298dd4b961b157e7ad3",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/__tests__/tenant.test.ts": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679957,
+    "ast_hash": "a4662b76571aab16ec6c849e9b162886",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/auth/AuthProvider.tsx": {
+    "mtime": 1794412735.1642232,
+    "seen": 1794412738.6679966,
+    "ast_hash": "889538cf96ec2905d68b10ba0f3857e6",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/auth/RequireAuth.tsx": {
+    "mtime": 1794412735.1647222,
+    "seen": 1794412738.6679978,
+    "ast_hash": "99ceb932a588117dff3ed1860e8918ce",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/auth/context.ts": {
+    "mtime": 1794412735.1647222,
+    "seen": 1794412738.6679993,
+    "ast_hash": "65b82297f58d64ff105aa06bf58c5f5e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/auth/mfa.ts": {
+    "mtime": 1794412735.1647222,
+    "seen": 1794412738.6680002,
+    "ast_hash": "479a461155c39fcd11f49f04ead4abe0",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/broker/BrokerAvatar.tsx": {
+    "mtime": 1794412735.1647222,
+    "seen": 1794412738.668001,
+    "ast_hash": "a237b2b84c8576873b1a0e35d54a91af",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/broker/BrokerContactCard.tsx": {
+    "mtime": 1794412735.1648514,
+    "seen": 1794412738.6680021,
+    "ast_hash": "7c1bce4c7f34adcbef166843f8d521c7",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/broker/brokerApi.ts": {
+    "mtime": 1794412735.1648514,
+    "seen": 1794412738.6680028,
+    "ast_hash": "24d8de215f4b221afc98dbc0c8487885",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/broker/icons.tsx": {
+    "mtime": 1794412735.1648514,
+    "seen": 1794412738.6680036,
+    "ast_hash": "583297d71bcf62b0a3de611e52783bb3",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/broker/profile.ts": {
+    "mtime": 1794412735.1648514,
+    "seen": 1794412738.6680043,
+    "ast_hash": "db93aa927cfda72459437c1c17c858c7",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/broker/share.ts": {
+    "mtime": 1794412735.1648514,
+    "seen": 1794412738.6680055,
+    "ast_hash": "9874656764fe7ee282e2fa99626e4b07",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/broker/types.ts": {
+    "mtime": 1794412735.1648514,
+    "seen": 1794412738.6680064,
+    "ast_hash": "847061c9405ab4a02239a8b1e8dedec6",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/forms/FiltersSheet.tsx": {
+    "mtime": 1794412735.1654177,
+    "seen": 1794412738.6680148,
+    "ast_hash": "bb2997400b95b4469dd5ea3736622a38",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/forms/PropertySearch.tsx": {
+    "mtime": 1794412735.1654675,
+    "seen": 1794412738.668016,
+    "ast_hash": "b2f58d242aee8fe0797e4fac3db4534f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/forms/RegionInput.tsx": {
+    "mtime": 1794412735.1654675,
+    "seen": 1794412738.668017,
+    "ast_hash": "f1346e5ee89a7ed1b164ad51f6835410",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/forms/SearchField.tsx": {
+    "mtime": 1794412735.1654675,
+    "seen": 1794412738.6680179,
+    "ast_hash": "2de90e591449a6bfde5b36ceaa2f28cf",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/home/Benefits.tsx": {
+    "mtime": 1794412735.1654675,
+    "seen": 1794412738.668019,
+    "ast_hash": "8bcb68f6472a4ab7d751865cdfb024fe",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/home/DocumentationSection.tsx": {
+    "mtime": 1794412735.1656308,
+    "seen": 1794412738.66802,
+    "ast_hash": "9b2808eb65de082ea5329cd076d73ef0",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/home/Experience3D.tsx": {
+    "mtime": 1794412735.1656308,
+    "seen": 1794412738.6680207,
+    "ast_hash": "3182335b14dd13585db0e936102ca9fd",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/home/FinalCTA.tsx": {
+    "mtime": 1794412735.1656308,
+    "seen": 1794412738.6680217,
+    "ast_hash": "c3fb5cd4ad4b477370c3d1882b7d0886",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/home/Hero.tsx": {
+    "mtime": 1794412735.1656308,
+    "seen": 1794412738.6680226,
+    "ast_hash": "7ee66b0c37911f308d6b03e73947d9fe",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/illustrations/SceneArt.tsx": {
+    "mtime": 1794412735.1656308,
+    "seen": 1794412738.6680233,
+    "ast_hash": "00ac8b526caa5d3ce420046edab4fd0b",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/layout/Footer.tsx": {
+    "mtime": 1794412735.1656308,
+    "seen": 1794412738.668024,
+    "ast_hash": "ba218f09f1e91d45a1ef3a5a81be09f2",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/layout/Header.tsx": {
+    "mtime": 1794412735.165889,
+    "seen": 1794412738.6680253,
+    "ast_hash": "6214a7dbcb43eaa85ff89a419ef44723",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/layout/MobileStickyCTA.tsx": {
+    "mtime": 1794412735.165889,
+    "seen": 1794412738.6680274,
+    "ast_hash": "d52f424c8138c9c0ba3605213f4116b3",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/layout/PageViewTracker.tsx": {
+    "mtime": 1794412735.165889,
+    "seen": 1794412738.668028,
+    "ast_hash": "bece9d495af2eb56edfa7a67dec0f3a2",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/layout/PreviewBanner.tsx": {
+    "mtime": 1794412735.165889,
+    "seen": 1794412738.668029,
+    "ast_hash": "8bdf8dbc113d33d5a4b39d992184cd44",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/layout/ScrollManager.tsx": {
+    "mtime": 1794412735.165889,
+    "seen": 1794412738.66803,
+    "ast_hash": "77c64fcc7649e05243d172bb910e6bf0",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/layout/SiteLayout.tsx": {
+    "mtime": 1794412735.165889,
+    "seen": 1794412738.6680312,
+    "ast_hash": "a12fabf301747ff161ea247fd33ec3b3",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/properties/ContactRequest.tsx": {
+    "mtime": 1794412735.165889,
+    "seen": 1794412738.6680322,
+    "ast_hash": "3c8c08961f8eb0c2e1149ceace29f0ed",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/properties/FavoriteButton.tsx": {
+    "mtime": 1794412735.16612,
+    "seen": 1794412738.6680336,
+    "ast_hash": "51e96dd5b6d90d4aab964701582a5119",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/properties/FeaturedProperties.tsx": {
+    "mtime": 1794412735.16612,
+    "seen": 1794412738.6680343,
+    "ast_hash": "5b4473ed17c5f5ca46184efc1dd2fc7f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/properties/PropertyCard.tsx": {
+    "mtime": 1794412735.16612,
+    "seen": 1794412738.6680353,
+    "ast_hash": "c6fa63475a13c6ed62ec839971204ec1",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/properties/PropertyGallery.tsx": {
+    "mtime": 1794412735.16612,
+    "seen": 1794412738.668036,
+    "ast_hash": "4d1b0047ae7b502e730f8a7fcb9b111d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/properties/PropertySpecs.tsx": {
+    "mtime": 1794412735.16612,
+    "seen": 1794412738.668037,
+    "ast_hash": "dc9e73ae8ffef8a917735f3b141a4a70",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DCanvas.tsx": {
+    "mtime": 1794412735.16612,
+    "seen": 1794412738.668038,
+    "ast_hash": "f0d7270b855897cf4b9cd9738b0e0f64",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DControls.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680388,
+    "ast_hash": "0501d3ae0f9051f12ec0874f943f7143",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DEntry.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680398,
+    "ast_hash": "ab9947d32cb49b0f670add69ee1be4f1",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DErrorBoundary.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680408,
+    "ast_hash": "0fac7a26c301232d11f49d3bc71d02fc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DExperience.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680417,
+    "ast_hash": "255e182d90a621df4709a381843593be",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DFallback.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680427,
+    "ast_hash": "bf5e712b0ba60fe4f7d6713de5e0bbe4",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DHotspots.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.668044,
+    "ast_hash": "fe6524485609b5102f9d6fe0fa76ee20",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DLoader.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.668045,
+    "ast_hash": "d8ee088bfb86b84e4e42550f7315e053",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DShowcase.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680458,
+    "ast_hash": "472f3d2d84f66f6e7aa1968530f29f25",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DToolbar.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680465,
+    "ast_hash": "f8a8aa6dbe18b0a2db605b946ee6eaa9",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/Property3DViewer.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680477,
+    "ast_hash": "7c28771cc5ff7b6301dc7647e29c7ee1",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/autoStart.ts": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680484,
+    "ast_hash": "b4edd4a3d68c3fbc2ae723e9634d91ce",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/cameraGoals.ts": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680493,
+    "ast_hash": "bfd624fbd2121a23d284aeaf5637c921",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/loadModel.ts": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680503,
+    "ast_hash": "ce774daa01ee0397835c381661dc5016",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/prepareModel.ts": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680512,
+    "ast_hash": "8c89d84063f70a0e7815d0e2a2c26527",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/three/webgl.ts": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.668052,
+    "ast_hash": "245ccad63704eafd119477355390ef71",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/FloorPlan.tsx": {
+    "mtime": 1794412735.166323,
+    "seen": 1794412738.6680527,
+    "ast_hash": "7e111faf7bf6b4e0d2535245f8b360bc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/HotspotCard.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.6680534,
+    "ast_hash": "0b077ba7bd54d29d7b0e50b66000760c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/ImmersiveTour.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.6680546,
+    "ast_hash": "de003e1b16386664124f681afc22c895",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/ImmersiveTourLoader.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.6680558,
+    "ast_hash": "be31ced74948334b40ad21368562d767",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/SceneThumbnails.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.6680567,
+    "ast_hash": "6a48da98c7870a4271e9eb9fa82a6234",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/TourCtaCard.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.668058,
+    "ast_hash": "eeb50cdb61381c6caca2349ea010433b",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/TourEntry.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.6680589,
+    "ast_hash": "4719ba05e1f3f116f81b499aff6c329e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/TourHotspotMarker.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.6680598,
+    "ast_hash": "895c93447b4275d25394b7dc8e1a3e9d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/prefetch.ts": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.668061,
+    "ast_hash": "9951fb77f6563655d9f8eecbb57c1bd3",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/renderers/EmbedRenderer.tsx": {
+    "mtime": 1794412735.1673942,
+    "seen": 1794412738.668062,
+    "ast_hash": "4ca0f14648fcfcc150cc521f183437bf",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/renderers/ModelRenderer.tsx": {
+    "mtime": 1794412735.1677456,
+    "seen": 1794412738.6680627,
+    "ast_hash": "8477ecacbbedaae657c7241edea27f37",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/renderers/PanoramaRenderer.tsx": {
+    "mtime": 1794412735.1677456,
+    "seen": 1794412738.6680634,
+    "ast_hash": "5f27dbec3e86510e91c36ff8e10a8f54",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/renderers/index.ts": {
+    "mtime": 1794412735.1677456,
+    "seen": 1794412738.6680646,
+    "ast_hash": "e5e622b66d7dc5065ff24d12a4056638",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/renderers/types.ts": {
+    "mtime": 1794412735.1677456,
+    "seen": 1794412738.6680653,
+    "ast_hash": "f0515b33678d19c30edb3db99662e6d0",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/tour/useTourLauncher.tsx": {
+    "mtime": 1794412735.1677456,
+    "seen": 1794412738.6680663,
+    "ast_hash": "18dc0ddbb93d949b142b3fb21147954f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/Badge.tsx": {
+    "mtime": 1794412735.1677456,
+    "seen": 1794412738.668067,
+    "ast_hash": "3340a2ee9cbd0bbb38f733cbb1eab4d2",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/BottomSheet.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680694,
+    "ast_hash": "b327cecc455a912aa129496c5a7ae34b",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/Button.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680706,
+    "ast_hash": "9d392fd1e8a3efd0bb3320412790eef3",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/IconCircle.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680715,
+    "ast_hash": "df472f9c903b33968db92c7f37025724",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/ImpulsigoLogo.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680725,
+    "ast_hash": "a8a27b11868a2a1b726623a687e87c8f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/Logo.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680732,
+    "ast_hash": "f308e0ac32eb251167b524ceaf260c85",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/PlatformMark.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680741,
+    "ast_hash": "e4f9d2781b29ffa0ba94ffcd65c3be81",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/SectionHeading.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680753,
+    "ast_hash": "34c729622257c7444ddbae17890b82b2",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/SmartImage.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680763,
+    "ast_hash": "124d3297bee068995dde29c40f22acfb",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/components/ui/WhatsAppIcon.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680772,
+    "ast_hash": "4cbbcf62f4b63d7f6598ab328902c529",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/config/site.ts": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.668079,
+    "ast_hash": "47abbf4672f00624d4aa12b268acb6bc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/ClientStageBadge.tsx": {
+    "mtime": 1794412735.1679707,
+    "seen": 1794412738.6680796,
+    "ast_hash": "045c93c0eddfaeb788fb2ca7f86d796d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/CredentialCard.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680808,
+    "ast_hash": "7576a39dec34cf9094f81bfd8a0f546d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/DailyChart.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680818,
+    "ast_hash": "bb0f75a73113c0b1f981e26f4a701193",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/FormParts.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680827,
+    "ast_hash": "bd109cde63a2491ef68a9eebc83d2503",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/LeadStatusBadge.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680834,
+    "ast_hash": "c882e2f1384a636bfbb5e636344eea48",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/PhotoManager.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680844,
+    "ast_hash": "86d71a5f4c6cab3ff92e6d6e90128948",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/PlatformOverview.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680856,
+    "ast_hash": "3f5063ac5340783458268be747503f0c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/StatusBadge.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680863,
+    "ast_hash": "87fc9963568a1559b97fa4c29356f820",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/TwoFactorSection.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680872,
+    "ast_hash": "5fc43636d8229ffca5498a980f43887a",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/WorkspaceProvider.tsx": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680884,
+    "ast_hash": "ebfc8ec7af3808aaf2e41739e5c063a8",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/clientStageTones.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680894,
+    "ast_hash": "b84cfb5df9ad4f52ef876ed9626ee158",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/clientsApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.66809,
+    "ast_hash": "97ca5ac90a82449d67a325c91fb89dc4",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/conversion.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680908,
+    "ast_hash": "4558ab5339789b9a637406b7da48c3b5",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/exportCsv.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.668092,
+    "ast_hash": "9e003c3aef07be9a60b81e80de3c251e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/leadsApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680927,
+    "ast_hash": "69155417f4bae3ffac5fdf28600e5a0f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/materials.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680937,
+    "ast_hash": "856d6d5e349d1160ac301e81d9263cbc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/mediaApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680946,
+    "ast_hash": "d2e3822773a5a4b4bc3ef4ccdb8e2a24",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/metricsApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.668096,
+    "ast_hash": "b06163626a9220cc0a6e37578f527628",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/nav.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.668097,
+    "ast_hash": "9e1add94a67507fe1f205e88084f8bd6",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/platformApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.668098,
+    "ast_hash": "a1b587a6a9094d5633c80fcfea2ccf2e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/propertiesApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.668099,
+    "ast_hash": "d29389d35f7584e274f5f839f82716bc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/propertyForm.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6680999,
+    "ast_hash": "37be05dceeb2514ef0495b1bb6d7f9a0",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/settingsApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6681006,
+    "ast_hash": "c81d1324a0a137205307c34704d33abc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/teamApi.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6681013,
+    "ast_hash": "37b9590ea4d03128e3633f83c7e57d9d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/dashboard/workspace.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6681025,
+    "ast_hash": "8f48cd16d781da36d21007754032094d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/data/content.ts": {
+    "mtime": 1794412735.1682713,
+    "seen": 1794412738.6681032,
+    "ast_hash": "cfcb120ef201dba0ba40b67f05611ca1",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/data/filters.ts": {
+    "mtime": 1794412735.169044,
+    "seen": 1794412738.6681042,
+    "ast_hash": "adaf6c7732811edc71f2be7bdd790e00",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/data/properties.ts": {
+    "mtime": 1794412735.169044,
+    "seen": 1794412738.668105,
+    "ast_hash": "4f87d5fbeda51f984e06afa694882673",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/data/property3DConfig.ts": {
+    "mtime": 1794412735.169044,
+    "seen": 1794412738.668106,
+    "ast_hash": "b3907a81675ba718e59850609f8c843f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/data/tours.ts": {
+    "mtime": 1794412735.169044,
+    "seen": 1794412738.6681068,
+    "ast_hash": "eb200d322612755fe59abab1f73548db",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/hooks/useAsyncData.ts": {
+    "mtime": 1794412735.169044,
+    "seen": 1794412738.6681077,
+    "ast_hash": "4d022e216112da1c5fb7373f54680de7",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/hooks/useFavorites.ts": {
+    "mtime": 1794412735.169297,
+    "seen": 1794412738.6681085,
+    "ast_hash": "36686f10b4990dbcafd47669de595ebb",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/hooks/useMediaQuery.ts": {
+    "mtime": 1794412735.169297,
+    "seen": 1794412738.6681097,
+    "ast_hash": "08ebbf84d1d6023697161eb3ce84971e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/hooks/useModal.ts": {
+    "mtime": 1794412735.169297,
+    "seen": 1794412738.6681104,
+    "ast_hash": "fa27738fba4b4104998f2d12eaf8a15d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/hooks/usePageTitle.ts": {
+    "mtime": 1794412735.169297,
+    "seen": 1794412738.6681113,
+    "ast_hash": "baf3572a4d6d4bc4ea3b280ade40a9bc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/hooks/useSuppressStickyCta.ts": {
+    "mtime": 1794412735.169297,
+    "seen": 1794412738.6681123,
+    "ast_hash": "6360e9ddb9a53b85301dc83baa0abf5a",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/analytics.ts": {
+    "mtime": 1794412735.169297,
+    "seen": 1794412738.6681132,
+    "ast_hash": "b1b3aafa09d58a1450fc765f0e06e226",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/attribution.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681142,
+    "ast_hash": "deb7a1a690ff6864a2c211c20b887222",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/backend.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681151,
+    "ast_hash": "9301e51bd9e9ce74106b7e2112d1cf54",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/entitlements.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681159,
+    "ast_hash": "a9235c4aec6e09e491a062c5381c5677",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/eventSink.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.668117,
+    "ast_hash": "7cae05626cc4052554f5e1e279572d49",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/images.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681178,
+    "ast_hash": "f1222bc75f167fae2ae2d113cac1e432",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/links.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681187,
+    "ast_hash": "0fef7e2179725e0e69a23ff5e6c3f6f5",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/permissions.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681197,
+    "ast_hash": "8c449e805128c763861f17fc3b9c7e85",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/supabase.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681206,
+    "ast_hash": "5ee16b31057e4bf5852ebdbcd99497f4",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/uiStore.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681216,
+    "ast_hash": "829e9911d0e17c8b56fbd89f8ed65c17",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/lib/whatsapp.ts": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681225,
+    "ast_hash": "f7aa49c30fe2754eacab2a20c9cc2021",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/main.tsx": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681237,
+    "ast_hash": "0cef92dcfb6bad2a907d48ca4d28650f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/Home.tsx": {
+    "mtime": 1794412735.1695046,
+    "seen": 1794412738.6681247,
+    "ast_hash": "1f8545f11e6401214f6de2827379266e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/NotFound.tsx": {
+    "mtime": 1794412735.1697595,
+    "seen": 1794412738.6681254,
+    "ast_hash": "b28f2441f8ba0d70be9fd81d9d695d40",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/Privacy.tsx": {
+    "mtime": 1794412735.1697595,
+    "seen": 1794412738.6681266,
+    "ast_hash": "d18f939edccf415fdad7c2a1cbc9929c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/Properties.tsx": {
+    "mtime": 1794412735.1697595,
+    "seen": 1794412738.6681273,
+    "ast_hash": "c74bd0a0b1b49cb823148aef35b979ec",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/PropertyDetails.tsx": {
+    "mtime": 1794412735.1697595,
+    "seen": 1794412738.6681285,
+    "ast_hash": "2f4e652d3afdf2ec8c057fce50d9144c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/Sell.tsx": {
+    "mtime": 1794412735.1697595,
+    "seen": 1794412738.6681292,
+    "ast_hash": "f3878f92e55035da5de81e44ed8db5fb",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/auth/AuthRoot.tsx": {
+    "mtime": 1794412735.1697595,
+    "seen": 1794412738.6681304,
+    "ast_hash": "451d579962fc8b021fc5db050a5f0ca1",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/auth/Login.tsx": {
+    "mtime": 1794412735.1700487,
+    "seen": 1794412738.6681314,
+    "ast_hash": "1984a18f8e87826f0e4a9ca8e4a1d35e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/broker/BrokerLayout.tsx": {
+    "mtime": 1794412735.1700487,
+    "seen": 1794412738.6681325,
+    "ast_hash": "f7de8d9659e4af06c01a2b1fe5fee0a6",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/broker/BrokerProfile.tsx": {
+    "mtime": 1794412735.1701343,
+    "seen": 1794412738.6681333,
+    "ast_hash": "a7eac01bbc459247a2d847f116802917",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/Account.tsx": {
+    "mtime": 1794412735.1701343,
+    "seen": 1794412738.6681345,
+    "ast_hash": "fc2908443ca2e49c96fef6aa7c7308f2",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/ApprovedReport.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681352,
+    "ast_hash": "cce238a1704e4c9d9227791cc0b27435",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/ClientDetail.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.668136,
+    "ast_hash": "3e1220fc5f9cbf102c72118cbc30bf27",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/ClientEditor.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681366,
+    "ast_hash": "7c68317628108b6d926728d19f2d30fe",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/ClientList.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681378,
+    "ast_hash": "acdfeb4d1eeb1e2e9cce48216d384036",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/DashboardHome.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681385,
+    "ast_hash": "5967a3b9f9f491c0dcc5dd2af0ec7ed4",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/DashboardLayout.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681392,
+    "ast_hash": "b7b2a055af90f3ea7dfb5bf17872115b",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/LeadDetail.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681402,
+    "ast_hash": "63ed8637166f45321a093550f82bd7d6",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/LeadList.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681411,
+    "ast_hash": "ca34850853a9d0b54ae522165bcdfdfc",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/Materials.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681418,
+    "ast_hash": "7cec543f848584ce49a6259e3f93c606",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/More.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681426,
+    "ast_hash": "08df420484b635002978af5d9b5781ac",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/Platform.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681433,
+    "ast_hash": "48665aa6bcc801c70f82f95a2b65ca27",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/PropertyEditor.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681445,
+    "ast_hash": "5a33905ccd49df43fd2e48f26608e507",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/PropertyList.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681452,
+    "ast_hash": "cc0f8a56263739a89d5168f13ebf9980",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/Results.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681461,
+    "ast_hash": "561fcc37edf16f2344eff4fe0611ee82",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/Team.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.6681468,
+    "ast_hash": "b0e3175adde765828a7fb2428121a48f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/pages/dashboard/TenantSettingsPage.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.668148,
+    "ast_hash": "87a08a554d9da0d7a36db907d84dd1d3",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/routes/index.tsx": {
+    "mtime": 1794412735.1702976,
+    "seen": 1794412738.668151,
+    "ast_hash": "7714284f2d8c016cf3353849cbedc012",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/routes/lazyPages.ts": {
+    "mtime": 1794412735.1711464,
+    "seen": 1794412738.6681519,
+    "ast_hash": "0379983b2e588faad084235889a45d2e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/routes/paths.ts": {
+    "mtime": 1794412735.1711464,
+    "seen": 1794412738.6681528,
+    "ast_hash": "95daafa9e19914870f55fb2d21a67055",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/services/leadService.ts": {
+    "mtime": 1794412735.1711464,
+    "seen": 1794412738.6681535,
+    "ast_hash": "1f0befe63ec6cba29e7c25eb437431b1",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/services/propertyService.ts": {
+    "mtime": 1794412735.171247,
+    "seen": 1794412738.6681547,
+    "ast_hash": "a19f972b037f9a255f3433b30dbb6aaa",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/services/repositories/catalogSnapshot.ts": {
+    "mtime": 1794412735.171247,
+    "seen": 1794412738.6681554,
+    "ast_hash": "2cc2617b13f63eb9e1baedb01584df09",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/services/repositories/mapProperty.ts": {
+    "mtime": 1794412735.1713061,
+    "seen": 1794412738.6681561,
+    "ast_hash": "7fbf5d2fc80576febee248386131c8f0",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/services/repositories/supabaseProperties.ts": {
+    "mtime": 1794412735.1713061,
+    "seen": 1794412738.668157,
+    "ast_hash": "0c1ccdd08445f501bd116fecad8992a7",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/TenantProvider.tsx": {
+    "mtime": 1794412735.1713061,
+    "seen": 1794412738.668158,
+    "ast_hash": "ebe452883e5f160cc5f3c0e2c027a31c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/defaultTenant.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.668159,
+    "ast_hash": "309e4586b23a14b44d17d0c7013ea20d",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/labels.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681597,
+    "ast_hash": "bcdb076e5cc241894b15c7f7da858275",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/mapProfile.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681607,
+    "ast_hash": "1417377aeea18b5d98cbda6e46bdaa1c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/preview.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681616,
+    "ast_hash": "f406adcd742e821b5e3d6476ab5ed86c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/resolveTenant.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681628,
+    "ast_hash": "91b11c661046dc571acae0ddb26287ad",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/store.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681635,
+    "ast_hash": "ec0cf644284ce5d0550810a07fd569ee",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/theme.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681643,
+    "ast_hash": "2841305b2dcb17cb8417433f25b5042e",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/tenant/types.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681654,
+    "ast_hash": "e77153030cb4a02691a03b51eb5a765f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/types/filters.ts": {
+    "mtime": 1794412735.1714623,
+    "seen": 1794412738.6681662,
+    "ast_hash": "9a74236fcdeb633e9752973dfe108a19",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/types/media.ts": {
+    "mtime": 1794412735.1717043,
+    "seen": 1794412738.668167,
+    "ast_hash": "da6dcb2996c1c9a5e4df2ae2075368d9",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/types/model3d.ts": {
+    "mtime": 1794412735.1717043,
+    "seen": 1794412738.6681678,
+    "ast_hash": "54c97241b0eea991e2bc979a4b272007",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/types/property.ts": {
+    "mtime": 1794412735.1717043,
+    "seen": 1794412738.668169,
+    "ast_hash": "54601780eb7404f4fdc5ab9400d65020",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/types/tour.ts": {
+    "mtime": 1794412735.1717043,
+    "seen": 1794412738.66817,
+    "ast_hash": "5c7b11ab9b10b4c10cd30d378e967fac",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/utils/cn.ts": {
+    "mtime": 1794412735.1717043,
+    "seen": 1794412738.6681707,
+    "ast_hash": "7bfe00c588d2b3131296daee1be9b15c",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/utils/filterProperties.ts": {
+    "mtime": 1794412735.1718442,
+    "seen": 1794412738.668172,
+    "ast_hash": "467e4347253ede71ad79384cbaa6cd4f",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/utils/format.ts": {
+    "mtime": 1794412735.1718442,
+    "seen": 1794412738.6681726,
+    "ast_hash": "897e89d7898924d458801f681c815716",
+    "semantic_hash": ""
+  },
+  "legalize-one/src/vite-env.d.ts": {
+    "mtime": 1794412735.1718442,
+    "seen": 1794412738.6681733,
+    "ast_hash": "6dbb3e7b5a28d0355deeee66639a2f8f",
+    "semantic_hash": ""
+  },
+  "legalize-one/supabase/functions/notify-lead/core.ts": {
+    "mtime": 1794412735.1719537,
+    "seen": 1794412738.6681743,
+    "ast_hash": "237c8ec563f4e5a27a25b02ba7daa308",
+    "semantic_hash": ""
+  },
+  "legalize-one/supabase/functions/notify-lead/index.ts": {
+    "mtime": 1794412735.1720078,
+    "seen": 1794412738.6681755,
+    "ast_hash": "e4d671dc2651e4ad6193c14637caefe4",
+    "semantic_hash": ""
+  },
+  "legalize-one/supabase/functions/team/core.ts": {
+    "mtime": 1794412735.1720078,
+    "seen": 1794412738.6681764,
+    "ast_hash": "f96182f274c0679b25bd48920e202fc4",
+    "semantic_hash": ""
+  },
+  "legalize-one/supabase/functions/team/index.ts": {
+    "mtime": 1794412735.172125,
+    "seen": 1794412738.6681771,
+    "ast_hash": "de7ba12266d3bf6a86fee38ea778be3f",
+    "semantic_hash": ""
+  },
+  "legalize-one/supabase/tests/rls.test.mjs": {
+    "mtime": 1794412735.172283,
+    "seen": 1794412738.668178,
+    "ast_hash": "f0f300c982843b6bd0ae11244e6d1c33",
+    "semantic_hash": ""
+  },
+  "legalize-one/tsconfig.app.json": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.6681793,
+    "ast_hash": "8fe498018da5cd77e033723c91bfcf51",
+    "semantic_hash": ""
+  },
+  "legalize-one/tsconfig.json": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.66818,
+    "ast_hash": "a3d39fa780ebff65444de257f291ce6c",
+    "semantic_hash": ""
+  },
+  "legalize-one/tsconfig.node.json": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.668181,
+    "ast_hash": "f9cb81ddcea69ffdab672fc8c48dca66",
+    "semantic_hash": ""
+  },
+  "legalize-one/vercel.json": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.6681817,
+    "ast_hash": "e8a5d8c50577ef303d6cb0e615b840be",
+    "semantic_hash": ""
+  },
+  "legalize-one/vite.config.ts": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.6681826,
+    "ast_hash": "ef8c6adceaa95b450944690ffbc2667b",
+    "semantic_hash": ""
+  },
+  "next.config.mjs": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.6681833,
+    "ast_hash": "aca592e9fc2b891a9410090e913f3b50",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.6681843,
+    "ast_hash": "f376eca04cb84e03a1ee6ac61edca8c4",
+    "semantic_hash": ""
+  },
+  "postcss.config.mjs": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.668185,
+    "ast_hash": "c735540bb63936a123bc867d950c9f69",
+    "semantic_hash": ""
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1794412735.1766975,
+    "seen": 1794412738.668186,
+    "ast_hash": "2e46c5503cb4e6d3aa94b421a0461636",
+    "semantic_hash": ""
+  },
+  "src/app/page.tsx": {
+    "mtime": 1794412735.176734,
+    "seen": 1794412738.668187,
+    "ast_hash": "dba6d335f7b137bb73c1d81fb9aefdcd",
+    "semantic_hash": ""
+  },
+  "src/components/Applications.tsx": {
+    "mtime": 1794412735.176734,
+    "seen": 1794412738.6681879,
+    "ast_hash": "02eeac25805eef1f14e56ebd504e45ae",
+    "semantic_hash": ""
+  },
+  "src/components/Audience.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681886,
+    "ast_hash": "6be0552fa936ca50d16ec805d7fe502d",
+    "semantic_hash": ""
+  },
+  "src/components/CheckoutLink.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681898,
+    "ast_hash": "7fafafc31e826f6fd246e4d574672270",
+    "semantic_hash": ""
+  },
+  "src/components/Comparison.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681905,
+    "ast_hash": "23ba651cc5ddbf44c826cee97902df15",
+    "semantic_hash": ""
+  },
+  "src/components/CourseBonus.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681912,
+    "ast_hash": "b8176f024265551b6348ee51343537f0",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentArt.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681921,
+    "ast_hash": "c83936993a16351a3fde30124dd4d8e6",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentCard.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681933,
+    "ast_hash": "87b3ec302c7bf7eea17fa7fa24f16e40",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentGrid.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.668194,
+    "ast_hash": "2727cb360be3b4cb60b91270c09f2108",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentImage.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681948,
+    "ast_hash": "7690b01f653588874c415681d0e3910b",
+    "semantic_hash": ""
+  },
+  "src/components/FAQ.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681957,
+    "ast_hash": "1c8280c444d04318b90ed23d9fe4bc6b",
+    "semantic_hash": ""
+  },
+  "src/components/FinalCTA.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681967,
+    "ast_hash": "d31e0b4bac9b8b02b13c8f12b20e4dd2",
+    "semantic_hash": ""
+  },
+  "src/components/Footer.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681976,
+    "ast_hash": "be32048cb9f3accbb429bc1d3a7799a6",
+    "semantic_hash": ""
+  },
+  "src/components/Guarantee.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681983,
+    "ast_hash": "f670d464ea6acf575792c1ae53b42141",
+    "semantic_hash": ""
+  },
+  "src/components/Header.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6681995,
+    "ast_hash": "da8d6160219cbe7fd7c7ab6196763af8",
+    "semantic_hash": ""
+  },
+  "src/components/Hero.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682005,
+    "ast_hash": "424888f32c69d06f301b2ac5ecc8c418",
+    "semantic_hash": ""
+  },
+  "src/components/MetaPixel.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682012,
+    "ast_hash": "3f13b51696c0d2c57168ac2e42d289bd",
+    "semantic_hash": ""
+  },
+  "src/components/Offer.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682022,
+    "ast_hash": "d0a4ea3779d37dce24336c6b2b2a273f",
+    "semantic_hash": ""
+  },
+  "src/components/Problems.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682034,
+    "ast_hash": "f079d1521f8d2cd87de7b8547150f7d2",
+    "semantic_hash": ""
+  },
+  "src/components/SocialProof.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682045,
+    "ast_hash": "2608b9fa3d1a94a39a887dfc50ad86db",
+    "semantic_hash": ""
+  },
+  "src/components/Solution.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682053,
+    "ast_hash": "cacb664e5dd381938315ce9f3530ef7a",
+    "semantic_hash": ""
+  },
+  "src/components/StickyMobileCTA.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682065,
+    "ast_hash": "1e9f15684346d5d7d81e93a7b875075d",
+    "semantic_hash": ""
+  },
+  "src/components/TrustBar.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682076,
+    "ast_hash": "17b165e8d90061d34c248ad562f854e8",
+    "semantic_hash": ""
+  },
+  "src/components/ValueStack.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682086,
+    "ast_hash": "233842499b5b10a893ab44dd850dc016",
+    "semantic_hash": ""
+  },
+  "src/components/WhatsAppSupport.tsx": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682096,
+    "ast_hash": "92f5814d9881710d885e26b5b3100d1d",
+    "semantic_hash": ""
+  },
+  "src/config/analytics.ts": {
+    "mtime": 1794412735.1767845,
+    "seen": 1794412738.6682105,
+    "ast_hash": "0756520d6ecc2cdd2549d7c5e4fbb6fa",
+    "semantic_hash": ""
+  },
+  "src/config/product.ts": {
+    "mtime": 1794412735.1773865,
+    "seen": 1794412738.6682112,
+    "ast_hash": "69ad5ab60425591d89401003fad6b8ca",
+    "semantic_hash": ""
+  },
+  "src/config/site.ts": {
+    "mtime": 1794412735.1773865,
+    "seen": 1794412738.6682122,
+    "ast_hash": "f492c3318d31f29050ca83bad1f0477d",
+    "semantic_hash": ""
+  },
+  "src/data/equipments.ts": {
+    "mtime": 1794412735.1773865,
+    "seen": 1794412738.6682131,
+    "ast_hash": "d157ab00c016b09b162534aef193941e",
+    "semantic_hash": ""
+  },
+  "src/data/faq.ts": {
+    "mtime": 1794412735.177451,
+    "seen": 1794412738.668214,
+    "ast_hash": "7371d77ac505d7d517a532825218aa67",
+    "semantic_hash": ""
+  },
+  "tailwind.config.ts": {
+    "mtime": 1794412735.177451,
+    "seen": 1794412738.668215,
+    "ast_hash": "a12bccb0d9239a60f94f8b17a1b75681",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1794412735.177451,
+    "seen": 1794412738.668216,
+    "ast_hash": "0571b7572750de64278b413e513f8022",
+    "semantic_hash": ""
+  },
+  "legalize-one/README.md": {
+    "mtime": 1794412734.6935298,
+    "seen": 1794412738.6682172,
+    "ast_hash": "bc3faa4f79a7808b8e1afa1231837df8",
+    "semantic_hash": ""
+  },
+  "legalize-one/SAAS_AUDIT.md": {
+    "mtime": 1794412734.6935298,
+    "seen": 1794412738.6682181,
+    "ast_hash": "c9e20eeef825684c3a49b5c399cf8e7c",
+    "semantic_hash": ""
+  },
+  "legalize-one/index.html": {
+    "mtime": 1794412734.6939406,
+    "seen": 1794412738.6682189,
+    "ast_hash": "b34907a10a1f51bbfdd827d6cf1fa83d",
+    "semantic_hash": ""
+  },
+  "legalize-one/marketing/impulsigo/index.html": {
+    "mtime": 1794412734.6940827,
+    "seen": 1794412738.6682198,
+    "ast_hash": "660d09203e00080513694dbe74c98c64",
+    "semantic_hash": ""
+  },
+  "legalize-one/marketing/impulsigo/favicon.svg": {
+    "mtime": 1794412734.694058,
+    "seen": 1794412738.668221,
+    "ast_hash": "37e524a5e2466c07286825882fadf117",
+    "semantic_hash": ""
+  },
+  "legalize-one/public/demo/corretor-demo.svg": {
+    "mtime": 1794412734.6948183,
+    "seen": 1794412738.668222,
+    "ast_hash": "8e0775048cca24b976339cc5563f1afb",
+    "semantic_hash": ""
+  },
+  "legalize-one/public/favicon.svg": {
+    "mtime": 1794412734.6948183,
+    "seen": 1794412738.6682227,
+    "ast_hash": "6fb432862307beb36a8e723c09eaf7ad",
+    "semantic_hash": ""
+  },
+  "legalize-one/public/models/casa-mobiliada/poster.webp": {
+    "mtime": 1794412735.1632926,
+    "seen": 1794412738.6682239,
+    "ast_hash": "b6727441061ccd2492bf887ec5b902b8",
+    "semantic_hash": ""
+  },
+  "public/images/flotador.jpg": {
+    "mtime": 1794412735.173299,
+    "seen": 1794412738.668225,
+    "ast_hash": "9877367af7aae1e6c8b5fc3ccc60ec51",
+    "semantic_hash": ""
+  },
+  "public/images/forno-industrial.jpg": {
+    "mtime": 1794412735.173299,
+    "seen": 1794412738.6682258,
+    "ast_hash": "a5068f42a7991e5bc450ad614f2b48fe",
+    "semantic_hash": ""
+  },
+  "public/images/motor-compressor.jpg": {
+    "mtime": 1794412735.173299,
+    "seen": 1794412738.6682265,
+    "ast_hash": "7b84ae7e5e53225ee6f31bea3c18ab07",
+    "semantic_hash": ""
+  },
+  "public/images/permutador-calor.jpg": {
+    "mtime": 1794412735.173299,
+    "seen": 1794412738.6682274,
+    "ast_hash": "59ce95823b6c6f64a975f10766729f60",
+    "semantic_hash": ""
+  },
+  "public/images/tanque-industrial.jpg": {
+    "mtime": 1794412735.1752927,
+    "seen": 1794412738.6682284,
+    "ast_hash": "4f1f6fb9a090e2e18987ca3f49d8330e",
+    "semantic_hash": ""
+  },
+  "public/images/vaso-de-pressao.jpg": {
+    "mtime": 1794412735.1752927,
+    "seen": 1794412738.6682289,
+    "ast_hash": "7e12445d2562a32cf129db497cf9a712",
+    "semantic_hash": ""
+  },
+  "legalize-one/package-lock.json": {
+    "mtime": 1794412734.6940827,
+    "seen": 1794412738.6682298,
+    "ast_hash": "4f7ee05f99c8baf00a1fd2182812a081",
+    "semantic_hash": ""
+  },
+  "package-lock.json": {
+    "mtime": 1794412735.1729941,
+    "seen": 1794412738.6682308,
+    "ast_hash": "c4732a37eb17609a4b8ce65016d81dd8",
+    "semantic_hash": ""
+  }
+}
