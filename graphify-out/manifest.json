@@ -1,0 +1,272 @@
+{
+  "next.config.mjs": {
+    "mtime": 1794412056.178149,
+    "seen": 1794412065.2145064,
+    "ast_hash": "aca592e9fc2b891a9410090e913f3b50",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1794412056.178149,
+    "seen": 1794412065.2145143,
+    "ast_hash": "f376eca04cb84e03a1ee6ac61edca8c4",
+    "semantic_hash": ""
+  },
+  "postcss.config.mjs": {
+    "mtime": 1794412056.178149,
+    "seen": 1794412065.2145178,
+    "ast_hash": "c735540bb63936a123bc867d950c9f69",
+    "semantic_hash": ""
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1794412056.182613,
+    "seen": 1794412065.2145197,
+    "ast_hash": "2e46c5503cb4e6d3aa94b421a0461636",
+    "semantic_hash": ""
+  },
+  "src/app/page.tsx": {
+    "mtime": 1794412056.1826608,
+    "seen": 1794412065.2145214,
+    "ast_hash": "d737759d67d0d455718c1f6b4a5f797f",
+    "semantic_hash": ""
+  },
+  "src/components/Applications.tsx": {
+    "mtime": 1794412056.1826608,
+    "seen": 1794412065.2145224,
+    "ast_hash": "02eeac25805eef1f14e56ebd504e45ae",
+    "semantic_hash": ""
+  },
+  "src/components/Audience.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145236,
+    "ast_hash": "6be0552fa936ca50d16ec805d7fe502d",
+    "semantic_hash": ""
+  },
+  "src/components/CheckoutLink.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145255,
+    "ast_hash": "7fafafc31e826f6fd246e4d574672270",
+    "semantic_hash": ""
+  },
+  "src/components/Comparison.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145264,
+    "ast_hash": "23ba651cc5ddbf44c826cee97902df15",
+    "semantic_hash": ""
+  },
+  "src/components/CourseBonus.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145276,
+    "ast_hash": "b8176f024265551b6348ee51343537f0",
+    "semantic_hash": ""
+  },
+  "src/components/CustomModels.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145288,
+    "ast_hash": "3235f28e87e6d6fd7314d7fce8cc682b",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentArt.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145302,
+    "ast_hash": "c83936993a16351a3fde30124dd4d8e6",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentCard.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145317,
+    "ast_hash": "87b3ec302c7bf7eea17fa7fa24f16e40",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentGrid.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145326,
+    "ast_hash": "2727cb360be3b4cb60b91270c09f2108",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentImage.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145336,
+    "ast_hash": "7690b01f653588874c415681d0e3910b",
+    "semantic_hash": ""
+  },
+  "src/components/FAQ.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.214535,
+    "ast_hash": "1c8280c444d04318b90ed23d9fe4bc6b",
+    "semantic_hash": ""
+  },
+  "src/components/FinalCTA.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145364,
+    "ast_hash": "d31e0b4bac9b8b02b13c8f12b20e4dd2",
+    "semantic_hash": ""
+  },
+  "src/components/Footer.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145376,
+    "ast_hash": "be32048cb9f3accbb429bc1d3a7799a6",
+    "semantic_hash": ""
+  },
+  "src/components/Guarantee.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.214539,
+    "ast_hash": "f670d464ea6acf575792c1ae53b42141",
+    "semantic_hash": ""
+  },
+  "src/components/Header.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145402,
+    "ast_hash": "cce32a6eafc6432b5c7416ecf9aad929",
+    "semantic_hash": ""
+  },
+  "src/components/Hero.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145412,
+    "ast_hash": "95f9b7851fc3e13e92457cde599eeacc",
+    "semantic_hash": ""
+  },
+  "src/components/MetaPixel.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145426,
+    "ast_hash": "3f13b51696c0d2c57168ac2e42d289bd",
+    "semantic_hash": ""
+  },
+  "src/components/Offer.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145438,
+    "ast_hash": "d0a4ea3779d37dce24336c6b2b2a273f",
+    "semantic_hash": ""
+  },
+  "src/components/Problems.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.214545,
+    "ast_hash": "f079d1521f8d2cd87de7b8547150f7d2",
+    "semantic_hash": ""
+  },
+  "src/components/SocialProof.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145462,
+    "ast_hash": "2608b9fa3d1a94a39a887dfc50ad86db",
+    "semantic_hash": ""
+  },
+  "src/components/Solution.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145474,
+    "ast_hash": "cacb664e5dd381938315ce9f3530ef7a",
+    "semantic_hash": ""
+  },
+  "src/components/StickyMobileCTA.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145488,
+    "ast_hash": "1e9f15684346d5d7d81e93a7b875075d",
+    "semantic_hash": ""
+  },
+  "src/components/TrustBar.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145498,
+    "ast_hash": "17b165e8d90061d34c248ad562f854e8",
+    "semantic_hash": ""
+  },
+  "src/components/ValueStack.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145507,
+    "ast_hash": "233842499b5b10a893ab44dd850dc016",
+    "semantic_hash": ""
+  },
+  "src/components/WhatsAppSupport.tsx": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145522,
+    "ast_hash": "92f5814d9881710d885e26b5b3100d1d",
+    "semantic_hash": ""
+  },
+  "src/config/analytics.ts": {
+    "mtime": 1794412056.1827576,
+    "seen": 1794412065.2145534,
+    "ast_hash": "0756520d6ecc2cdd2549d7c5e4fbb6fa",
+    "semantic_hash": ""
+  },
+  "src/config/customModels.ts": {
+    "mtime": 1794412056.1835916,
+    "seen": 1794412065.2145543,
+    "ast_hash": "617341d7db79ef85a4cd9c2d88006fca",
+    "semantic_hash": ""
+  },
+  "src/config/product.ts": {
+    "mtime": 1794412056.1835916,
+    "seen": 1794412065.2145555,
+    "ast_hash": "69ad5ab60425591d89401003fad6b8ca",
+    "semantic_hash": ""
+  },
+  "src/config/site.ts": {
+    "mtime": 1794412056.1835916,
+    "seen": 1794412065.2145567,
+    "ast_hash": "f492c3318d31f29050ca83bad1f0477d",
+    "semantic_hash": ""
+  },
+  "src/data/equipments.ts": {
+    "mtime": 1794412056.1835916,
+    "seen": 1794412065.214558,
+    "ast_hash": "d157ab00c016b09b162534aef193941e",
+    "semantic_hash": ""
+  },
+  "src/data/faq.ts": {
+    "mtime": 1794412056.18374,
+    "seen": 1794412065.214559,
+    "ast_hash": "479db55beef2cc7267d1d7697fed4041",
+    "semantic_hash": ""
+  },
+  "tailwind.config.ts": {
+    "mtime": 1794412056.18374,
+    "seen": 1794412065.2145603,
+    "ast_hash": "a12bccb0d9239a60f94f8b17a1b75681",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1794412056.18374,
+    "seen": 1794412065.2145627,
+    "ast_hash": "0571b7572750de64278b413e513f8022",
+    "semantic_hash": ""
+  },
+  "public/images/flotador.jpg": {
+    "mtime": 1794412056.1794574,
+    "seen": 1794412065.2145636,
+    "ast_hash": "9877367af7aae1e6c8b5fc3ccc60ec51",
+    "semantic_hash": ""
+  },
+  "public/images/forno-industrial.jpg": {
+    "mtime": 1794412056.1794574,
+    "seen": 1794412065.2145646,
+    "ast_hash": "a5068f42a7991e5bc450ad614f2b48fe",
+    "semantic_hash": ""
+  },
+  "public/images/motor-compressor.jpg": {
+    "mtime": 1794412056.1794574,
+    "seen": 1794412065.2145655,
+    "ast_hash": "7b84ae7e5e53225ee6f31bea3c18ab07",
+    "semantic_hash": ""
+  },
+  "public/images/permutador-calor.jpg": {
+    "mtime": 1794412056.1794574,
+    "seen": 1794412065.214567,
+    "ast_hash": "59ce95823b6c6f64a975f10766729f60",
+    "semantic_hash": ""
+  },
+  "public/images/tanque-industrial.jpg": {
+    "mtime": 1794412056.1794574,
+    "seen": 1794412065.2145684,
+    "ast_hash": "4f1f6fb9a090e2e18987ca3f49d8330e",
+    "semantic_hash": ""
+  },
+  "public/images/vaso-de-pressao.jpg": {
+    "mtime": 1794412056.1794574,
+    "seen": 1794412065.214571,
+    "ast_hash": "7e12445d2562a32cf129db497cf9a712",
+    "semantic_hash": ""
+  },
+  "package-lock.json": {
+    "mtime": 1794412056.178149,
+    "seen": 1794412065.214572,
+    "ast_hash": "c4732a37eb17609a4b8ce65016d81dd8",
+    "semantic_hash": ""
+  }
+}
