@@ -1,0 +1,1880 @@
+{
+  "next.config.mjs": {
+    "mtime": 1794412730.9792924,
+    "seen": 1794412734.272063,
+    "ast_hash": "aca592e9fc2b891a9410090e913f3b50",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1794412730.9792924,
+    "seen": 1794412734.2720704,
+    "ast_hash": "76a40adbf25fb3988768c42b09033c02",
+    "semantic_hash": ""
+  },
+  "postcss.config.mjs": {
+    "mtime": 1794412730.9792924,
+    "seen": 1794412734.2720726,
+    "ast_hash": "c735540bb63936a123bc867d950c9f69",
+    "semantic_hash": ""
+  },
+  "src/app/api/auth/login/route.ts": {
+    "mtime": 1794412731.2129023,
+    "seen": 1794412734.2720737,
+    "ast_hash": "362ba30697d5537728d860121f9eca8f",
+    "semantic_hash": ""
+  },
+  "src/app/api/auth/logout/route.ts": {
+    "mtime": 1794412731.2129023,
+    "seen": 1794412734.272075,
+    "ast_hash": "520cc9ee32004cf0a8d3b7520896b9a7",
+    "semantic_hash": ""
+  },
+  "src/app/api/auth/password/route.ts": {
+    "mtime": 1794412731.2129023,
+    "seen": 1794412734.2720761,
+    "ast_hash": "67a35bb95a1ba6b2f453774189ff43bc",
+    "semantic_hash": ""
+  },
+  "src/app/api/auth/status/route.ts": {
+    "mtime": 1794412731.2129023,
+    "seen": 1794412734.272077,
+    "ast_hash": "5627b2d164521bc70649e2c645567714",
+    "semantic_hash": ""
+  },
+  "src/app/api/costs/[id]/route.ts": {
+    "mtime": 1794412731.2131267,
+    "seen": 1794412734.2720778,
+    "ast_hash": "98001da165f9b6b7270bb70490e808ba",
+    "semantic_hash": ""
+  },
+  "src/app/api/costs/route.ts": {
+    "mtime": 1794412731.2131267,
+    "seen": 1794412734.272079,
+    "ast_hash": "27bf51f6e8becdffe5169bc09027ba17",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment-costs/[id]/route.ts": {
+    "mtime": 1794412731.2131777,
+    "seen": 1794412734.2720807,
+    "ast_hash": "96e9a501cda270789a807705f2331351",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment-costs/route.ts": {
+    "mtime": 1794412731.2131777,
+    "seen": 1794412734.2720816,
+    "ast_hash": "4964c7fb47f5fee90baef53d0ef7b735",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment-map-coordinates/[id]/route.ts": {
+    "mtime": 1794412731.2132504,
+    "seen": 1794412734.2720833,
+    "ast_hash": "91a23a451aec2831466e0d0a23c7182f",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment-map-coordinates/route.ts": {
+    "mtime": 1794412731.2132504,
+    "seen": 1794412734.2720842,
+    "ast_hash": "54cf2af656ac4bb4bb12c7939860a19a",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment-materials/[id]/duplicate/route.ts": {
+    "mtime": 1794412731.2132936,
+    "seen": 1794412734.2720854,
+    "ast_hash": "868f2ce828bd05f9641e17abe2ca50e8",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment-materials/[id]/route.ts": {
+    "mtime": 1794412731.2132936,
+    "seen": 1794412734.2720866,
+    "ast_hash": "00ca385e1ab2c0a29312d1b40645d7aa",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment-materials/route.ts": {
+    "mtime": 1794412731.2132936,
+    "seen": 1794412734.2720873,
+    "ast_hash": "c0327f0cf4e754ddbab77db5cb7cd89e",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment/[id]/activity/route.ts": {
+    "mtime": 1794412731.2133627,
+    "seen": 1794412734.2720885,
+    "ast_hash": "6289f73d218d5c73c79b88b52e6db4b1",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment/[id]/route.ts": {
+    "mtime": 1794412731.2133627,
+    "seen": 1794412734.27209,
+    "ast_hash": "494fe11f77f56ad20afba0743113080f",
+    "semantic_hash": ""
+  },
+  "src/app/api/equipment/route.ts": {
+    "mtime": 1794412731.2133627,
+    "seen": 1794412734.2720912,
+    "ast_hash": "34675a740e99f03df9ac4b14aeb278c6",
+    "semantic_hash": ""
+  },
+  "src/app/api/map-callout-offsets/[id]/route.ts": {
+    "mtime": 1794412731.2134185,
+    "seen": 1794412734.272092,
+    "ast_hash": "d91a7a01c404d1f3152013d2beb010ad",
+    "semantic_hash": ""
+  },
+  "src/app/api/map-callout-offsets/route.ts": {
+    "mtime": 1794412731.2134185,
+    "seen": 1794412734.2720926,
+    "ast_hash": "a4d07e8e8cd68ea7534f76877ac0fd31",
+    "semantic_hash": ""
+  },
+  "src/app/api/map-coordinates/[id]/route.ts": {
+    "mtime": 1794412731.2134578,
+    "seen": 1794412734.2720938,
+    "ast_hash": "c90e78537b8ba55ad023dbb3bd024a73",
+    "semantic_hash": ""
+  },
+  "src/app/api/map-coordinates/route.ts": {
+    "mtime": 1794412731.2134578,
+    "seen": 1794412734.2720952,
+    "ast_hash": "68031c1920afe00d60c628207d53d256",
+    "semantic_hash": ""
+  },
+  "src/app/api/materials/[id]/duplicate/route.ts": {
+    "mtime": 1794412731.213503,
+    "seen": 1794412734.2720962,
+    "ast_hash": "de773479db33002acb498de04f7e772f",
+    "semantic_hash": ""
+  },
+  "src/app/api/materials/[id]/route.ts": {
+    "mtime": 1794412731.213503,
+    "seen": 1794412734.272097,
+    "ast_hash": "228b51e7821c075f9732bfdfc27bee33",
+    "semantic_hash": ""
+  },
+  "src/app/api/materials/route.ts": {
+    "mtime": 1794412731.213503,
+    "seen": 1794412734.2720978,
+    "ast_hash": "468ebd256abd41bb48b4359811833d59",
+    "semantic_hash": ""
+  },
+  "src/app/api/reports/[id]/close/route.ts": {
+    "mtime": 1794412731.2135708,
+    "seen": 1794412734.2720985,
+    "ast_hash": "22a32c537012358201c874febcd839ca",
+    "semantic_hash": ""
+  },
+  "src/app/api/reports/[id]/route.ts": {
+    "mtime": 1794412731.2135708,
+    "seen": 1794412734.2720995,
+    "ast_hash": "61d32ac14ff2a28900a9a8d972dc542b",
+    "semantic_hash": ""
+  },
+  "src/app/api/reports/route.ts": {
+    "mtime": 1794412731.2135708,
+    "seen": 1794412734.2721004,
+    "ast_hash": "504c68ddc5cb39bc44389b492e5cbaae",
+    "semantic_hash": ""
+  },
+  "src/app/api/tanks/[id]/activity/route.ts": {
+    "mtime": 1794412731.2136486,
+    "seen": 1794412734.2721012,
+    "ast_hash": "50663afc794a53052a4588816b18f0a4",
+    "semantic_hash": ""
+  },
+  "src/app/api/tanks/[id]/reset-execution/route.ts": {
+    "mtime": 1794412731.2136486,
+    "seen": 1794412734.272102,
+    "ast_hash": "02b5286cb0bb3ef5f8850d212872b29a",
+    "semantic_hash": ""
+  },
+  "src/app/api/tanks/[id]/route.ts": {
+    "mtime": 1794412731.2136486,
+    "seen": 1794412734.2721033,
+    "ast_hash": "b241698f8524eefe15cc5c1dfe6e07c4",
+    "semantic_hash": ""
+  },
+  "src/app/api/tanks/route.ts": {
+    "mtime": 1794412731.2136486,
+    "seen": 1794412734.272104,
+    "ast_hash": "bcb4643c9bbcde2cbed8216e9cbaf904",
+    "semantic_hash": ""
+  },
+  "src/app/brava/campo/[tag]/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.272105,
+    "ast_hash": "5fb73264b0d91d262a6f089814c4a592",
+    "semantic_hash": ""
+  },
+  "src/app/brava/campo/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.2721062,
+    "ast_hash": "ef640d7e031dc77135ce41d858ef1e18",
+    "semantic_hash": ""
+  },
+  "src/app/brava/consolidado/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.2721076,
+    "ast_hash": "9bfc8b9c554051c1966b5410bb4b3803",
+    "semantic_hash": ""
+  },
+  "src/app/brava/custos/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.2721086,
+    "ast_hash": "ece5950606efb8c63766da8510ed1259",
+    "semantic_hash": ""
+  },
+  "src/app/brava/icon.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.2721093,
+    "ast_hash": "f2f15e8b59972946fedacea5680c8365",
+    "semantic_hash": ""
+  },
+  "src/app/brava/layout.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.2721107,
+    "ast_hash": "e8cdcf0337e996a1ba778d5cbe43fb8e",
+    "semantic_hash": ""
+  },
+  "src/app/brava/mapa/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.2721112,
+    "ast_hash": "23722ae66dd11a034c6c3a02e95e7e4b",
+    "semantic_hash": ""
+  },
+  "src/app/brava/materiais/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.272112,
+    "ast_hash": "d3cebe1a82e4f60fdedbac81fd75a287",
+    "semantic_hash": ""
+  },
+  "src/app/brava/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.2721124,
+    "ast_hash": "c0fe97b28650930fa8a5b792f0877681",
+    "semantic_hash": ""
+  },
+  "src/app/brava/reports/page.tsx": {
+    "mtime": 1794412731.213722,
+    "seen": 1794412734.272113,
+    "ast_hash": "f97f82950c03125f5c2b40d508910a45",
+    "semantic_hash": ""
+  },
+  "src/app/brava/tanques/[tag]/page.tsx": {
+    "mtime": 1794412731.214109,
+    "seen": 1794412734.2721171,
+    "ast_hash": "4a387efbda72b3b446fd5ab2ddc0d6a3",
+    "semantic_hash": ""
+  },
+  "src/app/brava/unidades/consolidado/page.tsx": {
+    "mtime": 1794412731.2141848,
+    "seen": 1794412734.272118,
+    "ast_hash": "84723ba5920f4161cc355040919a7c78",
+    "semantic_hash": ""
+  },
+  "src/app/brava/unidades/custos/page.tsx": {
+    "mtime": 1794412731.2141848,
+    "seen": 1794412734.2721186,
+    "ast_hash": "48f425695efca2227a351d437f105e7e",
+    "semantic_hash": ""
+  },
+  "src/app/brava/unidades/equipamentos/[tag]/page.tsx": {
+    "mtime": 1794412731.2142544,
+    "seen": 1794412734.2721195,
+    "ast_hash": "3a9074dc688ae4d6c7960c93573c1d01",
+    "semantic_hash": ""
+  },
+  "src/app/brava/unidades/mapa/page.tsx": {
+    "mtime": 1794412731.2142544,
+    "seen": 1794412734.2721202,
+    "ast_hash": "9b18ae52b8d56644789131c5b42fbdff",
+    "semantic_hash": ""
+  },
+  "src/app/brava/unidades/materiais/page.tsx": {
+    "mtime": 1794412731.2142544,
+    "seen": 1794412734.2721214,
+    "ast_hash": "0e8e792e664f6c6b8d57e82455f11caf",
+    "semantic_hash": ""
+  },
+  "src/app/brava/unidades/page.tsx": {
+    "mtime": 1794412731.2142544,
+    "seen": 1794412734.2721226,
+    "ast_hash": "bc9d5f9c1a858fe7e09cc432111678df",
+    "semantic_hash": ""
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1794412731.2142544,
+    "seen": 1794412734.2721233,
+    "ast_hash": "2e46c5503cb4e6d3aa94b421a0461636",
+    "semantic_hash": ""
+  },
+  "src/app/page.tsx": {
+    "mtime": 1794412731.2142544,
+    "seen": 1794412734.272124,
+    "ast_hash": "dba6d335f7b137bb73c1d81fb9aefdcd",
+    "semantic_hash": ""
+  },
+  "src/components/Applications.tsx": {
+    "mtime": 1794412731.2142544,
+    "seen": 1794412734.2721248,
+    "ast_hash": "02eeac25805eef1f14e56ebd504e45ae",
+    "semantic_hash": ""
+  },
+  "src/components/Audience.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721255,
+    "ast_hash": "6be0552fa936ca50d16ec805d7fe502d",
+    "semantic_hash": ""
+  },
+  "src/components/CheckoutLink.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721264,
+    "ast_hash": "7fafafc31e826f6fd246e4d574672270",
+    "semantic_hash": ""
+  },
+  "src/components/Comparison.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721272,
+    "ast_hash": "23ba651cc5ddbf44c826cee97902df15",
+    "semantic_hash": ""
+  },
+  "src/components/CourseBonus.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.272128,
+    "ast_hash": "b8176f024265551b6348ee51343537f0",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentArt.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721286,
+    "ast_hash": "c83936993a16351a3fde30124dd4d8e6",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentCard.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721293,
+    "ast_hash": "87b3ec302c7bf7eea17fa7fa24f16e40",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentGrid.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721298,
+    "ast_hash": "2727cb360be3b4cb60b91270c09f2108",
+    "semantic_hash": ""
+  },
+  "src/components/EquipmentImage.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721307,
+    "ast_hash": "7690b01f653588874c415681d0e3910b",
+    "semantic_hash": ""
+  },
+  "src/components/FAQ.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721317,
+    "ast_hash": "1c8280c444d04318b90ed23d9fe4bc6b",
+    "semantic_hash": ""
+  },
+  "src/components/FinalCTA.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721324,
+    "ast_hash": "d31e0b4bac9b8b02b13c8f12b20e4dd2",
+    "semantic_hash": ""
+  },
+  "src/components/Footer.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721329,
+    "ast_hash": "be32048cb9f3accbb429bc1d3a7799a6",
+    "semantic_hash": ""
+  },
+  "src/components/Guarantee.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721336,
+    "ast_hash": "f670d464ea6acf575792c1ae53b42141",
+    "semantic_hash": ""
+  },
+  "src/components/Header.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721343,
+    "ast_hash": "da8d6160219cbe7fd7c7ab6196763af8",
+    "semantic_hash": ""
+  },
+  "src/components/Hero.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721353,
+    "ast_hash": "424888f32c69d06f301b2ac5ecc8c418",
+    "semantic_hash": ""
+  },
+  "src/components/MetaPixel.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721362,
+    "ast_hash": "3f13b51696c0d2c57168ac2e42d289bd",
+    "semantic_hash": ""
+  },
+  "src/components/Offer.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.272137,
+    "ast_hash": "d0a4ea3779d37dce24336c6b2b2a273f",
+    "semantic_hash": ""
+  },
+  "src/components/Problems.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721376,
+    "ast_hash": "f079d1521f8d2cd87de7b8547150f7d2",
+    "semantic_hash": ""
+  },
+  "src/components/SocialProof.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721388,
+    "ast_hash": "2608b9fa3d1a94a39a887dfc50ad86db",
+    "semantic_hash": ""
+  },
+  "src/components/Solution.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721395,
+    "ast_hash": "cacb664e5dd381938315ce9f3530ef7a",
+    "semantic_hash": ""
+  },
+  "src/components/StickyMobileCTA.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.27214,
+    "ast_hash": "1e9f15684346d5d7d81e93a7b875075d",
+    "semantic_hash": ""
+  },
+  "src/components/TrustBar.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721407,
+    "ast_hash": "17b165e8d90061d34c248ad562f854e8",
+    "semantic_hash": ""
+  },
+  "src/components/ValueStack.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721422,
+    "ast_hash": "233842499b5b10a893ab44dd850dc016",
+    "semantic_hash": ""
+  },
+  "src/components/WhatsAppSupport.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721426,
+    "ast_hash": "92f5814d9881710d885e26b5b3100d1d",
+    "semantic_hash": ""
+  },
+  "src/components/brava/AttentionPanel.tsx": {
+    "mtime": 1794412731.2144306,
+    "seen": 1794412734.2721434,
+    "ast_hash": "031817cedf3cb5efff62be195017face",
+    "semantic_hash": ""
+  },
+  "src/components/brava/BlueprintGrid.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.272144,
+    "ast_hash": "b513d715183899433352c2e5f3b7054a",
+    "semantic_hash": ""
+  },
+  "src/components/brava/ConsolidatedGantt.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721448,
+    "ast_hash": "dbd569dadf112ab64ba55cb596ed1aea",
+    "semantic_hash": ""
+  },
+  "src/components/brava/DataStatusGate.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721455,
+    "ast_hash": "b0a53e04ec0d0058b38b71c9ed8f825d",
+    "semantic_hash": ""
+  },
+  "src/components/brava/DeadlinesPanel.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721462,
+    "ast_hash": "b8089f4989f18efbc8bcb5555d71821f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/EditPasswordModal.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.272147,
+    "ast_hash": "53ccfadb93097da69587ab300e260a04",
+    "semantic_hash": ""
+  },
+  "src/components/brava/ExecutiveHeader.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.272148,
+    "ast_hash": "202c52b9282adeec7211557996e4d43f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/ExecutiveTimeline.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721488,
+    "ast_hash": "31643e39451cbf9d9006e1bb0d67b59b",
+    "semantic_hash": ""
+  },
+  "src/components/brava/FamilyFilterBar.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721496,
+    "ast_hash": "d578c457cc1124ef9e7844df348603ce",
+    "semantic_hash": ""
+  },
+  "src/components/brava/FeaturedTankCard.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.27215,
+    "ast_hash": "7a36bd0a29f96a3ca7bf147730aa45b7",
+    "semantic_hash": ""
+  },
+  "src/components/brava/FilterBar.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721524,
+    "ast_hash": "da57d1681669f6f4ba2cfebd8a018813",
+    "semantic_hash": ""
+  },
+  "src/components/brava/GanttChart.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.272153,
+    "ast_hash": "5629856b80543e0947d037ccd7765079",
+    "semantic_hash": ""
+  },
+  "src/components/brava/HeroExecutive.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721539,
+    "ast_hash": "6869f37de72378defd8559ed02f07199",
+    "semantic_hash": ""
+  },
+  "src/components/brava/InspectionCriticalityBadge.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721546,
+    "ast_hash": "7c0288a3e100b0d1d5bf884d4b9e25a9",
+    "semantic_hash": ""
+  },
+  "src/components/brava/InspectionSummary.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721553,
+    "ast_hash": "39a461e3b49d7ef50376b180d198ffe6",
+    "semantic_hash": ""
+  },
+  "src/components/brava/KpiCard.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721562,
+    "ast_hash": "33f21924b13ddae70a064e4aafdbb9b0",
+    "semantic_hash": ""
+  },
+  "src/components/brava/KpiRow.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.272157,
+    "ast_hash": "531988eb7e75fbc109032485eb48ab6f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/MobileTopBar.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721577,
+    "ast_hash": "eaae2ed22bf578ed6a6b6244ac65d4b6",
+    "semantic_hash": ""
+  },
+  "src/components/brava/PageHeader.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721581,
+    "ast_hash": "acf4a0234e5dd484f81094fbe400fa6e",
+    "semantic_hash": ""
+  },
+  "src/components/brava/PlanningEditor.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721589,
+    "ast_hash": "837351508e60c0016528b2e89bc1bd17",
+    "semantic_hash": ""
+  },
+  "src/components/brava/ProgramOverviewMini.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721596,
+    "ast_hash": "e0a740c297cdb60462e61229fb4d462f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/ProgressBar.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721603,
+    "ast_hash": "b603a3620d33e30d9155b6c34ed8c587",
+    "semantic_hash": ""
+  },
+  "src/components/brava/ProgressRing.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721608,
+    "ast_hash": "6c7c9652cd0bc53d8d339bd5f3bbdaac",
+    "semantic_hash": ""
+  },
+  "src/components/brava/SectionHeading.tsx": {
+    "mtime": 1794412731.2149506,
+    "seen": 1794412734.2721615,
+    "ast_hash": "46d15af5862bd937d3d7bccbd279a3af",
+    "semantic_hash": ""
+  },
+  "src/components/brava/Sidebar.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.272162,
+    "ast_hash": "eebaa3bf800c3d53d18e885ef069078b",
+    "semantic_hash": ""
+  },
+  "src/components/brava/StatusBadge.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.272163,
+    "ast_hash": "0f0480a2ebcc504dc0880a3012618183",
+    "semantic_hash": ""
+  },
+  "src/components/brava/TankCard.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.2721636,
+    "ast_hash": "51596baf9b9fb4e488fe5fd4db9aa4e2",
+    "semantic_hash": ""
+  },
+  "src/components/brava/TankControlGrid.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.272164,
+    "ast_hash": "0be3d5ed4ef266834de40c306b14d788",
+    "semantic_hash": ""
+  },
+  "src/components/brava/TankIllustration.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.2721648,
+    "ast_hash": "5da720c08c69d270f983e07cb197e6d9",
+    "semantic_hash": ""
+  },
+  "src/components/brava/TankNotes.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.2721653,
+    "ast_hash": "184daca6c1bf0d4fa06a1a634fdf4d2a",
+    "semantic_hash": ""
+  },
+  "src/components/brava/UpcomingInspectionsTimeline.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.2721663,
+    "ast_hash": "3500075fc6f8ab3a35bdab649ee8555f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/consolidado/CronogramaTab.tsx": {
+    "mtime": 1794412731.2152925,
+    "seen": 1794412734.272167,
+    "ast_hash": "57f9206282d80ca8a15bcc1d0a295f7c",
+    "semantic_hash": ""
+  },
+  "src/components/brava/consolidado/CustosTab.tsx": {
+    "mtime": 1794412731.2158606,
+    "seen": 1794412734.272168,
+    "ast_hash": "8c61fd0e2e3a006de99c81cddea2efbd",
+    "semantic_hash": ""
+  },
+  "src/components/brava/consolidado/MateriaisTab.tsx": {
+    "mtime": 1794412731.2158606,
+    "seen": 1794412734.2721686,
+    "ast_hash": "ae5bb77c0b92ab63efee88c5872543de",
+    "semantic_hash": ""
+  },
+  "src/components/brava/costs/CostScurveChart.tsx": {
+    "mtime": 1794412731.2158606,
+    "seen": 1794412734.2721698,
+    "ast_hash": "6bf114b4c58d4a3097a026cc392d4703",
+    "semantic_hash": ""
+  },
+  "src/components/brava/costs/TankCostsSection.tsx": {
+    "mtime": 1794412731.2159638,
+    "seen": 1794412734.2721705,
+    "ast_hash": "6ca409e06d156fcef1594b0d69fcb65f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/AssetMapExplorer.tsx": {
+    "mtime": 1794412731.2159638,
+    "seen": 1794412734.2721715,
+    "ast_hash": "c3cad00ece703279c24d541f9c4f5d2f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/FullscreenControlBar.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721722,
+    "ast_hash": "bb9f63ee0f9ff254873efddef9435fa3",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/HudCorners.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721734,
+    "ast_hash": "f3c185a8af923ccaac881e9cc741c8d9",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/LiveClock.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721741,
+    "ast_hash": "0eec26edc2929cd3553a1823b72d4952",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/LiveDate.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.272175,
+    "ast_hash": "15267c5eeff8f6bdf64b8a949cd57397",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapAreaSelector.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721758,
+    "ast_hash": "1bb0c7e656c69d315b1800d0aaea1738",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapAssetDrawer.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721767,
+    "ast_hash": "9f759128f5af61efe28cf8f44ff6eb79",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapAssetListPanel.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721775,
+    "ast_hash": "0303c3ebd0ac28418508092b3296cc6d",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapCalibrationPanel.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.272178,
+    "ast_hash": "52f0af60abe63a41e5661b92ff1840c7",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapFilterBar.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721786,
+    "ast_hash": "6df068af304ab8c46d7393fe83555d64",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapHotspot.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721791,
+    "ast_hash": "d6b145dcbcd8bc8d059452b750cce8e3",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapHoverToolbar.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.27218,
+    "ast_hash": "e7c92a69a278859b4ba21dc5a4ed60be",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapSummaryCard.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721808,
+    "ast_hash": "1fb1decfc4c2211cc2720a07ec23e7cc",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapTourPanel.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721815,
+    "ast_hash": "3cd621f1a1e84785924a1b8b229dcab4",
+    "semantic_hash": ""
+  },
+  "src/components/brava/maps/MapZoomPan.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.272182,
+    "ast_hash": "ce6790315c323c91c826adad9f0f53cd",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialCriticalityBadge.tsx": {
+    "mtime": 1794412731.2161818,
+    "seen": 1794412734.2721827,
+    "ast_hash": "247774a8727b1d4b4f1d0a7fd80dc6b4",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialDetailDrawer.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721837,
+    "ast_hash": "9f346b5fae1050e86201aed4ab0c84e4",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialFormDrawer.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721844,
+    "ast_hash": "00fef56283ff3b090665aae749a0548c",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialRiskBadge.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.272185,
+    "ast_hash": "0aaefbeac2426bf408d57e05962ca4f9",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialStatusBadge.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721858,
+    "ast_hash": "9f558f7bb5ac892769950286c8ce5636",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialsAtRisk.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721863,
+    "ast_hash": "106e3525fd29c643a42b6de808b1e2b1",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialsFilterBar.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721872,
+    "ast_hash": "594967b75de3fbd191fc495ace3b388e",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialsHomeSummary.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721877,
+    "ast_hash": "d8f6a8f48bd77c966febe691f9861a3c",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialsKpiRow.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721884,
+    "ast_hash": "94930336b4e3eb5654c0b20a4660bf64",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/MaterialsTable.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721891,
+    "ast_hash": "6deaeff9872081618d9f7ac267bf5890",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/TankHistorySection.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721899,
+    "ast_hash": "176c1079f03bd1435f40f2f4c33319c6",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/TankMaterialsSection.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721906,
+    "ast_hash": "79eba4528e7e4c3a3f5814f83a63439a",
+    "semantic_hash": ""
+  },
+  "src/components/brava/materials/UpcomingMaterialNeeds.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.2721913,
+    "ast_hash": "f9c82fabc1d61c1dacef4d71c99d609e",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/DonutGauge.tsx": {
+    "mtime": 1794412731.2166553,
+    "seen": 1794412734.272192,
+    "ast_hash": "37e6ac0c995a773085151f61f465f08c",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/EditableList.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721925,
+    "ast_hash": "69d55c035513f90536e97cdce7d16947",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/ExecutiveSlideOne.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721932,
+    "ast_hash": "30d0a59b15092129673536bbc2cfc76a",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/ExecutiveSlideTwo.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721941,
+    "ast_hash": "605fa56e71c7e6670c4780cfde4def60",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/ReportHistoryPanel.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721946,
+    "ast_hash": "873661a02bcfc058678c8dfd886f2f55",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/ReportsControlBar.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721953,
+    "ast_hash": "2cd720e05bfeb2966a6ee4087533517d",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/SlideFooter.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.272196,
+    "ast_hash": "6fcc9fba4b3d32442a7feefc66120a2c",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/SlideFrame.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721968,
+    "ast_hash": "e0c2d5a82e38194eb55b3eb0bf9b9fc5",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/SlideHeader.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721977,
+    "ast_hash": "680c6f2dcd259984ba0e3aa1fd43f3f2",
+    "semantic_hash": ""
+  },
+  "src/components/brava/reports/SlidePanel.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.2721982,
+    "ast_hash": "c41d0b23a383845d948337a902176207",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentCard.tsx": {
+    "mtime": 1794412731.2170198,
+    "seen": 1794412734.272199,
+    "ast_hash": "3dd06f731099467ffa8476de8a7914ef",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentConsolidatedGantt.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2721994,
+    "ast_hash": "e6f63125a5b39f5992c271f30751b598",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentControlGrid.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722,
+    "ast_hash": "ef705bdb89845af823869d365b94213f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentExecutiveHeader.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722008,
+    "ast_hash": "72bc7f72fe285df8d7e209e5cccc3fc6",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentExecutiveTimeline.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722015,
+    "ast_hash": "5b9e05d9772369116018723a4ee06592",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentFilterBar.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722023,
+    "ast_hash": "c844eaf84bf588cc50eea749e93a2dad",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentGanttChart.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.272203,
+    "ast_hash": "375b21b9d3b73f57ec956ee906ecbed8",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentKpiRow.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722037,
+    "ast_hash": "baf9122a57bb0f9c4b6ce4910d1e3f1d",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentNotes.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722046,
+    "ast_hash": "3363e1aee60df08481c16ba87dc1badc",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentPlanningEditor.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722054,
+    "ast_hash": "a077ad117950549ceb46bb09b79704fa",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentProgramOverviewMini.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722058,
+    "ast_hash": "d8269da78e2ce9dc94c0d221a95b85c8",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/EquipmentStatusBadge.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722065,
+    "ast_hash": "5e681f0057e30988cdd27a519613faa5",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/UnitFilterBar.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722073,
+    "ast_hash": "d7b64596565846a204aaec07f7b516cb",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/UnitSummaryCards.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.272208,
+    "ast_hash": "67abb492da44ca091632e5cba821da10",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/costs/EquipmentCostsSection.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722087,
+    "ast_hash": "a81901c1e7f3cb818da063bba38d9974",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapAreaSelector.tsx": {
+    "mtime": 1794412731.2173493,
+    "seen": 1794412734.2722094,
+    "ast_hash": "b49523dededabff4953de2672f656305",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapAssetDrawer.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.27221,
+    "ast_hash": "3c652b674cfe64f60741f0d842282754",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapAssetListPanel.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.2722106,
+    "ast_hash": "d083af60014287fe540473aa3b55a701",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapCalibrationPanel.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.2722116,
+    "ast_hash": "51e0fa71847b9b81cd056e521bfe3414",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapExplorer.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.272212,
+    "ast_hash": "8a889fd1c381eb583e6285f4f89e5194",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapFilterBar.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.2722127,
+    "ast_hash": "29c87ad4d801528f72192dac592e01d9",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapHotspot.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.2722154,
+    "ast_hash": "eae0c9f364e2b9a4905d5c451d7f7282",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapLegend.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.272216,
+    "ast_hash": "05df9c287a4ae043668912f6c73b50e9",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/maps/EquipmentMapSummaryCard.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.2722166,
+    "ast_hash": "dd22f7d0d8b1c611d8d2c48d8b9eec72",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentHistorySection.tsx": {
+    "mtime": 1794412731.217619,
+    "seen": 1794412734.2722173,
+    "ast_hash": "fe3e032a3041a38c2b72f6984b734843",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialDetailDrawer.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722182,
+    "ast_hash": "a6f6b98f8d99315d70ebad609c658996",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialFormDrawer.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.272219,
+    "ast_hash": "fa5c65413feb9612d52fd5909ec9d62b",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialsAtRisk.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722194,
+    "ast_hash": "4f2ac90f59267d0d6ea784ddf6551007",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialsFilterBar.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722201,
+    "ast_hash": "bd9a1da1bc4535e4768efd41eb458eda",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialsHomeSummary.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722206,
+    "ast_hash": "17171a08fd5794bb9eb60d9f67e48f12",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialsKpiRow.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722213,
+    "ast_hash": "6c53d0e735eae4ea2799ce725f71998e",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialsSection.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722223,
+    "ast_hash": "582e52a58599c06f01f0046cf58919be",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/EquipmentMaterialsTable.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722228,
+    "ast_hash": "cc7a0eb952d36d77506da432f01cd06e",
+    "semantic_hash": ""
+  },
+  "src/components/brava/units/materials/UpcomingEquipmentMaterialNeeds.tsx": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.2722235,
+    "ast_hash": "1913fa70e8a9782319a3cabf7c8b7286",
+    "semantic_hash": ""
+  },
+  "src/config/analytics.ts": {
+    "mtime": 1794412731.2178483,
+    "seen": 1794412734.272224,
+    "ast_hash": "0756520d6ecc2cdd2549d7c5e4fbb6fa",
+    "semantic_hash": ""
+  },
+  "src/config/product.ts": {
+    "mtime": 1794412731.2180111,
+    "seen": 1794412734.2722247,
+    "ast_hash": "69ad5ab60425591d89401003fad6b8ca",
+    "semantic_hash": ""
+  },
+  "src/config/site.ts": {
+    "mtime": 1794412731.2180111,
+    "seen": 1794412734.2722256,
+    "ast_hash": "f492c3318d31f29050ca83bad1f0477d",
+    "semantic_hash": ""
+  },
+  "src/data/equipments.ts": {
+    "mtime": 1794412731.2180111,
+    "seen": 1794412734.2722263,
+    "ast_hash": "d157ab00c016b09b162534aef193941e",
+    "semantic_hash": ""
+  },
+  "src/data/faq.ts": {
+    "mtime": 1794412731.2180805,
+    "seen": 1794412734.272227,
+    "ast_hash": "7371d77ac505d7d517a532825218aa67",
+    "semantic_hash": ""
+  },
+  "src/lib/auth/editAuth.ts": {
+    "mtime": 1794412731.2181146,
+    "seen": 1794412734.2722278,
+    "ast_hash": "52727f520d83f593007fefcf701722c0",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/cn.ts": {
+    "mtime": 1794412731.2181146,
+    "seen": 1794412734.2722282,
+    "ast_hash": "c752c7e5ba2d28c91396b3df374ff38f",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/context.tsx": {
+    "mtime": 1794412731.218229,
+    "seen": 1794412734.2722292,
+    "ast_hash": "6cfc2cc64b62c0c65f41e6bcdb30c626",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/costs/calculations.ts": {
+    "mtime": 1794412731.218229,
+    "seen": 1794412734.2722297,
+    "ast_hash": "9f381d6df0a7bb90664650554e9fe26a",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/costs/context.tsx": {
+    "mtime": 1794412731.2183251,
+    "seen": 1794412734.2722304,
+    "ast_hash": "9a506e58906849bd9281c0384b58bc73",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/costs/seed.ts": {
+    "mtime": 1794412731.2183251,
+    "seen": 1794412734.2722309,
+    "ast_hash": "31ad9c48fe9db9308583a48bad3ca3e6",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/costs/types.ts": {
+    "mtime": 1794412731.2183251,
+    "seen": 1794412734.2722316,
+    "ast_hash": "b09b64485909ca0acbe60be0e7a1ba65",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/cronogramaLinks.ts": {
+    "mtime": 1794412731.2183251,
+    "seen": 1794412734.2722325,
+    "ast_hash": "7133c02ee63f2a544618570edc958625",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/data/inspection-inventory.ts": {
+    "mtime": 1794412731.2183251,
+    "seen": 1794412734.272233,
+    "ast_hash": "8f6212866f400a35b01ed5cfb342a5a7",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/data/tanks.ts": {
+    "mtime": 1794412731.2184575,
+    "seen": 1794412734.2722337,
+    "ast_hash": "e05f06ae44dfd595663e7358ba3e3231",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/date-utils.ts": {
+    "mtime": 1794412731.2184575,
+    "seen": 1794412734.2722342,
+    "ast_hash": "af2e66010c680aabcfb2d3f6147d4633",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/editAuthContext.tsx": {
+    "mtime": 1794412731.2184575,
+    "seen": 1794412734.272235,
+    "ast_hash": "4ecf8375ba35982b80b8ddc677c283ac",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/home-selectors.ts": {
+    "mtime": 1794412731.2184575,
+    "seen": 1794412734.2722359,
+    "ast_hash": "2ee0440e3301758eba09fc3cf60a71b1",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/inspection.ts": {
+    "mtime": 1794412731.2184575,
+    "seen": 1794412734.2722363,
+    "ast_hash": "6b1c3d603fdf009984ac70a303c1021e",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/maps/calloutLayout.ts": {
+    "mtime": 1794412731.2184575,
+    "seen": 1794412734.272237,
+    "ast_hash": "3445d476f5bd3d50273c1a23c663c4d6",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/maps/config.ts": {
+    "mtime": 1794412731.2187636,
+    "seen": 1794412734.2722378,
+    "ast_hash": "5daca6af7bf276f85d03da94386f3e4d",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/maps/context.tsx": {
+    "mtime": 1794412731.2187636,
+    "seen": 1794412734.2722385,
+    "ast_hash": "caadc7c99db46fc587b2ca6fb4d61d04",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/maps/selectors.ts": {
+    "mtime": 1794412731.2187636,
+    "seen": 1794412734.2722394,
+    "ast_hash": "8cfdfb4d9e5d3c6a55750ec9a448077d",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/maps/statusLabel.ts": {
+    "mtime": 1794412731.2187636,
+    "seen": 1794412734.2722402,
+    "ast_hash": "7058c9e180b1344b6c7f581663f5b33f",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/maps/types.ts": {
+    "mtime": 1794412731.2187636,
+    "seen": 1794412734.2722409,
+    "ast_hash": "564fa59352559ceedd6fc4098135e190",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/materials/calculations.ts": {
+    "mtime": 1794412731.2187636,
+    "seen": 1794412734.2722414,
+    "ast_hash": "88be8caa8bb02feb7ff2dcae53cc9fa0",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/materials/context.tsx": {
+    "mtime": 1794412731.219037,
+    "seen": 1794412734.272242,
+    "ast_hash": "638a71f400d46be9f56f782e3d151775",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/materials/meta.ts": {
+    "mtime": 1794412731.219037,
+    "seen": 1794412734.272243,
+    "ast_hash": "3b01a185a95900829d43c3eae13e24b7",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/materials/types.ts": {
+    "mtime": 1794412731.219037,
+    "seen": 1794412734.2722435,
+    "ast_hash": "1946bcbc9a8740e06efd7b55bea8301b",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/photos.ts": {
+    "mtime": 1794412731.219037,
+    "seen": 1794412734.2722445,
+    "ast_hash": "cb01a94118957ff6bf9b553fb47830bc",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/reports/calculations.ts": {
+    "mtime": 1794412731.219037,
+    "seen": 1794412734.2722452,
+    "ast_hash": "04faed342f70e4c9e7adcf98281a1de9",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/reports/context.tsx": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722461,
+    "ast_hash": "9c32a0e4635be4e339d8a80cb633ee4c",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/reports/types.ts": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722468,
+    "ast_hash": "51c80f503d638b7bcfc2ae523a3cb26c",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/schedule-engine.ts": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722473,
+    "ast_hash": "49811ff79145f5bdc1b523f5479d7590",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/selectors.ts": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.272248,
+    "ast_hash": "efc091451a93b48d9b0fa31342e0fef7",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/stage-template.ts": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722487,
+    "ast_hash": "dc4cb17e523a691df0ab667024e594a8",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/status-meta.ts": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722497,
+    "ast_hash": "9964605d46776bee06356732b4d4443d",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/timescale.ts": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722504,
+    "ast_hash": "005d87194393d72f88b4d46c7846c6e0",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/types.ts": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722514,
+    "ast_hash": "5b776203f10430a9ccfaa5b3da33f970",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/context.tsx": {
+    "mtime": 1794412731.2192388,
+    "seen": 1794412734.2722523,
+    "ast_hash": "19e8c56d25da7a1b690e4c0da644dda5",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/costs/calculations.ts": {
+    "mtime": 1794412731.2195077,
+    "seen": 1794412734.272253,
+    "ast_hash": "9590ffe83fb40f65d7bec9e9c03a67af",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/costs/context.tsx": {
+    "mtime": 1794412731.2195444,
+    "seen": 1794412734.272254,
+    "ast_hash": "f6b41dc69b70207e0215e8182226d9fe",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/costs/types.ts": {
+    "mtime": 1794412731.2195444,
+    "seen": 1794412734.2722545,
+    "ast_hash": "ebf3943a17f59fe7f3c7b99480cef9c4",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/data/equipment.ts": {
+    "mtime": 1794412731.2195444,
+    "seen": 1794412734.2722552,
+    "ast_hash": "1ec9bda70d81c154293aaf84db7d2535",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/maps/config.ts": {
+    "mtime": 1794412731.2195444,
+    "seen": 1794412734.272256,
+    "ast_hash": "9e7f193d4a1e3da304a8e2792e2c9bc4",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/maps/context.tsx": {
+    "mtime": 1794412731.2197018,
+    "seen": 1794412734.2722566,
+    "ast_hash": "be22d99352b25fd818a83a0fbbf94b3c",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/maps/selectors.ts": {
+    "mtime": 1794412731.2197018,
+    "seen": 1794412734.2722573,
+    "ast_hash": "80bab36f95c3ff07f23459158e464ab0",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/maps/types.ts": {
+    "mtime": 1794412731.2197018,
+    "seen": 1794412734.272258,
+    "ast_hash": "b25f25c0d62ec1f2fd8ce898846b4474",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/materials/calculations.ts": {
+    "mtime": 1794412731.2197018,
+    "seen": 1794412734.2722585,
+    "ast_hash": "647b0e6d3527b374a46cfd3b33e27643",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/materials/context.tsx": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.2722592,
+    "ast_hash": "b7c55cb655d22775e6d3bd353e38a6d6",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/materials/types.ts": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.27226,
+    "ast_hash": "dc5f66460e9515768601f259b9fdd111",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/schedule-engine.ts": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.2722607,
+    "ast_hash": "46416b7e8bbd442ce9c9ef3da6537f96",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/selectors.ts": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.2722611,
+    "ast_hash": "f318a3cad0f837856eba303094e4ebb5",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/stage-template.ts": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.2722619,
+    "ast_hash": "4e45cda2c178283adc6d6559e972cbd4",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/units/types.ts": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.2722626,
+    "ast_hash": "3c0eacf6a003b65083d25dc4959bfc6a",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/use-poll-interval.ts": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.2722635,
+    "ast_hash": "cc3378b4d2198cd01c4c7b912e69616b",
+    "semantic_hash": ""
+  },
+  "src/lib/db/client.ts": {
+    "mtime": 1794412731.2198415,
+    "seen": 1794412734.2722642,
+    "ast_hash": "7bee034ddf2ed86065b1a94c8fe4191a",
+    "semantic_hash": ""
+  },
+  "src/lib/db/costsRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722647,
+    "ast_hash": "c7efc570b6e8060b44f090f6dcaf1d08",
+    "semantic_hash": ""
+  },
+  "src/lib/db/equipmentCostsRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722657,
+    "ast_hash": "f4a739f1950b78da6ef1a3d386e3fa7e",
+    "semantic_hash": ""
+  },
+  "src/lib/db/equipmentMapCoordinatesRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722664,
+    "ast_hash": "41af57c3cfee2c7f7e0d6a2d70939d0e",
+    "semantic_hash": ""
+  },
+  "src/lib/db/equipmentMaterialsRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.272267,
+    "ast_hash": "26678c8dfde2e9d993bc6cbf27d148a3",
+    "semantic_hash": ""
+  },
+  "src/lib/db/equipmentRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722678,
+    "ast_hash": "a73bfffa2c350fddab0db3a737afb83b",
+    "semantic_hash": ""
+  },
+  "src/lib/db/executiveReportsRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722683,
+    "ast_hash": "c5bd61bc0322f397e787e94e05421f7f",
+    "semantic_hash": ""
+  },
+  "src/lib/db/mapCalloutOffsetsRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722692,
+    "ast_hash": "42bc37e11c34a0c827177b77139afba3",
+    "semantic_hash": ""
+  },
+  "src/lib/db/mapCoordinatesRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722697,
+    "ast_hash": "b29281b47e743c111c5640fc0665404a",
+    "semantic_hash": ""
+  },
+  "src/lib/db/materialsRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722707,
+    "ast_hash": "92d96136d6470ba6c447f90fa8da898a",
+    "semantic_hash": ""
+  },
+  "src/lib/db/schema.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722714,
+    "ast_hash": "7d53e6806033db59f8e98f3700d7e210",
+    "semantic_hash": ""
+  },
+  "src/lib/db/settingsRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722719,
+    "ast_hash": "02b712c9aebe3e576e7378c2112dce19",
+    "semantic_hash": ""
+  },
+  "src/lib/db/tanksRepo.ts": {
+    "mtime": 1794412731.220069,
+    "seen": 1794412734.2722723,
+    "ast_hash": "2cc67b5727a22d0a091762f415dd8a24",
+    "semantic_hash": ""
+  },
+  "tailwind.config.ts": {
+    "mtime": 1794412731.2204757,
+    "seen": 1794412734.272273,
+    "ast_hash": "061bebf476b981132c6170428d1c6941",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1794412731.2204757,
+    "seen": 1794412734.272274,
+    "ast_hash": "0571b7572750de64278b413e513f8022",
+    "semantic_hash": ""
+  },
+  "public/images/brava/tanques/README.md": {
+    "mtime": 1794412731.012327,
+    "seen": 1794412734.2722745,
+    "ast_hash": "a2abeac71c18d62ee94387483760eef4",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/README.md": {
+    "mtime": 1794412731.0169845,
+    "seen": 1794412734.2722752,
+    "ast_hash": "2507e9d3b9b44873ac0278185561ec8d",
+    "semantic_hash": ""
+  },
+  "ChatGPT Image 8 de set. de 2026, 10_52_21.png": {
+    "mtime": 1794412730.9632924,
+    "seen": 1794412734.272276,
+    "ast_hash": "9f9278d042f4aa06636100f73f6eee06",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.27.jpeg": {
+    "mtime": 1794412730.9672923,
+    "seen": 1794412734.2722764,
+    "ast_hash": "22a059a98dbac0ba60dd505c00bdd67e",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.28 (1).jpeg": {
+    "mtime": 1794412730.9672923,
+    "seen": 1794412734.2722774,
+    "ast_hash": "29733bd44512075b6c5c1cf978118c49",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.28 (2).jpeg": {
+    "mtime": 1794412730.9672923,
+    "seen": 1794412734.272278,
+    "ast_hash": "08cc2550a43dc3c7eb611b65b415abfd",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.28.jpeg": {
+    "mtime": 1794412730.9712925,
+    "seen": 1794412734.2722785,
+    "ast_hash": "c0510a1783c27eb8876b341fd37ec9e4",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.29 (1).jpeg": {
+    "mtime": 1794412730.9712925,
+    "seen": 1794412734.2722793,
+    "ast_hash": "5a3fb7ec5b70f407f44be003a78b8270",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.29.jpeg": {
+    "mtime": 1794412730.9712925,
+    "seen": 1794412734.27228,
+    "ast_hash": "9bfc31c98885264f5b2fd48cbab85862",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.30.jpeg": {
+    "mtime": 1794412730.9712925,
+    "seen": 1794412734.272281,
+    "ast_hash": "bc2d65270fb18b2ef52c32eeef95c91a",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.31 (1).jpeg": {
+    "mtime": 1794412730.9712925,
+    "seen": 1794412734.2722814,
+    "ast_hash": "bdad7e9b3ee301ddc161deff719bc732",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.31 (2).jpeg": {
+    "mtime": 1794412730.9752924,
+    "seen": 1794412734.2722821,
+    "ast_hash": "8d577b360cc2265f3fac65ef3581c85a",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.31.jpeg": {
+    "mtime": 1794412730.9752924,
+    "seen": 1794412734.2722826,
+    "ast_hash": "38b91013ba95971fb880a359d6b13197",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.32 (1).jpeg": {
+    "mtime": 1794412730.9752924,
+    "seen": 1794412734.2722833,
+    "ast_hash": "8f9ba0851d77ab5ed61fbf71734492d9",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.32.jpeg": {
+    "mtime": 1794412730.9752924,
+    "seen": 1794412734.2722843,
+    "ast_hash": "2d20a275a2f5d52cefc6ca5605b08feb",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.33 (1).jpeg": {
+    "mtime": 1794412730.9752924,
+    "seen": 1794412734.272285,
+    "ast_hash": "9ea0f3a7a4bee37747e3be4c613c30fa",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.19.33.jpeg": {
+    "mtime": 1794412730.9792924,
+    "seen": 1794412734.2722857,
+    "ast_hash": "396a9cbf7160d455b81560b024af3069",
+    "semantic_hash": ""
+  },
+  "WhatsApp Image 2026-07-14 at 14.22.07.jpeg": {
+    "mtime": 1794412730.9792924,
+    "seen": 1794412734.2722862,
+    "ast_hash": "dbbf1266d0b297aad85f283b5507aa20",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-overview.jpg": {
+    "mtime": 1794412730.9805822,
+    "seen": 1794412734.272287,
+    "ast_hash": "190bad4d1da33b31fc01f8b3278707a6",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-1222-25.jpg": {
+    "mtime": 1794412730.9814456,
+    "seen": 1794412734.2722878,
+    "ast_hash": "acd20d16cb043567f63b165c37151822",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-1222-31.jpg": {
+    "mtime": 1794412730.9814456,
+    "seen": 1794412734.2722886,
+    "ast_hash": "6ccd54bfde1e3f8a2d754901ded53ba9",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-1222-33.jpg": {
+    "mtime": 1794412730.9814456,
+    "seen": 1794412734.2722893,
+    "ast_hash": "03898ab324440b82ed618746fa876bd4",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-1222-35.jpg": {
+    "mtime": 1794412730.9814456,
+    "seen": 1794412734.2722898,
+    "ast_hash": "0dce7714a1c321681da868a7680fba80",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-1222-36.jpg": {
+    "mtime": 1794412730.9814456,
+    "seen": 1794412734.2722907,
+    "ast_hash": "0a7d6ad78c7cc86af462465439286995",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-41004.jpg": {
+    "mtime": 1794412730.9814456,
+    "seen": 1794412734.272292,
+    "ast_hash": "0d56722af7f6ee23ecda88c25e5fd3e3",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-41008.jpg": {
+    "mtime": 1794412730.9814456,
+    "seen": 1794412734.2722924,
+    "ast_hash": "38b91013ba95971fb880a359d6b13197",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-6313004.jpg": {
+    "mtime": 1794412730.9832923,
+    "seen": 1794412734.272293,
+    "ast_hash": "2a115d85a5987f63968227be8aaf672d",
+    "semantic_hash": ""
+  },
+  "public/images/brava/hero-tq-6313005.jpg": {
+    "mtime": 1794412730.9832923,
+    "seen": 1794412734.2722938,
+    "ast_hash": "31d2860cfa4d038d5612863e5f3fa61a",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/1222.jpg": {
+    "mtime": 1794412730.9832923,
+    "seen": 1794412734.2722943,
+    "ast_hash": "f3dfe141855804cdbc1bc5b642a449e5",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/1222.webp": {
+    "mtime": 1794412730.9843218,
+    "seen": 1794412734.2722952,
+    "ast_hash": "a75d2110e35042d34ecadf4398fca425",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/270.jpg": {
+    "mtime": 1794412730.9843218,
+    "seen": 1794412734.272296,
+    "ast_hash": "380f0e17b09d49c9ad6d7b01d4011469",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/270.webp": {
+    "mtime": 1794412730.9843218,
+    "seen": 1794412734.2722967,
+    "ast_hash": "d499fc2d78adf8f02b3c43704ac8e25e",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/410-6313.jpg": {
+    "mtime": 1794412730.9843218,
+    "seen": 1794412734.2722974,
+    "ast_hash": "f624a5485912e1853e113c662edd49af",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/410-6313.webp": {
+    "mtime": 1794412730.9843218,
+    "seen": 1794412734.2722983,
+    "ast_hash": "fd4b64b525cc2cfb13f8806eb79a7e48",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/geral.webp": {
+    "mtime": 1794412730.9843218,
+    "seen": 1794412734.272299,
+    "ast_hash": "6c76ec78bcaac5b14e6f002640dae829",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/source/1222-reference.png": {
+    "mtime": 1794412730.9952924,
+    "seen": 1794412734.2722998,
+    "ast_hash": "948459294f470b7f37b4ff02992ece74",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/source/270-reference.png": {
+    "mtime": 1794412731.0032923,
+    "seen": 1794412734.2723005,
+    "ast_hash": "96271794d4cbb8dc1b085a2d4497a4ed",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/source/410-6313-reference.png": {
+    "mtime": 1794412731.0112925,
+    "seen": 1794412734.2723012,
+    "ast_hash": "710fa57d5fbca4de8da4af1d9c1298b9",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/units/geral.webp": {
+    "mtime": 1794412731.0112925,
+    "seen": 1794412734.2723024,
+    "ast_hash": "740c85160d9afe34e9f150d69b0f6b6b",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/units/u-260.jpg": {
+    "mtime": 1794412731.012327,
+    "seen": 1794412734.272303,
+    "ast_hash": "4cf2a9a5997a230eff4ef5ab59d7b5bd",
+    "semantic_hash": ""
+  },
+  "public/images/brava/maps/units/u-270.jpg": {
+    "mtime": 1794412731.012327,
+    "seen": 1794412734.2723038,
+    "ast_hash": "c011d3dc301bf1d9ca5c927d36528811",
+    "semantic_hash": ""
+  },
+  "public/images/brava/reference/hero-reference.png": {
+    "mtime": 1794412731.012327,
+    "seen": 1794412734.2723045,
+    "ast_hash": "9f9278d042f4aa06636100f73f6eee06",
+    "semantic_hash": ""
+  },
+  "public/images/flotador.jpg": {
+    "mtime": 1794412731.012327,
+    "seen": 1794412734.2723055,
+    "ast_hash": "9877367af7aae1e6c8b5fc3ccc60ec51",
+    "semantic_hash": ""
+  },
+  "public/images/forno-industrial.jpg": {
+    "mtime": 1794412731.012327,
+    "seen": 1794412734.2723062,
+    "ast_hash": "a5068f42a7991e5bc450ad614f2b48fe",
+    "semantic_hash": ""
+  },
+  "public/images/motor-compressor.jpg": {
+    "mtime": 1794412731.012327,
+    "seen": 1794412734.2723067,
+    "ast_hash": "7b84ae7e5e53225ee6f31bea3c18ab07",
+    "semantic_hash": ""
+  },
+  "public/images/permutador-calor.jpg": {
+    "mtime": 1794412731.0152924,
+    "seen": 1794412734.2723074,
+    "ast_hash": "59ce95823b6c6f64a975f10766729f60",
+    "semantic_hash": ""
+  },
+  "public/images/tanque-industrial.jpg": {
+    "mtime": 1794412731.0152924,
+    "seen": 1794412734.272308,
+    "ast_hash": "4f1f6fb9a090e2e18987ca3f49d8330e",
+    "semantic_hash": ""
+  },
+  "public/images/vaso-de-pressao.jpg": {
+    "mtime": 1794412731.0152924,
+    "seen": 1794412734.272309,
+    "ast_hash": "7e12445d2562a32cf129db497cf9a712",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-1222-25.mp4": {
+    "mtime": 1794412731.0432925,
+    "seen": 1794412734.2723095,
+    "ast_hash": "ed2e3b874f9543cf307d08bc6b8ca1bb",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-1222-31.mp4": {
+    "mtime": 1794412731.0672925,
+    "seen": 1794412734.2723103,
+    "ast_hash": "dcfc0459738446b9e4912e4978504be8",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-1222-33.mp4": {
+    "mtime": 1794412731.0912924,
+    "seen": 1794412734.2723107,
+    "ast_hash": "5487b6445ab336bbef9188a0be004643",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-1222-35.mp4": {
+    "mtime": 1794412731.1272924,
+    "seen": 1794412734.2723114,
+    "ast_hash": "655da8cc609cc5b582cbd4c90e4cb3e2",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-1222-36.mp4": {
+    "mtime": 1794412731.1472924,
+    "seen": 1794412734.2723122,
+    "ast_hash": "0cc9c9eca7ee8107e658aa7835adee90",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-41004.mp4": {
+    "mtime": 1794412731.1712925,
+    "seen": 1794412734.2723129,
+    "ast_hash": "c0f15475d08a5624d75e9f6194a20e4c",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-41005.mp4": {
+    "mtime": 1794412731.1712925,
+    "seen": 1794412734.2723134,
+    "ast_hash": "b757250abe968eb1a4e546d721e55458",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-6313004.mp4": {
+    "mtime": 1794412731.1952925,
+    "seen": 1794412734.272314,
+    "ast_hash": "6f7c81afaa47c91d0f2637bf8cf1d268",
+    "semantic_hash": ""
+  },
+  "public/videos/brava/tanques/TQ-6313005.mp4": {
+    "mtime": 1794412731.2112925,
+    "seen": 1794412734.2723148,
+    "ast_hash": "ebfd7f12b828ae83ccd0d1c0836e8bf2",
+    "semantic_hash": ""
+  },
+  "package-lock.json": {
+    "mtime": 1794412730.9792924,
+    "seen": 1794412734.2723157,
+    "ast_hash": "c8c1665d09c202d1ad7529788895696c",
+    "semantic_hash": ""
+  }
+}
