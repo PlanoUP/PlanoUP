@@ -7,6 +7,7 @@ import PageHeader from "@/components/brava/PageHeader";
 import ExecutiveHeader from "@/components/brava/ExecutiveHeader";
 import ExecutiveTimeline from "@/components/brava/ExecutiveTimeline";
 import GanttChart from "@/components/brava/GanttChart";
+import TankScurveSection from "@/components/brava/TankScurveSection";
 import PlanningEditor from "@/components/brava/PlanningEditor";
 import TankNotes from "@/components/brava/TankNotes";
 import TankMaterialsSection from "@/components/brava/materials/TankMaterialsSection";
@@ -112,6 +113,7 @@ export default function TankDetailPage() {
           (tank.activities.length > 0 ? (
             <>
               <GanttChart activities={tank.activities} />
+              <TankScurveSection tank={tank} />
               <PlanningEditor tank={tank} />
             </>
           ) : (
