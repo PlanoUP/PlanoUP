@@ -10,6 +10,7 @@ import { EquipmentMaterialsDataProvider } from "@/lib/brava/units/materials/cont
 import { EquipmentCostsDataProvider } from "@/lib/brava/units/costs/context";
 import { EquipmentMapCoordinatesProvider } from "@/lib/brava/units/maps/context";
 import { EditAuthProvider } from "@/lib/brava/editAuthContext";
+import { FieldAuthProvider } from "@/lib/brava/fieldAuthContext";
 import Sidebar from "@/components/brava/Sidebar";
 import MobileTopBar from "@/components/brava/MobileTopBar";
 import DataStatusGate from "@/components/brava/DataStatusGate";
@@ -32,29 +33,31 @@ export default function BravaLayout({ children }: { children: React.ReactNode })
   return (
     <div className={`${manrope.variable} brava-app min-h-screen font-brava text-brava-text`}>
       <EditAuthProvider>
-        <BravaDataProvider>
-          <DataStatusGate>
-            <MaterialsDataProvider>
-              <CostsDataProvider>
-                <MapCoordinatesProvider>
-                  <MapCalloutOffsetsProvider>
-                    <UnitsDataProvider>
-                      <EquipmentMaterialsDataProvider>
-                        <EquipmentCostsDataProvider>
-                          <EquipmentMapCoordinatesProvider>
-                            <Sidebar />
-                            <MobileTopBar />
-                            <div className="lg:pl-64">{children}</div>
-                          </EquipmentMapCoordinatesProvider>
-                        </EquipmentCostsDataProvider>
-                      </EquipmentMaterialsDataProvider>
-                    </UnitsDataProvider>
-                  </MapCalloutOffsetsProvider>
-                </MapCoordinatesProvider>
-              </CostsDataProvider>
-            </MaterialsDataProvider>
-          </DataStatusGate>
-        </BravaDataProvider>
+        <FieldAuthProvider>
+          <BravaDataProvider>
+            <DataStatusGate>
+              <MaterialsDataProvider>
+                <CostsDataProvider>
+                  <MapCoordinatesProvider>
+                    <MapCalloutOffsetsProvider>
+                      <UnitsDataProvider>
+                        <EquipmentMaterialsDataProvider>
+                          <EquipmentCostsDataProvider>
+                            <EquipmentMapCoordinatesProvider>
+                              <Sidebar />
+                              <MobileTopBar />
+                              <div className="lg:pl-64">{children}</div>
+                            </EquipmentMapCoordinatesProvider>
+                          </EquipmentCostsDataProvider>
+                        </EquipmentMaterialsDataProvider>
+                      </UnitsDataProvider>
+                    </MapCalloutOffsetsProvider>
+                  </MapCoordinatesProvider>
+                </CostsDataProvider>
+              </MaterialsDataProvider>
+            </DataStatusGate>
+          </BravaDataProvider>
+        </FieldAuthProvider>
         <EditPasswordModal />
       </EditAuthProvider>
     </div>

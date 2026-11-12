@@ -6,6 +6,7 @@ import { ChevronRight, Search } from "lucide-react";
 import PageHeader from "@/components/brava/PageHeader";
 import StatusBadge from "@/components/brava/StatusBadge";
 import ProgressBar from "@/components/brava/ProgressBar";
+import FieldLoginCard from "@/components/brava/campo/FieldLoginCard";
 import { useBravaData } from "@/lib/brava/context";
 import { STATUS_ORDER } from "@/lib/brava/status-meta";
 import { cn } from "@/lib/brava/cn";
@@ -45,6 +46,8 @@ export default function CampoPage() {
         subtitle="Selecione o tanque para registrar o andamento da inspeção"
       />
       <div className="space-y-4 px-5 py-6 sm:px-8 sm:py-8">
+        <FieldLoginCard />
+
         <div className="relative">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brava-text-secondary" />
           <input

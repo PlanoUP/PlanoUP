@@ -47,6 +47,8 @@ interface BravaContextValue {
   ) => void;
   /** Clears every activity's real dates/progress back to not-yet-started and re-derives status from scratch. */
   resetTankExecution: (tankId: string) => void;
+  /** Merges a server-returned Tank into local state — for callers that mutate a tank through their own fetch (e.g. a field-entry submission) instead of one of the methods above, so the UI reflects it immediately instead of waiting for the next poll. */
+  applyTankUpdate: (tank: Tank) => void;
 }
 
 const BravaContext = createContext<BravaContextValue | null>(null);
@@ -169,6 +171,10 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
     [fetchTanks]
   );
 
+  const applyTankUpdate = useCallback((tank: Tank) => {
+    setTanksRaw((prev) => prev.map((t) => (t.id === tank.id ? tank : t)));
+  }, []);
+
   const tanks = useMemo(() => withDerived(tanksRaw, today), [tanksRaw, today]);
 
   const getTank = useCallback(
@@ -189,6 +195,7 @@ export function BravaDataProvider({ children }: { children: React.ReactNode }) {
     updateActivity,
     updateTankMeta,
     resetTankExecution,
+    applyTankUpdate,
   };
 
   return <BravaContext.Provider value={value}>{children}</BravaContext.Provider>;

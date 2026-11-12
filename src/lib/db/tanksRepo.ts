@@ -238,7 +238,7 @@ export async function listTanks(): Promise<Tank[]> {
   return rows.map((r: Record<string, unknown>) => r.data as Tank);
 }
 
-async function getTank(id: string): Promise<Tank | null> {
+export async function getTank(id: string): Promise<Tank | null> {
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM tanks WHERE id = $1", [id]);
   return rows[0]?.data ?? null;

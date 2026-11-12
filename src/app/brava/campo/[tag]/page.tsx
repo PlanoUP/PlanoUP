@@ -6,12 +6,17 @@ import { ChevronLeft, Lock, CheckCircle2, PlayCircle, Minus, Plus } from "lucide
 import StatusBadge from "@/components/brava/StatusBadge";
 import ProgressBar from "@/components/brava/ProgressBar";
 import TankNotes from "@/components/brava/TankNotes";
+import FieldLoginCard from "@/components/brava/campo/FieldLoginCard";
+import FieldEntryForm from "@/components/brava/campo/FieldEntryForm";
+import FieldEntryHistory from "@/components/brava/campo/FieldEntryHistory";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
+import { useFieldAuth } from "@/lib/brava/fieldAuthContext";
 import { formatShort } from "@/lib/brava/date-utils";
 import { Activity } from "@/lib/brava/types";
+import { FieldEntry } from "@/lib/brava/field/types";
 import { cn } from "@/lib/brava/cn";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const QUICK_PROGRESS_VALUES = [25, 50, 75, 100];
 
@@ -19,8 +24,18 @@ export default function CampoTankPage() {
   const params = useParams<{ tag: string }>();
   const { getTank, updateActivity, today } = useBravaData();
   const { isEditor, requireEditor } = useEditAuth();
+  const { fieldUser } = useFieldAuth();
   const [savedPulse, setSavedPulse] = useState(false);
+  const [fieldEntries, setFieldEntries] = useState<FieldEntry[]>([]);
   const tank = getTank(decodeURIComponent(params.tag));
+
+  useEffect(() => {
+    if (!tank) return;
+    fetch(`/api/field-entries?tankId=${encodeURIComponent(tank.id)}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((body) => setFieldEntries(body.entries ?? []))
+      .catch(() => {});
+  }, [tank?.id]);
 
   function flashSaved() {
     setSavedPulse(true);
@@ -100,17 +115,39 @@ export default function CampoTankPage() {
         </div>
 
         {!isEditor && (
-          <button
-            type="button"
-            onClick={() => requireEditor()}
-            className="flex w-full items-center justify-center gap-2 rounded-brava-lg border border-dashed border-brava-border bg-brava-white py-3 text-[13px] font-semibold text-brava-text-secondary"
-          >
-            <Lock className="h-4 w-4" />
-            Desbloqueie para registrar atualizações
-          </button>
+          <div className="space-y-2.5">
+            <FieldLoginCard />
+            {!fieldUser && (
+              <button
+                type="button"
+                onClick={() => requireEditor()}
+                className="flex w-full items-center justify-center gap-2 rounded-brava-lg border border-dashed border-brava-border bg-brava-white py-3 text-[13px] font-semibold text-brava-text-secondary"
+              >
+                <Lock className="h-4 w-4" />
+                Ou desbloqueie a edição completa
+              </button>
+            )}
+          </div>
         )}
 
-        {activeActivity ? (
+        {fieldUser && !isEditor && (
+          <>
+            {tank.activities.length > 0 && !activeActivity ? (
+              <div className="flex flex-col items-center gap-2 rounded-brava-lg border border-brava-success-border bg-brava-success-bg py-10 text-center">
+                <CheckCircle2 className="h-7 w-7 text-brava-success" />
+                <p className="text-[13.5px] font-semibold text-brava-success">Todas as etapas concluídas</p>
+              </div>
+            ) : (
+              <FieldEntryForm
+                tank={tank}
+                activity={activeActivity}
+                onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])}
+              />
+            )}
+          </>
+        )}
+
+        {isEditor && activeActivity ? (
           <div className="rounded-brava-lg border border-brava-blue/25 bg-brava-white p-5 shadow-brava-sm">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] font-bold uppercase tracking-wide text-brava-blue">
@@ -196,6 +233,7 @@ export default function CampoTankPage() {
             )}
           </div>
         ) : (
+          isEditor &&
           tank.activities.length > 0 && (
             <div className="flex flex-col items-center gap-2 rounded-brava-lg border border-brava-success-border bg-brava-success-bg py-10 text-center">
               <CheckCircle2 className="h-7 w-7 text-brava-success" />
@@ -235,6 +273,8 @@ export default function CampoTankPage() {
             </div>
           </div>
         )}
+
+        <FieldEntryHistory entries={fieldEntries} />
 
         <TankNotes tank={tank} />
       </div>

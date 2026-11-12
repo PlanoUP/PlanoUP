@@ -11,6 +11,8 @@ const TABLES = [
   "equipment_cost_entries",
   "equipment_map_coordinates",
   "executive_reports",
+  "field_users",
+  "field_entries",
 ];
 
 /** Postgres error codes that mean "the table exists now" — the exact outcome CREATE TABLE IF NOT EXISTS was asked for. */
