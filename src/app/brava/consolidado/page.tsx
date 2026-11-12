@@ -2,15 +2,17 @@
 
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarRange, Wallet, Package } from "lucide-react";
+import { CalendarRange, Wallet, Package, TrendingUp } from "lucide-react";
 import PageHeader from "@/components/brava/PageHeader";
 import CronogramaTab from "@/components/brava/consolidado/CronogramaTab";
 import CustosTab from "@/components/brava/consolidado/CustosTab";
 import MateriaisTab from "@/components/brava/consolidado/MateriaisTab";
+import CurvaSTab from "@/components/brava/consolidado/CurvaSTab";
 import { cn } from "@/lib/brava/cn";
 
 const TABS = [
   { key: "cronograma", label: "Cronograma", icon: CalendarRange },
+  { key: "curva-s", label: "Curva S", icon: TrendingUp },
   { key: "custos", label: "Custos", icon: Wallet },
   { key: "materiais", label: "Materiais", icon: Package },
 ] as const;
@@ -53,6 +55,7 @@ function ConsolidadoContent() {
         </div>
 
         {activeTab === "cronograma" && <CronogramaTab />}
+        {activeTab === "curva-s" && <CurvaSTab />}
         {activeTab === "custos" && <CustosTab />}
         {activeTab === "materiais" && <MateriaisTab />}
       </div>
