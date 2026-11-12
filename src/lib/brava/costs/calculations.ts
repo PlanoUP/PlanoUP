@@ -31,6 +31,20 @@ export function getTagsWithCosts(entries: CostEntry[]): string[] {
   return Array.from(new Set(entries.map((e) => e.tag)));
 }
 
+export interface PeriodTankRow {
+  tag: string;
+  orcado: number;
+  realizado: number | null;
+}
+
+/** Per-tank orçado/realizado for a single period, sorted by orçado desc — e.g. "só os tanques de 2027". */
+export function getTanksByPeriod(entries: CostEntry[], period: CostPeriod): PeriodTankRow[] {
+  return entries
+    .filter((e) => e.period === period)
+    .map((e) => ({ tag: e.tag, orcado: e.orcado, realizado: e.realizado }))
+    .sort((a, b) => b.orcado - a.orcado);
+}
+
 export interface CostPeriodPoint {
   period: CostPeriod;
   label: string;

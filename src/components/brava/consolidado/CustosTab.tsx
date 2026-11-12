@@ -5,7 +5,14 @@ import Link from "next/link";
 import { Wallet, TrendingUp, TrendingDown, Percent } from "lucide-react";
 import { useBravaData } from "@/lib/brava/context";
 import { useCostsData } from "@/lib/brava/costs/context";
-import { computeCostTotals, buildCostScurve, getCostsByTag, getTagsWithCosts, formatCostMM } from "@/lib/brava/costs/calculations";
+import {
+  computeCostTotals,
+  buildCostScurve,
+  getCostsByTag,
+  getTagsWithCosts,
+  getTanksByPeriod,
+  formatCostMM,
+} from "@/lib/brava/costs/calculations";
 import KpiCard from "@/components/brava/KpiCard";
 import CostScurveChart from "@/components/brava/costs/CostScurveChart";
 
@@ -17,6 +24,8 @@ export default function CustosTab() {
 
   const totals = useMemo(() => computeCostTotals(costs), [costs]);
   const scurve = useMemo(() => buildCostScurve(costs), [costs]);
+  const tanks2027 = useMemo(() => getTanksByPeriod(costs, "2027"), [costs]);
+  const total2027 = useMemo(() => tanks2027.reduce((acc, r) => acc + r.orcado, 0), [tanks2027]);
 
   const maintenanceTanksWithCosts = useMemo(() => {
     const tagsWithCosts = new Set(getTagsWithCosts(costs).map((t) => t.toUpperCase()));
@@ -49,6 +58,40 @@ export default function CustosTab() {
         </p>
         <CostScurveChart data={scurve} />
       </div>
+
+      {tanks2027.length > 0 && (
+        <div className="rounded-brava-lg border border-brava-border bg-brava-white p-5 shadow-brava-sm sm:p-6">
+          <h3 className="mb-1 text-[14px] font-bold text-brava-text">CAPEX 2027 — Tanques</h3>
+          <p className="mb-4 text-[12.5px] text-brava-text-secondary">
+            Tanques com orçamento previsto para 2027 · {tanks2027.length} tanque{tanks2027.length === 1 ? "" : "s"}.
+          </p>
+          <div className="overflow-hidden rounded-brava-md border border-brava-border">
+            <table className="w-full text-[12.5px]">
+              <thead>
+                <tr className="border-b border-brava-border bg-brava-bg text-left text-[11px] font-semibold uppercase tracking-wide text-brava-text-secondary">
+                  <th className="px-4 py-2.5">Tanque</th>
+                  <th className="px-4 py-2.5 text-right">Orçado</th>
+                  <th className="px-4 py-2.5 text-right">Realizado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tanks2027.map((row) => (
+                  <tr key={row.tag} className="border-b border-brava-border/60 last:border-0">
+                    <td className="px-4 py-2.5 font-mono font-semibold text-brava-text">{row.tag}</td>
+                    <td className="px-4 py-2.5 text-right text-brava-text">{formatCostMM(row.orcado)}</td>
+                    <td className="px-4 py-2.5 text-right text-brava-text-secondary">{formatCostMM(row.realizado)}</td>
+                  </tr>
+                ))}
+                <tr className="bg-brava-bg font-bold text-brava-text">
+                  <td className="px-4 py-2.5">Total/Ano</td>
+                  <td className="px-4 py-2.5 text-right">{formatCostMM(total2027)}</td>
+                  <td className="px-4 py-2.5 text-right">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-brava-lg border border-brava-border bg-brava-white p-5 shadow-brava-sm sm:p-6">
         <h3 className="mb-1 text-[14px] font-bold text-brava-text">Tanques em Manutenção com Custos</h3>
