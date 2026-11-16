@@ -8,10 +8,11 @@ import StatusBadge from "@/components/brava/StatusBadge";
 import ProgressBar from "@/components/brava/ProgressBar";
 import TankNotes from "@/components/brava/TankNotes";
 import FieldLoginCard from "@/components/brava/campo/FieldLoginCard";
+import DailyLogHeaderCard from "@/components/brava/campo/DailyLogHeaderCard";
 import ActivitySelector from "@/components/brava/campo/ActivitySelector";
 import FieldEntryForm from "@/components/brava/campo/FieldEntryForm";
 import FieldEntryHistory from "@/components/brava/campo/FieldEntryHistory";
-import PtLiberacaoCard from "@/components/brava/campo/PtLiberacaoCard";
+import GerarRelatorioButton from "@/components/brava/campo/GerarRelatorioButton";
 import ActionPlanTrigger from "@/components/brava/campo/ActionPlanTrigger";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
@@ -30,7 +31,7 @@ export default function CampoTankPage() {
   const { fieldUser } = useFieldAuth();
   const [savedPulse, setSavedPulse] = useState(false);
   const [fieldEntries, setFieldEntries] = useState<FieldEntry[]>([]);
-  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+  const [selectedActivityName, setSelectedActivityName] = useState<string | null>(null);
   const tank = getTank(decodeURIComponent(params.tag));
 
   useEffect(() => {
@@ -44,14 +45,6 @@ export default function CampoTankPage() {
   const ordered = useMemo(() => (tank ? [...tank.activities].sort((a, b) => a.order - b.order) : []), [tank]);
   const activeActivity = ordered.find((a) => a.status !== "CONCLUIDO") ?? null;
   const activeIndex = activeActivity ? ordered.indexOf(activeActivity) : -1;
-
-  useEffect(() => {
-    if (selectedActivityId && ordered.some((a) => a.id === selectedActivityId)) return;
-    setSelectedActivityId(activeActivity?.id ?? ordered[0]?.id ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tank?.id, ordered.length]);
-
-  const selectedActivity = ordered.find((a) => a.id === selectedActivityId) ?? null;
 
   function flashSaved() {
     setSavedPulse(true);
@@ -99,6 +92,7 @@ export default function CampoTankPage() {
   // allocated never sees the registration tools for it either.
   const allocationBlocked =
     !isEditor && !!fieldUser && !fieldUser.allocatedTags.map((t) => t.toUpperCase()).includes(tank.tag.toUpperCase());
+  const canRegister = (fieldUser || isEditor) && !allocationBlocked;
 
   return (
     <div className="pb-24">
@@ -156,26 +150,18 @@ export default function CampoTankPage() {
           </div>
         )}
 
-        {fieldUser && !isEditor && !allocationBlocked && (
+        {/* Primeiro item do fluxo de registro: PT (número + horário) e efetivo do dia. */}
+        {canRegister && <DailyLogHeaderCard tank={tank} />}
+
+        {canRegister && (
           <>
-            {ordered.length > 0 ? (
-              <>
-                <ActivitySelector activities={ordered} selectedId={selectedActivityId} onSelect={setSelectedActivityId} />
-                <FieldEntryForm
-                  key={selectedActivity?.id ?? "no-activity"}
-                  tank={tank}
-                  activity={selectedActivity}
-                  onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])}
-                />
-              </>
-            ) : (
-              <FieldEntryForm
-                key="no-activity"
-                tank={tank}
-                activity={null}
-                onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])}
-              />
-            )}
+            <ActivitySelector selected={selectedActivityName} onSelect={setSelectedActivityName} />
+            <FieldEntryForm
+              key={selectedActivityName ?? "none"}
+              tank={tank}
+              activityName={selectedActivityName ?? ""}
+              onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])}
+            />
           </>
         )}
 
@@ -308,9 +294,9 @@ export default function CampoTankPage() {
 
         <FieldEntryHistory entries={fieldEntries} />
 
-        {(fieldUser || isEditor) && !allocationBlocked && <PtLiberacaoCard tank={tank} onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])} />}
+        {canRegister && <GerarRelatorioButton tank={tank} />}
 
-        {(fieldUser || isEditor) && !allocationBlocked && <ActionPlanTrigger tank={tank} />}
+        {canRegister && <ActionPlanTrigger tank={tank} />}
 
         <TankNotes tank={tank} />
       </div>

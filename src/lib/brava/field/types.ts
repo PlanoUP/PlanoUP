@@ -1,9 +1,18 @@
 // Fiscal field-registration domain — individual Fiscal accounts, distinct
 // from the single shared "editor" password, plus a dated, attributed log of
-// what each one registers from a tank in the field (progress, observação,
-// ocorrência, material consumido, fotos). Never a source of truth for a
-// tank's own fields — a field entry's progress update still lands through
-// tanksRepo.updateTankActivity exactly like an editor's own edit would.
+// what each one registers from a tank in the field: a running list of
+// activities as they happen during the day (not tied to the tank's formal
+// Gantt schedule), each with its own start/end time, observação and fotos,
+// plus one "day header" per tank+date (PT número/horário, efetivo) that the
+// day's PDF report is built from.
+
+/** Quick-pick activity labels offered in Campo — a Fiscal can also type a custom one via "+ Adicionar atividade". */
+export const PRESET_FIELD_ACTIVITIES = [
+  "Início da pré-parada",
+  "Materiais",
+  "Término da pré-parada",
+  "Início da parada",
+] as const;
 
 export interface FieldUser {
   id: string;
@@ -28,33 +37,41 @@ export function toPublicFieldUser(user: FieldUser): FieldUserPublic {
 
 export interface FieldEntryInput {
   tankId: string;
-  activityId: string | null;
-  /** New progress (0-100) for that activity, or null when this entry only carries an observação/fotos without touching progress. */
-  progress: number | null;
+  /** One of PRESET_FIELD_ACTIVITIES, or a custom label the Fiscal typed. */
+  activityName: string;
+  horarioInicio: string | null;
+  horarioTermino: string | null;
   observacao: string;
   ocorrencia: boolean;
-  materialDescricao: string;
-  materialQuantidade: string;
   photos: string[];
-  /** "HH:MM" when this entry is a "liberação da PT" record — null for a normal avanço/observação entry. */
-  ptHorario: string | null;
 }
 
 export interface FieldEntry {
   id: string;
   tankId: string;
   tankTag: string;
-  activityId: string | null;
-  activityName: string | null;
+  /** YYYY-MM-DD, assigned server-side at creation — the day this entry's report groups it into. */
+  date: string;
+  activityName: string;
+  horarioInicio: string | null;
+  horarioTermino: string | null;
   userId: string;
   userName: string;
-  progressBefore: number | null;
-  progressAfter: number | null;
   observacao: string;
   ocorrencia: boolean;
-  materialDescricao: string;
-  materialQuantidade: string;
   photos: string[];
-  ptHorario: string | null;
   createdAt: string;
+}
+
+/** One per tank+date — the PT release info and efetivo for that day, pinned at the top of Campo and of the day's PDF report. Upserted (last write wins), not an append-only log. */
+export interface FieldDailyLog {
+  id: string; // `${tankId}__${date}`
+  tankId: string;
+  tankTag: string;
+  date: string;
+  ptNumero: string;
+  ptHorario: string | null;
+  efetivo: string;
+  updatedAt: string;
+  updatedByName: string;
 }

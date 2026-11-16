@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1794827354.5652,
-    "seen": 1794827934.0808983,
-    "ast_hash": "424f3f8e298c0d60f4041215171104be",
+    "mtime": 1794835297.68365,
+    "seen": 1794835726.8109803,
+    "ast_hash": "695c48ef99909e170a528e25b185a21e",
     "semantic_hash": ""
   },
   "postcss.config.mjs": {
@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/app/brava/campo/[tag]/page.tsx": {
-    "mtime": 1794827862.9532301,
-    "seen": 1794827934.0809574,
-    "ast_hash": "1e3dd43f620c020757abc26bd46dd431",
+    "mtime": 1794835548.563665,
+    "seen": 1794835726.8110952,
+    "ast_hash": "eda3405936edcbc24b6425c28e57280c",
     "semantic_hash": ""
   },
   "src/app/brava/campo/page.tsx": {
@@ -1476,9 +1476,9 @@
     "semantic_hash": ""
   },
   "src/lib/db/schema.ts": {
-    "mtime": 1794827547.9212115,
-    "seen": 1794827934.0812974,
-    "ast_hash": "7732bd026a2174a5b71ac7a92574e682",
+    "mtime": 1794835335.3876522,
+    "seen": 1794835726.8116443,
+    "ast_hash": "a95e2734a9914cf9f01ef1989e9dff28",
     "semantic_hash": ""
   },
   "src/lib/db/settingsRepo.ts": {
@@ -1890,9 +1890,9 @@
     "semantic_hash": ""
   },
   "src/app/api/field-entries/route.ts": {
-    "mtime": 1794827599.5532146,
-    "seen": 1794827934.080938,
-    "ast_hash": "6887c6e73c0ba8614968b5b74e5c49f2",
+    "mtime": 1794835347.643653,
+    "seen": 1794835726.8110578,
+    "ast_hash": "ce6b565e4db24d9ab1c71276e5ef1b50",
     "semantic_hash": ""
   },
   "src/app/api/field-users/[id]/route.ts": {
@@ -1938,33 +1938,27 @@
     "semantic_hash": ""
   },
   "src/components/brava/campo/ActivitySelector.tsx": {
-    "mtime": 1794827778.753225,
-    "seen": 1794827934.0810623,
-    "ast_hash": "572338cf68f7b174738a0cff3097fbb3",
+    "mtime": 1794835432.943658,
+    "seen": 1794835726.8112643,
+    "ast_hash": "694729e1846b82024bb09903dc3a84e9",
     "semantic_hash": ""
   },
   "src/components/brava/campo/FieldEntryForm.tsx": {
-    "mtime": 1794827354.9216113,
-    "seen": 1794827934.0810637,
-    "ast_hash": "0babdb4eeb215d357699066910f82f3a",
+    "mtime": 1794835457.5076594,
+    "seen": 1794835726.8112686,
+    "ast_hash": "52fc09e12506721f89ad34511849df5e",
     "semantic_hash": ""
   },
   "src/components/brava/campo/FieldEntryHistory.tsx": {
-    "mtime": 1794827816.2452273,
-    "seen": 1794827934.0810647,
-    "ast_hash": "9db5512f2637527ab3e964206e7a3541",
+    "mtime": 1794835489.9556615,
+    "seen": 1794835726.8112707,
+    "ast_hash": "86f1ee934bf7f92ccfa58c927c0ca2d2",
     "semantic_hash": ""
   },
   "src/components/brava/campo/FieldLoginCard.tsx": {
     "mtime": 1794827354.922968,
     "seen": 1794827934.0810661,
     "ast_hash": "5cbd3baaae1103b68208e8a7d8815d84",
-    "semantic_hash": ""
-  },
-  "src/components/brava/campo/PtLiberacaoCard.tsx": {
-    "mtime": 1794827792.689226,
-    "seen": 1794827934.0810676,
-    "ast_hash": "da59d4169ad32e96abc1c50e58579d39",
     "semantic_hash": ""
   },
   "src/components/brava/consolidado/CurvaSTab.tsx": {
@@ -1998,9 +1992,9 @@
     "semantic_hash": ""
   },
   "src/lib/brava/field/types.ts": {
-    "mtime": 1794827536.0172107,
-    "seen": 1794827934.0811875,
-    "ast_hash": "a1430df0b57ad83254ede805e73a2580",
+    "mtime": 1794835377.1796548,
+    "seen": 1794835726.8115225,
+    "ast_hash": "772bd486291a58eeea8cd8a713405e07",
     "semantic_hash": ""
   },
   "src/lib/brava/fieldAuthContext.tsx": {
@@ -2022,9 +2016,9 @@
     "semantic_hash": ""
   },
   "src/lib/db/fieldEntriesRepo.ts": {
-    "mtime": 1794827354.9284964,
-    "seen": 1794827934.0812907,
-    "ast_hash": "4abf8489b35677090fbd0648df172022",
+    "mtime": 1794835322.2116516,
+    "seen": 1794835726.8116333,
+    "ast_hash": "58251260bb0d4d244125593272d8f081",
     "semantic_hash": ""
   },
   "src/lib/db/fieldUsersRepo.ts": {
@@ -2045,10 +2039,46 @@
     "ast_hash": "67d88e9d0760c3ba54c75dfd9551c1c5",
     "semantic_hash": ""
   },
+  "src/app/api/field-daily-log/route.ts": {
+    "mtime": 1794835372.6716545,
+    "seen": 1794835726.8110445,
+    "ast_hash": "9faa1eef71f38cab3053bd9b8cf8ec03",
+    "semantic_hash": ""
+  },
+  "src/app/api/field-entries/report/route.tsx": {
+    "mtime": 1794835577.2836666,
+    "seen": 1794835726.8110495,
+    "ast_hash": "0da054e12a56744c5d76686081024890",
+    "semantic_hash": ""
+  },
+  "src/components/brava/campo/DailyLogHeaderCard.tsx": {
+    "mtime": 1794835474.1716604,
+    "seen": 1794835726.8112664,
+    "ast_hash": "9fcbc8fd8b93eae8f150d72763cd6456",
+    "semantic_hash": ""
+  },
+  "src/components/brava/campo/GerarRelatorioButton.tsx": {
+    "mtime": 1794835497.755662,
+    "seen": 1794835726.8112748,
+    "ast_hash": "b177a818276859ffefbed4249af099cf",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/field/DailyReportDocument.tsx": {
+    "mtime": 1794835407.9436567,
+    "seen": 1794835726.811514,
+    "ast_hash": "a0e0a0d8625c03d056a76b1b591838a0",
+    "semantic_hash": ""
+  },
+  "src/lib/db/fieldDailyLogRepo.ts": {
+    "mtime": 1794835367.7716541,
+    "seen": 1794835726.8116312,
+    "ast_hash": "53a0070c0a56b4e15d3e40c7503c07e5",
+    "semantic_hash": ""
+  },
   "package-lock.json": {
-    "mtime": 1794827380.0972016,
-    "seen": 1794827934.0814152,
-    "ast_hash": "a0a4ac42f2cb644bd2f1e0b3ddf98faa",
+    "mtime": 1794835297.72365,
+    "seen": 1794835726.8117833,
+    "ast_hash": "a413833e2167e0bd214c262105d67972",
     "semantic_hash": ""
   }
 }

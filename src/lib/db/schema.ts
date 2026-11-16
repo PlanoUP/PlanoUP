@@ -14,6 +14,7 @@ const TABLES = [
   "field_users",
   "field_entries",
   "field_action_plans",
+  "field_daily_logs",
 ];
 
 /** Postgres error codes that mean "the table exists now" — the exact outcome CREATE TABLE IF NOT EXISTS was asked for. */

@@ -15,6 +15,17 @@ export async function listFieldEntries(tankId?: string): Promise<FieldEntry[]> {
   return (rows as Record<string, unknown>[]).map((r) => r.data as FieldEntry);
 }
 
+/** Entries for one tank's one day, oldest first — the exact sequence the PDF report lists. */
+export async function listFieldEntriesByDate(tankId: string, date: string): Promise<FieldEntry[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql.query(
+    "SELECT data FROM field_entries WHERE data->>'tankId' = $1 AND data->>'date' = $2 ORDER BY data->>'createdAt' ASC",
+    [tankId, date]
+  );
+  return (rows as Record<string, unknown>[]).map((r) => r.data as FieldEntry);
+}
+
 export async function createFieldEntry(entry: Omit<FieldEntry, "id" | "createdAt">): Promise<FieldEntry> {
   await ensureSchema();
   const full: FieldEntry = { ...entry, id: genId(), createdAt: new Date().toISOString() };

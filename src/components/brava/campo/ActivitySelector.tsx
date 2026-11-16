@@ -1,53 +1,93 @@
 "use client";
 
-import { CheckCircle2, Circle, PlayCircle } from "lucide-react";
-import { Activity } from "@/lib/brava/types";
+import { useState } from "react";
+import { Plus, Check } from "lucide-react";
+import { PRESET_FIELD_ACTIVITIES } from "@/lib/brava/field/types";
 import { cn } from "@/lib/brava/cn";
 
-/** Lets a Fiscal pick which etapa to register against — not locked to "the current one" so progress for any stage can be logged. */
+/** Lets a Fiscal pick which activity just happened — from the quick presets, a custom one typed earlier today, or a brand new one via "+ Adicionar atividade". */
 export default function ActivitySelector({
-  activities,
-  selectedId,
+  selected,
   onSelect,
 }: {
-  activities: Activity[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
+  selected: string | null;
+  onSelect: (label: string) => void;
 }) {
-  const ordered = [...activities].sort((a, b) => a.order - b.order);
+  const [customLabels, setCustomLabels] = useState<string[]>([]);
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  const chips: string[] = [...PRESET_FIELD_ACTIVITIES, ...customLabels];
+
+  function confirmCustom() {
+    const label = draft.trim();
+    if (!label) {
+      setAdding(false);
+      return;
+    }
+    if (!chips.includes(label)) setCustomLabels((prev) => [...prev, label]);
+    onSelect(label);
+    setDraft("");
+    setAdding(false);
+  }
 
   return (
     <div className="rounded-brava-lg border border-brava-border bg-brava-white p-3 shadow-brava-sm">
       <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wide text-brava-text-secondary">Etapa</p>
-      <div className="flex flex-col gap-1.5">
-        {ordered.map((a) => {
-          const active = a.id === selectedId;
-          const Icon = a.status === "CONCLUIDO" ? CheckCircle2 : a.status === "ATUAL" || a.status === "ATRASADO" ? PlayCircle : Circle;
+      <div className="flex flex-wrap gap-1.5">
+        {chips.map((label) => {
+          const active = label === selected;
           return (
             <button
-              key={a.id}
+              key={label}
               type="button"
-              onClick={() => onSelect(a.id)}
+              onClick={() => onSelect(label)}
               className={cn(
-                "flex items-center gap-2.5 rounded-brava-sm border px-3 py-2.5 text-left transition-colors",
-                active ? "border-brava-blue bg-brava-blue/5" : "border-transparent"
+                "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12.5px] font-semibold transition-colors",
+                active
+                  ? "border-brava-blue bg-brava-blue text-brava-white"
+                  : "border-brava-border bg-brava-white text-brava-text-secondary"
               )}
             >
-              <Icon
-                className={cn(
-                  "h-4 w-4 shrink-0",
-                  a.status === "CONCLUIDO" && "text-brava-success",
-                  (a.status === "ATUAL" || a.status === "ATRASADO") && "text-brava-blue",
-                  a.status === "FUTURO" && "text-brava-text-secondary"
-                )}
-              />
-              <span className={cn("flex-1 truncate text-[13.5px]", active ? "font-bold text-brava-text" : "text-brava-text")}>
-                {a.name}
-              </span>
-              <span className="shrink-0 font-mono text-[12px] font-bold text-brava-text-secondary">{a.progress}%</span>
+              {active && <Check className="h-3 w-3 shrink-0" />}
+              {label}
             </button>
           );
         })}
+
+        {adding ? (
+          <div className="flex w-full items-center gap-2">
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  confirmCustom();
+                }
+              }}
+              autoFocus
+              placeholder="Nome da atividade"
+              className="min-w-0 flex-1 rounded-brava-sm border border-brava-border px-3 py-1.5 text-[13px] focus:border-brava-blue focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={confirmCustom}
+              className="shrink-0 rounded-brava-sm bg-brava-blue px-3 py-1.5 text-[12px] font-bold text-brava-white"
+            >
+              OK
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="flex items-center gap-1.5 rounded-full border border-dashed border-brava-border px-3 py-1.5 text-[12.5px] font-semibold text-brava-text-secondary"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Adicionar atividade
+          </button>
+        )}
       </div>
     </div>
   );

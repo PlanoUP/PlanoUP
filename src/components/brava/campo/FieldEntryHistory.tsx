@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Clock, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, Image as ImageIcon } from "lucide-react";
 import { FieldEntry } from "@/lib/brava/field/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
@@ -33,19 +33,14 @@ export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="text-[12.5px] font-bold text-brava-text">{entry.userName}</p>
+              <p className="text-[12.5px] font-bold text-brava-text">{entry.activityName}</p>
               <p className="shrink-0 font-mono text-[11px] text-brava-text-secondary">{formatDateTime(entry.createdAt)}</p>
             </div>
-            {entry.ptHorario && (
-              <p className="mt-0.5 flex items-center gap-1 text-[12px] font-semibold text-brava-blue-dark">
-                <Clock className="h-3.5 w-3.5" />
-                PT liberada às {entry.ptHorario}
-              </p>
-            )}
-            {entry.progressAfter !== null && (
+            <p className="mt-0.5 text-[11px] text-brava-text-secondary">{entry.userName}</p>
+            {(entry.horarioInicio || entry.horarioTermino) && (
               <p className="mt-0.5 text-[12px] text-brava-text-secondary">
-                {entry.activityName ? `${entry.activityName}: ` : ""}
-                {entry.progressBefore ?? 0}% → <span className="font-bold text-brava-blue">{entry.progressAfter}%</span>
+                Início: <span className="font-semibold text-brava-text">{entry.horarioInicio || "—"}</span> · Término:{" "}
+                <span className="font-semibold text-brava-text">{entry.horarioTermino || "—"}</span>
               </p>
             )}
             {entry.observacao && <p className="mt-1 text-[13px] text-brava-text">{entry.observacao}</p>}
@@ -53,12 +48,6 @@ export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }
               <p className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-brava-danger">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 Ocorrência de segurança/qualidade
-              </p>
-            )}
-            {entry.materialDescricao && (
-              <p className="mt-1 text-[12px] text-brava-text-secondary">
-                Material: {entry.materialDescricao}
-                {entry.materialQuantidade ? ` — ${entry.materialQuantidade}` : ""}
               </p>
             )}
             {entry.photos.length > 0 && (
@@ -71,12 +60,7 @@ export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }
                 ))}
               </div>
             )}
-            {entry.photos.length === 0 &&
-              entry.ocorrencia === false &&
-              !entry.observacao &&
-              !entry.materialDescricao &&
-              entry.progressAfter === null &&
-              !entry.ptHorario && (
+            {entry.photos.length === 0 && entry.ocorrencia === false && !entry.observacao && !entry.horarioInicio && !entry.horarioTermino && (
               <p className="mt-0.5 flex items-center gap-1 text-[11px] text-brava-text-secondary">
                 <ImageIcon className="h-3 w-3" />
                 Registro vazio
