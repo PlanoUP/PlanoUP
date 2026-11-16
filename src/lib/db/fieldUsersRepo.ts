@@ -11,6 +11,11 @@ export function hashFieldPassword(password: string): string {
   return createHash("sha256").update(password).digest("hex");
 }
 
+/** Rows saved before `allocatedTags` existed have no such key — default them to empty so every caller can rely on an array. */
+function normalize(user: FieldUser): FieldUser {
+  return { ...user, allocatedTags: Array.isArray(user.allocatedTags) ? user.allocatedTags : [] };
+}
+
 async function saveFieldUser(user: FieldUser): Promise<void> {
   const sql = getSql();
   await sql.query(
@@ -23,25 +28,32 @@ export async function listFieldUsers(): Promise<FieldUser[]> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM field_users ORDER BY data->>'name'");
-  return (rows as Record<string, unknown>[]).map((r) => r.data as FieldUser);
+  return (rows as Record<string, unknown>[]).map((r) => normalize(r.data as FieldUser));
 }
 
 export async function getFieldUser(id: string): Promise<FieldUser | null> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM field_users WHERE id = $1", [id]);
-  return (rows[0]?.data as FieldUser | undefined) ?? null;
+  const user = rows[0]?.data as FieldUser | undefined;
+  return user ? normalize(user) : null;
 }
 
 export async function getFieldUserByUsername(username: string): Promise<FieldUser | null> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql.query("SELECT data FROM field_users WHERE lower(data->>'username') = lower($1)", [username]);
-  return (rows[0]?.data as FieldUser | undefined) ?? null;
+  const user = rows[0]?.data as FieldUser | undefined;
+  return user ? normalize(user) : null;
 }
 
 /** Throws USERNAME_TAKEN if another field user already has this username (case-insensitive). */
-export async function createFieldUser(input: { name: string; username: string; password: string }): Promise<FieldUser> {
+export async function createFieldUser(input: {
+  name: string;
+  username: string;
+  password: string;
+  allocatedTags?: string[];
+}): Promise<FieldUser> {
   const existing = await getFieldUserByUsername(input.username);
   if (existing) throw new Error("USERNAME_TAKEN");
 
@@ -52,6 +64,7 @@ export async function createFieldUser(input: { name: string; username: string; p
     username: input.username.trim().toLowerCase(),
     passwordHash: hashFieldPassword(input.password),
     active: true,
+    allocatedTags: Array.isArray(input.allocatedTags) ? input.allocatedTags : [],
     createdAt: now,
     updatedAt: now,
   };
@@ -71,6 +84,14 @@ export async function setFieldUserPassword(id: string, newPassword: string): Pro
   const user = await getFieldUser(id);
   if (!user) return null;
   const updated: FieldUser = { ...user, passwordHash: hashFieldPassword(newPassword), updatedAt: new Date().toISOString() };
+  await saveFieldUser(updated);
+  return updated;
+}
+
+export async function setFieldUserAllocatedTags(id: string, allocatedTags: string[]): Promise<FieldUser | null> {
+  const user = await getFieldUser(id);
+  if (!user) return null;
+  const updated: FieldUser = { ...user, allocatedTags, updatedAt: new Date().toISOString() };
   await saveFieldUser(updated);
   return updated;
 }

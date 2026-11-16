@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { setFieldUserActive, setFieldUserPassword } from "@/lib/db/fieldUsersRepo";
+import { setFieldUserActive, setFieldUserPassword, setFieldUserAllocatedTags } from "@/lib/db/fieldUsersRepo";
 import { isRequestEditor } from "@/lib/auth/editAuth";
 import { toPublicFieldUser } from "@/lib/brava/field/types";
 
@@ -20,6 +20,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         return NextResponse.json({ error: "INVALID_INPUT", message: "Senha deve ter ao menos 4 caracteres." }, { status: 400 });
       }
       user = await setFieldUserPassword(params.id, body.password);
+    }
+    if (Array.isArray(body.allocatedTags)) {
+      user = await setFieldUserAllocatedTags(
+        params.id,
+        body.allocatedTags.filter((t: unknown) => typeof t === "string")
+      );
     }
     if (!user) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
     return NextResponse.json({ user: toPublicFieldUser(user) });

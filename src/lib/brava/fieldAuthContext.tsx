@@ -7,6 +7,7 @@ interface FieldUserPublic {
   name: string;
   username: string;
   active: boolean;
+  allocatedTags: string[];
   createdAt: string;
   updatedAt: string;
 }

@@ -1,14 +1,18 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Lock, CheckCircle2, PlayCircle, Minus, Plus } from "lucide-react";
+import { ChevronLeft, Lock, CheckCircle2, PlayCircle, Minus, Plus, ShieldAlert } from "lucide-react";
 import StatusBadge from "@/components/brava/StatusBadge";
 import ProgressBar from "@/components/brava/ProgressBar";
 import TankNotes from "@/components/brava/TankNotes";
 import FieldLoginCard from "@/components/brava/campo/FieldLoginCard";
+import ActivitySelector from "@/components/brava/campo/ActivitySelector";
 import FieldEntryForm from "@/components/brava/campo/FieldEntryForm";
 import FieldEntryHistory from "@/components/brava/campo/FieldEntryHistory";
+import PtLiberacaoCard from "@/components/brava/campo/PtLiberacaoCard";
+import ActionPlanTrigger from "@/components/brava/campo/ActionPlanTrigger";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { useFieldAuth } from "@/lib/brava/fieldAuthContext";
@@ -16,7 +20,6 @@ import { formatShort } from "@/lib/brava/date-utils";
 import { Activity } from "@/lib/brava/types";
 import { FieldEntry } from "@/lib/brava/field/types";
 import { cn } from "@/lib/brava/cn";
-import { useEffect, useState } from "react";
 
 const QUICK_PROGRESS_VALUES = [25, 50, 75, 100];
 
@@ -27,6 +30,7 @@ export default function CampoTankPage() {
   const { fieldUser } = useFieldAuth();
   const [savedPulse, setSavedPulse] = useState(false);
   const [fieldEntries, setFieldEntries] = useState<FieldEntry[]>([]);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const tank = getTank(decodeURIComponent(params.tag));
 
   useEffect(() => {
@@ -36,6 +40,18 @@ export default function CampoTankPage() {
       .then((body) => setFieldEntries(body.entries ?? []))
       .catch(() => {});
   }, [tank?.id]);
+
+  const ordered = useMemo(() => (tank ? [...tank.activities].sort((a, b) => a.order - b.order) : []), [tank]);
+  const activeActivity = ordered.find((a) => a.status !== "CONCLUIDO") ?? null;
+  const activeIndex = activeActivity ? ordered.indexOf(activeActivity) : -1;
+
+  useEffect(() => {
+    if (selectedActivityId && ordered.some((a) => a.id === selectedActivityId)) return;
+    setSelectedActivityId(activeActivity?.id ?? ordered[0]?.id ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tank?.id, ordered.length]);
+
+  const selectedActivity = ordered.find((a) => a.id === selectedActivityId) ?? null;
 
   function flashSaved() {
     setSavedPulse(true);
@@ -78,9 +94,11 @@ export default function CampoTankPage() {
     );
   }
 
-  const ordered = [...tank.activities].sort((a, b) => a.order - b.order);
-  const activeActivity = ordered.find((a) => a.status !== "CONCLUIDO") ?? null;
-  const activeIndex = activeActivity ? ordered.indexOf(activeActivity) : -1;
+  // Defense in depth — the Campo list already filters by allocation, but the
+  // URL itself is guessable, so a logged-in Fiscal without this tank
+  // allocated never sees the registration tools for it either.
+  const allocationBlocked =
+    !isEditor && !!fieldUser && !fieldUser.allocatedTags.map((t) => t.toUpperCase()).includes(tank.tag.toUpperCase());
 
   return (
     <div className="pb-24">
@@ -130,17 +148,31 @@ export default function CampoTankPage() {
           </div>
         )}
 
-        {fieldUser && !isEditor && (
+        {allocationBlocked && (
+          <div className="flex flex-col items-center gap-2 rounded-brava-lg border border-brava-danger-border bg-brava-danger-bg py-10 text-center">
+            <ShieldAlert className="h-7 w-7 text-brava-danger" />
+            <p className="text-[13.5px] font-semibold text-brava-danger">Este equipamento não está alocado para você</p>
+            <p className="max-w-xs px-6 text-[12px] text-brava-text-secondary">Fale com o administrador para liberar o acesso.</p>
+          </div>
+        )}
+
+        {fieldUser && !isEditor && !allocationBlocked && (
           <>
-            {tank.activities.length > 0 && !activeActivity ? (
-              <div className="flex flex-col items-center gap-2 rounded-brava-lg border border-brava-success-border bg-brava-success-bg py-10 text-center">
-                <CheckCircle2 className="h-7 w-7 text-brava-success" />
-                <p className="text-[13.5px] font-semibold text-brava-success">Todas as etapas concluídas</p>
-              </div>
+            {ordered.length > 0 ? (
+              <>
+                <ActivitySelector activities={ordered} selectedId={selectedActivityId} onSelect={setSelectedActivityId} />
+                <FieldEntryForm
+                  key={selectedActivity?.id ?? "no-activity"}
+                  tank={tank}
+                  activity={selectedActivity}
+                  onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])}
+                />
+              </>
             ) : (
               <FieldEntryForm
+                key="no-activity"
                 tank={tank}
-                activity={activeActivity}
+                activity={null}
                 onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])}
               />
             )}
@@ -242,7 +274,7 @@ export default function CampoTankPage() {
           )
         )}
 
-        {ordered.length > 0 && (
+        {isEditor && ordered.length > 0 && (
           <div className="rounded-brava-lg border border-brava-border bg-brava-white p-4 shadow-brava-sm">
             <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-brava-text-secondary">
               Todas as etapas
@@ -275,6 +307,10 @@ export default function CampoTankPage() {
         )}
 
         <FieldEntryHistory entries={fieldEntries} />
+
+        {(fieldUser || isEditor) && !allocationBlocked && <PtLiberacaoCard tank={tank} onSubmitted={(entry) => setFieldEntries((prev) => [entry, ...prev])} />}
+
+        {(fieldUser || isEditor) && !allocationBlocked && <ActionPlanTrigger tank={tank} />}
 
         <TankNotes tank={tank} />
       </div>

@@ -12,6 +12,8 @@ export interface FieldUser {
   username: string;
   passwordHash: string;
   active: boolean;
+  /** Tank TAGs this Fiscal may see and register against in /brava/campo — empty means none allocated yet. */
+  allocatedTags: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +36,8 @@ export interface FieldEntryInput {
   materialDescricao: string;
   materialQuantidade: string;
   photos: string[];
+  /** "HH:MM" when this entry is a "liberação da PT" record — null for a normal avanço/observação entry. */
+  ptHorario: string | null;
 }
 
 export interface FieldEntry {
@@ -51,5 +55,6 @@ export interface FieldEntry {
   materialDescricao: string;
   materialQuantidade: string;
   photos: string[];
+  ptHorario: string | null;
   createdAt: string;
 }

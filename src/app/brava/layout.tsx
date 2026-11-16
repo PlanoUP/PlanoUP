@@ -15,6 +15,7 @@ import Sidebar from "@/components/brava/Sidebar";
 import MobileTopBar from "@/components/brava/MobileTopBar";
 import DataStatusGate from "@/components/brava/DataStatusGate";
 import EditPasswordModal from "@/components/brava/EditPasswordModal";
+import ActionPlanBanner from "@/components/brava/ActionPlanBanner";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -46,7 +47,10 @@ export default function BravaLayout({ children }: { children: React.ReactNode })
                             <EquipmentMapCoordinatesProvider>
                               <Sidebar />
                               <MobileTopBar />
-                              <div className="lg:pl-64">{children}</div>
+                              <div className="lg:pl-64">
+                                <ActionPlanBanner />
+                                {children}
+                              </div>
                             </EquipmentMapCoordinatesProvider>
                           </EquipmentCostsDataProvider>
                         </EquipmentMaterialsDataProvider>

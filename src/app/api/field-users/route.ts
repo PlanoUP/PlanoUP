@@ -24,14 +24,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "UNAUTHORIZED", message: "Desbloqueie o modo de edição para cadastrar um usuário." }, { status: 401 });
   }
   try {
-    const { name, username, password } = await request.json();
+    const { name, username, password, allocatedTags } = await request.json();
     if (!name?.trim() || !username?.trim() || !password || password.length < 4) {
       return NextResponse.json(
         { error: "INVALID_INPUT", message: "Nome, usuário e senha (mín. 4 caracteres) são obrigatórios." },
         { status: 400 }
       );
     }
-    const user = await createFieldUser({ name, username, password });
+    const user = await createFieldUser({
+      name,
+      username,
+      password,
+      allocatedTags: Array.isArray(allocatedTags) ? allocatedTags.filter((t) => typeof t === "string") : [],
+    });
     return NextResponse.json({ user: toPublicFieldUser(user) }, { status: 201 });
   } catch (err) {
     if (err instanceof Error && err.message === "USERNAME_TAKEN") {

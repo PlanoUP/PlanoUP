@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       materialDescricao: body.materialDescricao?.trim() ?? "",
       materialQuantidade: body.materialQuantidade?.trim() ?? "",
       photos: Array.isArray(body.photos) ? body.photos.filter((p) => typeof p === "string") : [],
+      ptHorario: typeof body.ptHorario === "string" && body.ptHorario.length > 0 ? body.ptHorario : null,
     });
 
     return NextResponse.json({ entry, tank: updatedTank }, { status: 201 });
