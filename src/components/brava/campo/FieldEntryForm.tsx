@@ -193,11 +193,11 @@ export default function FieldEntryForm({
           </button>
         )}
       </div>
+      {/* No `capture` attribute on purpose — on Android/iOS it forces the camera open directly and hides the "choose from gallery" option in the native picker. Leaving it off lets the browser show both. */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         multiple
         onChange={(e) => addPhotos(e.target.files)}
         className="hidden"
