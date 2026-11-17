@@ -61,6 +61,8 @@ export interface FieldEntry {
   ocorrencia: boolean;
   photos: string[];
   createdAt: string;
+  /** Client-only — set when this is a local, not-yet-synced entry from the offline outbox. Never set by the server. */
+  pendingSync?: boolean;
 }
 
 /** One per tank+date — the PT release info and efetivo for that day, pinned at the top of Campo and of the day's PDF report. Upserted (last write wins), not an append-only log. */

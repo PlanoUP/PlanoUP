@@ -5,6 +5,9 @@ import { AlertOctagon, Send } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { notifyActionPlansChanged } from "@/lib/brava/field/actionPlanBus";
 import { cn } from "@/lib/brava/cn";
+import { fetchWithTimeout, isDefinitelyOffline } from "@/lib/brava/field/offlineFetch";
+import { enqueuePendingAction } from "@/lib/brava/field/offlineQueue";
+import { flushOfflineQueue } from "@/lib/brava/field/offlineSync";
 
 /** Lets a Fiscal flag a critical impediment on this tank — it immediately shows up as a standing alert across the whole painel (ActionPlanBanner), until an editor resolves it. */
 export default function ActionPlanTrigger({ tank }: { tank: TankWithDerived }) {
@@ -13,14 +16,31 @@ export default function ActionPlanTrigger({ tank }: { tank: TankWithDerived }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [queuedMessage, setQueuedMessage] = useState<string | null>(null);
+
+  async function queueOffline() {
+    await enqueuePendingAction("action-plan", tank.tag, { tankId: tank.id, tankTag: tank.tag, description });
+    setDescription("");
+    setOpen(false);
+    setQueuedMessage("Salvo no aparelho — será acionado assim que a internet voltar ✓");
+    window.setTimeout(() => setQueuedMessage(null), 3000);
+    flushOfflineQueue();
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!description.trim()) return;
     setSubmitting(true);
     setError(null);
+
+    if (isDefinitelyOffline()) {
+      await queueOffline();
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      const res = await fetch("/api/action-plans", {
+      const res = await fetchWithTimeout("/api/action-plans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tankId: tank.id, tankTag: tank.tag, description }),
@@ -32,7 +52,11 @@ export default function ActionPlanTrigger({ tank }: { tank: TankWithDerived }) {
       setDone(true);
       window.setTimeout(() => setDone(false), 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao acionar o plano de ação.");
+      if (err instanceof TypeError || (err instanceof DOMException && err.name === "AbortError")) {
+        await queueOffline();
+      } else {
+        setError(err instanceof Error ? err.message : "Falha ao acionar o plano de ação.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -50,6 +74,7 @@ export default function ActionPlanTrigger({ tank }: { tank: TankWithDerived }) {
           Acionar Plano de Ação
         </button>
         {done && <p className="text-center text-[12px] font-semibold text-brava-success">Plano de ação acionado ✓</p>}
+        {queuedMessage && <p className="text-center text-[12px] font-semibold text-brava-warning">{queuedMessage}</p>}
       </div>
     );
   }

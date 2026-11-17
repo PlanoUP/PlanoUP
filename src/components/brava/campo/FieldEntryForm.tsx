@@ -5,6 +5,9 @@ import { Camera, X, AlertTriangle, Send } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { FieldEntry } from "@/lib/brava/field/types";
 import { cn } from "@/lib/brava/cn";
+import { fetchWithTimeout, isDefinitelyOffline } from "@/lib/brava/field/offlineFetch";
+import { enqueuePendingAction } from "@/lib/brava/field/offlineQueue";
+import { flushOfflineQueue } from "@/lib/brava/field/offlineSync";
 
 async function parseErrorMessage(res: Response): Promise<string> {
   try {
@@ -35,6 +38,7 @@ export default function FieldEntryForm({
   const [error, setError] = useState<string | null>(null);
   const [photoWarning, setPhotoWarning] = useState<string | null>(null);
   const [savedPulse, setSavedPulse] = useState(false);
+  const [queuedMessage, setQueuedMessage] = useState<string | null>(null);
 
   function addPhotos(files: FileList | null) {
     if (!files) return;
@@ -52,7 +56,7 @@ export default function FieldEntryForm({
       const formData = new FormData();
       formData.append("file", file);
       try {
-        const res = await fetch("/api/field-entries/photos", { method: "POST", body: formData });
+        const res = await fetchWithTimeout("/api/field-entries/photos", { method: "POST", body: formData });
         if (!res.ok) {
           skipped++;
           continue;
@@ -73,6 +77,34 @@ export default function FieldEntryForm({
     return urls;
   }
 
+  function resetFields() {
+    setHorarioInicio("");
+    setHorarioTermino("");
+    setObservacao("");
+    setOcorrencia(false);
+    setPhotoFiles([]);
+  }
+
+  async function queueOffline() {
+    await enqueuePendingAction("field-entry", tank.tag, {
+      tankId: tank.id,
+      activityName,
+      horarioInicio: horarioInicio || null,
+      horarioTermino: horarioTermino || null,
+      observacao,
+      ocorrencia,
+      photoFiles: [...photoFiles],
+    });
+    resetFields();
+    setQueuedMessage("Salvo no aparelho — será enviado quando a internet voltar ✓");
+    window.setTimeout(() => setQueuedMessage(null), 3000);
+    flushOfflineQueue();
+  }
+
+  function isNetworkFailure(err: unknown): boolean {
+    return err instanceof TypeError || (err instanceof DOMException && err.name === "AbortError");
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!activityName) {
@@ -82,9 +114,17 @@ export default function FieldEntryForm({
     setSubmitting(true);
     setError(null);
     setPhotoWarning(null);
+    setQueuedMessage(null);
+
+    if (isDefinitelyOffline()) {
+      await queueOffline();
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const photos = photoFiles.length > 0 ? await uploadPhotos() : [];
-      const res = await fetch("/api/field-entries", {
+      const res = await fetchWithTimeout("/api/field-entries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -100,15 +140,15 @@ export default function FieldEntryForm({
       if (!res.ok) throw new Error(await parseErrorMessage(res));
       const body = await res.json();
       onSubmitted(body.entry);
-      setHorarioInicio("");
-      setHorarioTermino("");
-      setObservacao("");
-      setOcorrencia(false);
-      setPhotoFiles([]);
+      resetFields();
       setSavedPulse(true);
       window.setTimeout(() => setSavedPulse(false), 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao salvar o registro.");
+      if (isNetworkFailure(err)) {
+        await queueOffline();
+      } else {
+        setError(err instanceof Error ? err.message : "Falha ao salvar o registro.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -215,6 +255,7 @@ export default function FieldEntryForm({
         {submitting ? "Enviando..." : "Enviar registro"}
       </button>
       {savedPulse && <p className="mt-2 text-center text-[12px] font-semibold text-brava-success">Salvo ✓</p>}
+      {queuedMessage && <p className="mt-2 text-center text-[12px] font-semibold text-brava-warning">{queuedMessage}</p>}
     </form>
   );
 }

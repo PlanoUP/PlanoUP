@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/app/brava/campo/[tag]/page.tsx": {
-    "mtime": 1794835548.563665,
-    "seen": 1794835726.8110952,
-    "ast_hash": "eda3405936edcbc24b6425c28e57280c",
+    "mtime": 1794911454.9122171,
+    "seen": 1794911783.8058355,
+    "ast_hash": "e005ec31ffaf80f6405bc9718a743d0d",
     "semantic_hash": ""
   },
   "src/app/brava/campo/page.tsx": {
@@ -1932,9 +1932,9 @@
     "semantic_hash": ""
   },
   "src/components/brava/campo/ActionPlanTrigger.tsx": {
-    "mtime": 1794827805.7212267,
-    "seen": 1794827934.0810614,
-    "ast_hash": "53d8a2a9260a78cc84c84c541751a87c",
+    "mtime": 1794911433.6722157,
+    "seen": 1794911783.8059824,
+    "ast_hash": "39b71d91ce80ef736d6a092f044cad0f",
     "semantic_hash": ""
   },
   "src/components/brava/campo/ActivitySelector.tsx": {
@@ -1944,15 +1944,15 @@
     "semantic_hash": ""
   },
   "src/components/brava/campo/FieldEntryForm.tsx": {
-    "mtime": 1794835457.5076594,
-    "seen": 1794835726.8112686,
-    "ast_hash": "52fc09e12506721f89ad34511849df5e",
+    "mtime": 1794911373.1122122,
+    "seen": 1794911783.8059886,
+    "ast_hash": "73cd82ecfe3d79ffaea32fb7486e2413",
     "semantic_hash": ""
   },
   "src/components/brava/campo/FieldEntryHistory.tsx": {
-    "mtime": 1794835489.9556615,
-    "seen": 1794835726.8112707,
-    "ast_hash": "86f1ee934bf7f92ccfa58c927c0ca2d2",
+    "mtime": 1794911346.1762106,
+    "seen": 1794911783.8059897,
+    "ast_hash": "6decf82949f8d42b5e77543ac12ffa7b",
     "semantic_hash": ""
   },
   "src/components/brava/campo/FieldLoginCard.tsx": {
@@ -1992,9 +1992,9 @@
     "semantic_hash": ""
   },
   "src/lib/brava/field/types.ts": {
-    "mtime": 1794835377.1796548,
-    "seen": 1794835726.8115225,
-    "ast_hash": "772bd486291a58eeea8cd8a713405e07",
+    "mtime": 1794911326.1162095,
+    "seen": 1794911783.8061187,
+    "ast_hash": "12196db8638c303b60af59de51ca7781",
     "semantic_hash": ""
   },
   "src/lib/brava/fieldAuthContext.tsx": {
@@ -2052,9 +2052,9 @@
     "semantic_hash": ""
   },
   "src/components/brava/campo/DailyLogHeaderCard.tsx": {
-    "mtime": 1794835474.1716604,
-    "seen": 1794835726.8112664,
-    "ast_hash": "9fcbc8fd8b93eae8f150d72763cd6456",
+    "mtime": 1794911405.0682142,
+    "seen": 1794911783.8059874,
+    "ast_hash": "839d52edb56d7fd86d1a9ebc8da43259",
     "semantic_hash": ""
   },
   "src/components/brava/campo/GerarRelatorioButton.tsx": {
@@ -2073,6 +2073,60 @@
     "mtime": 1794835367.7716541,
     "seen": 1794835726.8116312,
     "ast_hash": "53a0070c0a56b4e15d3e40c7503c07e5",
+    "semantic_hash": ""
+  },
+  "public/sw-campo.js": {
+    "mtime": 1794911467.3282177,
+    "seen": 1794911783.805748,
+    "ast_hash": "41b1c7e700fb9321362d83f52de38240",
+    "semantic_hash": ""
+  },
+  "src/app/brava/campo/layout.tsx": {
+    "mtime": 1794911475.5322182,
+    "seen": 1794911783.8058422,
+    "ast_hash": "bec2e4680f9363c9b3e66ab41c6ae04f",
+    "semantic_hash": ""
+  },
+  "src/components/brava/campo/OfflineServiceWorkerRegistrar.tsx": {
+    "mtime": 1794911472.4642181,
+    "seen": 1794911783.8059936,
+    "ast_hash": "70d3bb3451c5069074c05957774630a4",
+    "semantic_hash": ""
+  },
+  "src/components/brava/campo/OfflineStatusBar.tsx": {
+    "mtime": 1794911249.0522048,
+    "seen": 1794911783.805995,
+    "ast_hash": "26eb1ab734c38013e6a76a6f47d0d739",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/field/offlineDb.ts": {
+    "mtime": 1794911187.5602012,
+    "seen": 1794911783.8061142,
+    "ast_hash": "714f80ab44db0a9e3f031c07b8884d97",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/field/offlineFetch.ts": {
+    "mtime": 1794911206.0642023,
+    "seen": 1794911783.8061152,
+    "ast_hash": "0c88b074eb527b098de73c1bc24df7b2",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/field/offlineQueue.ts": {
+    "mtime": 1794911335.85621,
+    "seen": 1794911783.8061159,
+    "ast_hash": "9eba788469364da09b80b0ec2a644c09",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/field/offlineSync.ts": {
+    "mtime": 1794911227.4402034,
+    "seen": 1794911783.8061163,
+    "ast_hash": "cbd55ada215ae42d8a9cd1410130eda9",
+    "semantic_hash": ""
+  },
+  "src/lib/brava/field/useOfflineQueue.ts": {
+    "mtime": 1794911234.856204,
+    "seen": 1794911783.8061197,
+    "ast_hash": "2e79058db484430691a2ac5e86111307",
     "semantic_hash": ""
   },
   "package-lock.json": {

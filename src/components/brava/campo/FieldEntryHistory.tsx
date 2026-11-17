@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, Clock, Image as ImageIcon } from "lucide-react";
 import { FieldEntry } from "@/lib/brava/field/types";
 import { formatShort } from "@/lib/brava/date-utils";
 import { cn } from "@/lib/brava/cn";
@@ -29,14 +29,21 @@ export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }
             key={entry.id}
             className={cn(
               "rounded-brava-sm border-l-[3px] bg-brava-bg px-3 py-2.5",
-              entry.ocorrencia ? "border-brava-danger" : "border-brava-blue/40"
+              entry.pendingSync ? "border-brava-warning" : entry.ocorrencia ? "border-brava-danger" : "border-brava-blue/40"
             )}
           >
             <div className="flex items-center justify-between gap-2">
               <p className="text-[12.5px] font-bold text-brava-text">{entry.activityName}</p>
               <p className="shrink-0 font-mono text-[11px] text-brava-text-secondary">{formatDateTime(entry.createdAt)}</p>
             </div>
-            <p className="mt-0.5 text-[11px] text-brava-text-secondary">{entry.userName}</p>
+            {entry.pendingSync ? (
+              <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-brava-warning">
+                <Clock className="h-3 w-3" />
+                {entry.userName}
+              </p>
+            ) : (
+              <p className="mt-0.5 text-[11px] text-brava-text-secondary">{entry.userName}</p>
+            )}
             {(entry.horarioInicio || entry.horarioTermino) && (
               <p className="mt-0.5 text-[12px] text-brava-text-secondary">
                 Início: <span className="font-semibold text-brava-text">{entry.horarioInicio || "—"}</span> · Término:{" "}

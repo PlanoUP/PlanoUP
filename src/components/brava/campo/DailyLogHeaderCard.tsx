@@ -5,6 +5,14 @@ import { Clock, Users, Send } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { FieldDailyLog } from "@/lib/brava/field/types";
 import { todayISO } from "@/lib/brava/date-utils";
+import { fetchWithTimeout, isDefinitelyOffline } from "@/lib/brava/field/offlineFetch";
+import {
+  enqueuePendingAction,
+  listPendingActionsForTank,
+  PendingAction,
+  PendingDailyLogPayload,
+} from "@/lib/brava/field/offlineQueue";
+import { flushOfflineQueue } from "@/lib/brava/field/offlineSync";
 
 function nowHHMM(): string {
   const d = new Date();
@@ -22,26 +30,68 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/field-daily-log?tankId=${encodeURIComponent(tank.id)}&date=${todayISO()}`, { cache: "no-store" })
-      .then((res) => res.json())
-      .then((body) => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetchWithTimeout(`/api/field-daily-log?tankId=${encodeURIComponent(tank.id)}&date=${todayISO()}`, {
+          cache: "no-store",
+        });
+        const body = await res.json();
         const log = body.log as FieldDailyLog | null;
-        if (log) {
+        if (log && !cancelled) {
           setPtNumero(log.ptNumero);
           if (log.ptHorario) setPtHorario(log.ptHorario);
           setEfetivo(log.efetivo);
         }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      } catch {
+        // offline on first load — fields stay blank/defaulted below from the outbox, if anything was queued already
+      }
+      try {
+        const pending = await listPendingActionsForTank(tank.id);
+        const queuedDailyLog = pending.find((a) => a.kind === "daily-log") as PendingAction | undefined;
+        if (queuedDailyLog && !cancelled) {
+          const p = queuedDailyLog.payload as PendingDailyLogPayload;
+          setPtNumero(p.ptNumero);
+          setPtHorario(p.ptHorario);
+          setEfetivo(p.efetivo);
+        }
+      } catch {
+        // IndexedDB unavailable — nothing to overlay, carry on with whatever the server returned
+      }
+      if (!cancelled) setLoading(false);
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [tank.id]);
+
+  async function queueOffline() {
+    await enqueuePendingAction("daily-log", tank.tag, {
+      tankId: tank.id,
+      date: todayISO(),
+      ptNumero,
+      ptHorario,
+      efetivo,
+    });
+    setDone(true);
+    window.setTimeout(() => setDone(false), 3000);
+    flushOfflineQueue();
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+
+    if (isDefinitelyOffline()) {
+      await queueOffline();
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      const res = await fetch("/api/field-daily-log", {
+      const res = await fetchWithTimeout("/api/field-daily-log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tankId: tank.id, date: todayISO(), ptNumero, ptHorario, efetivo }),
@@ -50,7 +100,11 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
       setDone(true);
       window.setTimeout(() => setDone(false), 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao salvar.");
+      if (err instanceof TypeError || (err instanceof DOMException && err.name === "AbortError")) {
+        await queueOffline();
+      } else {
+        setError(err instanceof Error ? err.message : "Falha ao salvar.");
+      }
     } finally {
       setSubmitting(false);
     }

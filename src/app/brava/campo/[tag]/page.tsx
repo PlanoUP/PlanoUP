@@ -14,12 +14,14 @@ import FieldEntryForm from "@/components/brava/campo/FieldEntryForm";
 import FieldEntryHistory from "@/components/brava/campo/FieldEntryHistory";
 import GerarRelatorioButton from "@/components/brava/campo/GerarRelatorioButton";
 import ActionPlanTrigger from "@/components/brava/campo/ActionPlanTrigger";
+import OfflineStatusBar from "@/components/brava/campo/OfflineStatusBar";
 import { useBravaData } from "@/lib/brava/context";
 import { useEditAuth } from "@/lib/brava/editAuthContext";
 import { useFieldAuth } from "@/lib/brava/fieldAuthContext";
 import { formatShort } from "@/lib/brava/date-utils";
 import { Activity } from "@/lib/brava/types";
 import { FieldEntry } from "@/lib/brava/field/types";
+import { listPendingActionsForTank, pendingFieldEntryToDisplay, subscribeOfflineQueueChanged } from "@/lib/brava/field/offlineQueue";
 import { cn } from "@/lib/brava/cn";
 
 const QUICK_PROGRESS_VALUES = [25, 50, 75, 100];
@@ -36,10 +38,24 @@ export default function CampoTankPage() {
 
   useEffect(() => {
     if (!tank) return;
-    fetch(`/api/field-entries?tankId=${encodeURIComponent(tank.id)}`, { cache: "no-store" })
-      .then((res) => res.json())
-      .then((body) => setFieldEntries(body.entries ?? []))
-      .catch(() => {});
+    const tankId = tank.id;
+
+    async function refreshEntries() {
+      const [serverEntries, pending] = await Promise.all([
+        fetch(`/api/field-entries?tankId=${encodeURIComponent(tankId)}`, { cache: "no-store" })
+          .then((res) => res.json())
+          .then((body) => (body.entries ?? []) as FieldEntry[])
+          .catch(() => [] as FieldEntry[]),
+        listPendingActionsForTank(tankId).catch(() => []),
+      ]);
+      const pendingDisplay = pending
+        .map(pendingFieldEntryToDisplay)
+        .filter((e): e is FieldEntry => e !== null);
+      setFieldEntries([...pendingDisplay, ...serverEntries]);
+    }
+
+    refreshEntries();
+    return subscribeOfflineQueueChanged(refreshEntries);
   }, [tank?.id]);
 
   const ordered = useMemo(() => (tank ? [...tank.activities].sort((a, b) => a.order - b.order) : []), [tank]);
@@ -125,6 +141,8 @@ export default function CampoTankPage() {
             </div>
           )}
         </div>
+
+        <OfflineStatusBar tankId={tank.id} />
 
         {!isEditor && (
           <div className="space-y-2.5">
