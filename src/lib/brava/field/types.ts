@@ -39,8 +39,6 @@ export interface FieldEntryInput {
   tankId: string;
   /** One of PRESET_FIELD_ACTIVITIES, or a custom label the Fiscal typed. */
   activityName: string;
-  horarioInicio: string | null;
-  horarioTermino: string | null;
   observacao: string;
   ocorrencia: boolean;
   photos: string[];
@@ -53,8 +51,6 @@ export interface FieldEntry {
   /** YYYY-MM-DD, assigned server-side at creation — the day this entry's report groups it into. */
   date: string;
   activityName: string;
-  horarioInicio: string | null;
-  horarioTermino: string | null;
   userId: string;
   userName: string;
   observacao: string;
@@ -65,7 +61,7 @@ export interface FieldEntry {
   pendingSync?: boolean;
 }
 
-/** One per tank+date — the PT release info and efetivo for that day, pinned at the top of Campo and of the day's PDF report. Upserted (last write wins), not an append-only log. */
+/** One per tank+date — the PT/PET release info and efetivo for that day, pinned at the top of Campo and of the day's PDF report. Upserted (last write wins), not an append-only log. */
 export interface FieldDailyLog {
   id: string; // `${tankId}__${date}`
   tankId: string;
@@ -73,6 +69,8 @@ export interface FieldDailyLog {
   date: string;
   ptNumero: string;
   ptHorario: string | null;
+  petHorario1: string | null;
+  petHorario2: string | null;
   efetivo: string;
   updatedAt: string;
   updatedByName: string;

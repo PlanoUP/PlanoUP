@@ -38,8 +38,6 @@ async function replayFieldEntry(payload: PendingFieldEntryPayload): Promise<void
     body: JSON.stringify({
       tankId: payload.tankId,
       activityName: payload.activityName,
-      horarioInicio: payload.horarioInicio,
-      horarioTermino: payload.horarioTermino,
       observacao: payload.observacao,
       ocorrencia: payload.ocorrencia,
       photos,

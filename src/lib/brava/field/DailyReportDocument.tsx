@@ -7,14 +7,14 @@ const styles = StyleSheet.create({
   title: { fontSize: 16, fontWeight: 700, marginBottom: 2 },
   subtitle: { fontSize: 11, color: "#4B5563", marginBottom: 14 },
   headerCard: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: "#1A0572",
     borderRadius: 4,
     padding: 10,
     marginBottom: 14,
   },
+  headerRow: { flexDirection: "row", justifyContent: "space-between" },
+  headerRowSpaced: { flexDirection: "row", justifyContent: "space-between", marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: "#E4E6EB" },
   headerCol: { flexGrow: 1 },
   headerLabel: { fontSize: 8, color: "#6B7280", textTransform: "uppercase", marginBottom: 2 },
   headerValue: { fontSize: 12, fontWeight: 700 },
@@ -23,7 +23,6 @@ const styles = StyleSheet.create({
   entryHeaderRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 2 },
   entryName: { fontSize: 11.5, fontWeight: 700 },
   entryMeta: { fontSize: 9, color: "#6B7280" },
-  entryTimes: { fontSize: 9, color: "#374151", marginBottom: 3 },
   entryObs: { fontSize: 10, marginBottom: 3, lineHeight: 1.4 },
   ocorrencia: { fontSize: 9.5, color: "#B91C1C", fontWeight: 700, marginBottom: 3 },
   photosRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
@@ -57,17 +56,31 @@ export default function DailyReportDocument({
         </Text>
 
         <View style={styles.headerCard}>
-          <View style={styles.headerCol}>
-            <Text style={styles.headerLabel}>Número da PT</Text>
-            <Text style={styles.headerValue}>{dailyLog?.ptNumero || "—"}</Text>
+          <View style={styles.headerRow}>
+            <View style={styles.headerCol}>
+              <Text style={styles.headerLabel}>Número da PT</Text>
+              <Text style={styles.headerValue}>{dailyLog?.ptNumero || "—"}</Text>
+            </View>
+            <View style={styles.headerCol}>
+              <Text style={styles.headerLabel}>Horário de liberação da PT</Text>
+              <Text style={styles.headerValue}>{dailyLog?.ptHorario || "—"}</Text>
+            </View>
           </View>
-          <View style={styles.headerCol}>
-            <Text style={styles.headerLabel}>Horário de liberação da PT</Text>
-            <Text style={styles.headerValue}>{dailyLog?.ptHorario || "—"}</Text>
+          <View style={styles.headerRowSpaced}>
+            <View style={styles.headerCol}>
+              <Text style={styles.headerLabel}>Liberação de PET — Horário 1</Text>
+              <Text style={styles.headerValue}>{dailyLog?.petHorario1 || "—"}</Text>
+            </View>
+            <View style={styles.headerCol}>
+              <Text style={styles.headerLabel}>Liberação de PET — Horário 2</Text>
+              <Text style={styles.headerValue}>{dailyLog?.petHorario2 || "—"}</Text>
+            </View>
           </View>
-          <View style={styles.headerCol}>
-            <Text style={styles.headerLabel}>Efetivo</Text>
-            <Text style={styles.headerValue}>{dailyLog?.efetivo || "—"}</Text>
+          <View style={styles.headerRowSpaced}>
+            <View style={styles.headerCol}>
+              <Text style={styles.headerLabel}>Efetivo</Text>
+              <Text style={styles.headerValue}>{dailyLog?.efetivo || "—"}</Text>
+            </View>
           </View>
         </View>
 
@@ -84,11 +97,6 @@ export default function DailyReportDocument({
                   {entry.userName} · {formatDateTime(entry.createdAt)}
                 </Text>
               </View>
-              {(entry.horarioInicio || entry.horarioTermino) && (
-                <Text style={styles.entryTimes}>
-                  Início: {entry.horarioInicio || "—"} · Término: {entry.horarioTermino || "—"}
-                </Text>
-              )}
               {entry.ocorrencia && <Text style={styles.ocorrencia}>⚠ Ocorrência de segurança/qualidade</Text>}
               {entry.observacao && <Text style={styles.entryObs}>{entry.observacao}</Text>}
               {entry.photos.length > 0 && (

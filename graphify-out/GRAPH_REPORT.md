@@ -1,7 +1,7 @@
 # Graph Report - PlanoUP  (2026-11-17)
 
 ## Corpus Check
-- 300 files · ~102,863 words
+- 300 files · ~102,885 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .css 1)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `16b1a698`
+- Built from commit: `d5b68804`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -83,12 +83,12 @@
   src/components/brava/maps/MapAssetListPanel.tsx → src/lib/brava/types.ts
 - `tier()` --indirect_call--> `todayISO()`  [INFERRED]
   src/lib/brava/materials/calculations.ts → src/lib/brava/date-utils.ts
-- `computeUpcomingMilestones()` --calls--> `diffDays()`  [EXTRACTED]
-  src/lib/brava/home-selectors.ts → src/lib/brava/date-utils.ts
 - `tier()` --indirect_call--> `todayISO()`  [INFERRED]
   src/lib/brava/units/materials/calculations.ts → src/lib/brava/date-utils.ts
 - `handleCloseWeek()` --calls--> `formatShort()`  [EXTRACTED]
   src/app/brava/reports/page.tsx → src/lib/brava/date-utils.ts
+- `computeUpcomingMilestones()` --calls--> `diffDays()`  [EXTRACTED]
+  src/lib/brava/home-selectors.ts → src/lib/brava/date-utils.ts
 
 ## Import Cycles
 - None detected.
@@ -278,15 +278,15 @@ Nodes (33): FieldUserPublic, TagMultiSelect(), ActivitySelector(), DeadlinesPane
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `next` connect `next` to `useBravaData`, `units/materials/calculations.ts`, `react`, `brava/layout.tsx`, `AssetMapExplorer.tsx`, `tanksRepo.ts`, `package.json`, `EquipmentMapExplorer.tsx`, `useBravaData`, `next`, `client.ts`, `isRequestEditor`, `costsRepo.ts`, `units/context.tsx`, `field/types.ts`, `materialsRepo.ts`, `app/layout.tsx`, `formatShort`, `equipmentRepo.ts`, `lucide-react`, `equipmentCostsRepo.ts`, `PageHeader`, `action-plans/route.ts`, `react`, `equipmentMapCoordinatesRepo.ts`, `mapCoordinatesRepo.ts`, `EquipmentArt.tsx`, `cn`, `icon.tsx`?**
-  _High betweenness centrality (0.222) - this node is a cross-community bridge._
+  _High betweenness centrality (0.216) - this node is a cross-community bridge._
 - **Should `useBravaData` be split into smaller, more focused modules?**
   _Cohesion score 0.08408953418027829 - nodes in this community are weakly interconnected._
 - **Why does `lucide-react` connect `lucide-react` to `useBravaData`, `app/page.tsx`, `units/materials/calculations.ts`, `reports/page.tsx`, `react`, `brava/layout.tsx`, `AssetMapExplorer.tsx`, `package.json`, `EquipmentMapExplorer.tsx`, `useBravaData`, `units/context.tsx`, `field/types.ts`, `app/layout.tsx`, `formatShort`, `CheckoutLink`, `PageHeader`, `react`, `Hero.tsx`, `brava/context.tsx`, `FAQ.tsx`, `cn`?**
-  _High betweenness centrality (0.138) - this node is a cross-community bridge._
+  _High betweenness centrality (0.112) - this node is a cross-community bridge._
 - **Should `app/page.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.10080645161290322 - nodes in this community are weakly interconnected._
-- **Why does `cn()` connect `cn` to `useBravaData`, `units/materials/calculations.ts`, `brava/layout.tsx`, `brava/context.tsx`, `AssetMapExplorer.tsx`, `EquipmentMapExplorer.tsx`, `useBravaData`, `units/context.tsx`, `field/types.ts`, `formatShort`, `lucide-react`, `PageHeader`, `react`?**
-  _High betweenness centrality (0.095) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `useBravaData`, `units/materials/calculations.ts`, `reports/page.tsx`, `react`, `brava/layout.tsx`, `AssetMapExplorer.tsx`, `package.json`, `EquipmentMapExplorer.tsx`, `useBravaData`, `units/context.tsx`, `app/layout.tsx`, `lucide-react`, `CheckoutLink`, `PageHeader`, `scurve.ts`, `EquipmentArt.tsx`, `brava/context.tsx`, `FAQ.tsx`, `cn`?**
+  _High betweenness centrality (0.093) - this node is a cross-community bridge._
 - **Should `units/materials/calculations.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.05114083398898505 - nodes in this community are weakly interconnected._
 - **Should `reports/page.tsx` be split into smaller, more focused modules?**

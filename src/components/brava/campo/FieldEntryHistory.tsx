@@ -44,12 +44,6 @@ export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }
             ) : (
               <p className="mt-0.5 text-[11px] text-brava-text-secondary">{entry.userName}</p>
             )}
-            {(entry.horarioInicio || entry.horarioTermino) && (
-              <p className="mt-0.5 text-[12px] text-brava-text-secondary">
-                Início: <span className="font-semibold text-brava-text">{entry.horarioInicio || "—"}</span> · Término:{" "}
-                <span className="font-semibold text-brava-text">{entry.horarioTermino || "—"}</span>
-              </p>
-            )}
             {entry.observacao && <p className="mt-1 text-[13px] text-brava-text">{entry.observacao}</p>}
             {entry.ocorrencia && (
               <p className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-brava-danger">
@@ -67,7 +61,7 @@ export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }
                 ))}
               </div>
             )}
-            {entry.photos.length === 0 && entry.ocorrencia === false && !entry.observacao && !entry.horarioInicio && !entry.horarioTermino && (
+            {entry.photos.length === 0 && entry.ocorrencia === false && !entry.observacao && (
               <p className="mt-0.5 flex items-center gap-1 text-[11px] text-brava-text-secondary">
                 <ImageIcon className="h-3 w-3" />
                 Registro vazio

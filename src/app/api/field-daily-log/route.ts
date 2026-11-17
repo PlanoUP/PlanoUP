@@ -45,6 +45,8 @@ export async function POST(request: Request) {
         date: typeof body.date === "string" && body.date ? body.date : todayISO(),
         ptNumero: typeof body.ptNumero === "string" ? body.ptNumero.trim() : undefined,
         ptHorario: typeof body.ptHorario === "string" && body.ptHorario.length > 0 ? body.ptHorario : undefined,
+        petHorario1: typeof body.petHorario1 === "string" && body.petHorario1.length > 0 ? body.petHorario1 : undefined,
+        petHorario2: typeof body.petHorario2 === "string" && body.petHorario2.length > 0 ? body.petHorario2 : undefined,
         efetivo: typeof body.efetivo === "string" ? body.efetivo.trim() : undefined,
       },
       author.name

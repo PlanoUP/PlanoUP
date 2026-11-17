@@ -23,6 +23,8 @@ function nowHHMM(): string {
 export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) {
   const [ptNumero, setPtNumero] = useState("");
   const [ptHorario, setPtHorario] = useState(nowHHMM());
+  const [petHorario1, setPetHorario1] = useState("");
+  const [petHorario2, setPetHorario2] = useState("");
   const [efetivo, setEfetivo] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -41,6 +43,8 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
         if (log && !cancelled) {
           setPtNumero(log.ptNumero);
           if (log.ptHorario) setPtHorario(log.ptHorario);
+          if (log.petHorario1) setPetHorario1(log.petHorario1);
+          if (log.petHorario2) setPetHorario2(log.petHorario2);
           setEfetivo(log.efetivo);
         }
       } catch {
@@ -53,6 +57,8 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
           const p = queuedDailyLog.payload as PendingDailyLogPayload;
           setPtNumero(p.ptNumero);
           setPtHorario(p.ptHorario);
+          setPetHorario1(p.petHorario1 ?? "");
+          setPetHorario2(p.petHorario2 ?? "");
           setEfetivo(p.efetivo);
         }
       } catch {
@@ -72,6 +78,8 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
       date: todayISO(),
       ptNumero,
       ptHorario,
+      petHorario1,
+      petHorario2,
       efetivo,
     });
     setDone(true);
@@ -94,7 +102,7 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
       const res = await fetchWithTimeout("/api/field-daily-log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tankId: tank.id, date: todayISO(), ptNumero, ptHorario, efetivo }),
+        body: JSON.stringify({ tankId: tank.id, date: todayISO(), ptNumero, ptHorario, petHorario1, petHorario2, efetivo }),
       });
       if (!res.ok) throw new Error("Falha ao salvar.");
       setDone(true);
@@ -138,6 +146,35 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
             type="time"
             value={ptHorario}
             onChange={(e) => setPtHorario(e.target.value)}
+            className="mt-1 w-full rounded-brava-sm border border-brava-border px-3 py-2 text-[14px] focus:border-brava-blue focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2.5 border-t border-brava-border pt-3">
+        <Clock className="h-4 w-4 shrink-0 text-brava-blue" />
+        <p className="text-[13px] font-bold text-brava-text">Liberação de PET</p>
+      </div>
+      <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+        <div>
+          <label className="block text-[10.5px] font-semibold uppercase tracking-wide text-brava-text-secondary">
+            Horário 1
+          </label>
+          <input
+            type="time"
+            value={petHorario1}
+            onChange={(e) => setPetHorario1(e.target.value)}
+            className="mt-1 w-full rounded-brava-sm border border-brava-border px-3 py-2 text-[14px] focus:border-brava-blue focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[10.5px] font-semibold uppercase tracking-wide text-brava-text-secondary">
+            Horário 2
+          </label>
+          <input
+            type="time"
+            value={petHorario2}
+            onChange={(e) => setPetHorario2(e.target.value)}
             className="mt-1 w-full rounded-brava-sm border border-brava-border px-3 py-2 text-[14px] focus:border-brava-blue focus:outline-none"
           />
         </div>
