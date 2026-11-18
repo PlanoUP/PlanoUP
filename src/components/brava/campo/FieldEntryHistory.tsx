@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { AlertTriangle, Clock, Image as ImageIcon } from "lucide-react";
 import { FieldEntry } from "@/lib/brava/field/types";
 import { formatShort } from "@/lib/brava/date-utils";
@@ -10,7 +11,30 @@ function formatDateTime(iso: string): string {
   return `${formatShort(iso.slice(0, 10))} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
+interface PtGroup {
+  ptNumero: string;
+  ptHorario: string | null;
+  entries: FieldEntry[];
+}
+
+/** Groups entries by their frente de serviço (PT) — several PTs can be open on the same day, so grouping keeps the log scannable instead of one long interleaved list. Groups and entries within them stay newest-first. */
+function groupByPt(entries: FieldEntry[]): PtGroup[] {
+  const order: string[] = [];
+  const groups = new Map<string, PtGroup>();
+  for (const entry of entries) {
+    const key = entry.ptNumero || "—";
+    if (!groups.has(key)) {
+      order.push(key);
+      groups.set(key, { ptNumero: entry.ptNumero, ptHorario: entry.ptHorario, entries: [] });
+    }
+    groups.get(key)!.entries.push(entry);
+  }
+  return order.map((key) => groups.get(key)!);
+}
+
 export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }) {
+  const groups = useMemo(() => groupByPt(entries), [entries]);
+
   if (entries.length === 0) {
     return (
       <div className="rounded-brava-lg border border-brava-border bg-brava-white p-4 shadow-brava-sm">
@@ -22,51 +46,66 @@ export default function FieldEntryHistory({ entries }: { entries: FieldEntry[] }
 
   return (
     <div className="rounded-brava-lg border border-brava-border bg-brava-white p-4 shadow-brava-sm">
-      <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-brava-text-secondary">Histórico de registros</p>
-      <div className="space-y-3">
-        {entries.map((entry) => (
-          <div
-            key={entry.id}
-            className={cn(
-              "rounded-brava-sm border-l-[3px] bg-brava-bg px-3 py-2.5",
-              entry.pendingSync ? "border-brava-warning" : entry.ocorrencia ? "border-brava-danger" : "border-brava-blue/40"
-            )}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-[12.5px] font-bold text-brava-text">{entry.activityName}</p>
-              <p className="shrink-0 font-mono text-[11px] text-brava-text-secondary">{formatDateTime(entry.createdAt)}</p>
+      <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-brava-text-secondary">
+        Histórico de registros · {groups.length} frente{groups.length === 1 ? "" : "s"} de serviço
+      </p>
+      <div className="space-y-4">
+        {groups.map((group) => (
+          <div key={group.ptNumero || "sem-pt"} className="rounded-brava-sm border border-brava-border/70 p-2.5">
+            <div className="mb-2 flex items-center justify-between gap-2 border-b border-brava-border pb-1.5">
+              <p className="inline-flex items-center gap-1.5 font-mono text-[12.5px] font-extrabold text-brava-blue-dark">
+                <Clock className="h-3.5 w-3.5 text-brava-blue" />
+                {group.ptNumero || "Sem número de PT"}
+              </p>
+              {group.ptHorario && <p className="text-[11px] font-semibold text-brava-text-secondary">Liberada às {group.ptHorario}</p>}
             </div>
-            {entry.pendingSync ? (
-              <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-brava-warning">
-                <Clock className="h-3 w-3" />
-                {entry.userName}
-              </p>
-            ) : (
-              <p className="mt-0.5 text-[11px] text-brava-text-secondary">{entry.userName}</p>
-            )}
-            {entry.observacao && <p className="mt-1 text-[13px] text-brava-text">{entry.observacao}</p>}
-            {entry.ocorrencia && (
-              <p className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-brava-danger">
-                <AlertTriangle className="h-3.5 w-3.5" />
-                Ocorrência de segurança/qualidade
-              </p>
-            )}
-            {entry.photos.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {entry.photos.map((url) => (
-                  <a key={url} href={url} target="_blank" rel="noreferrer" className="block h-14 w-14 overflow-hidden rounded-brava-sm border border-brava-border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt="" className="h-full w-full object-cover" />
-                  </a>
-                ))}
-              </div>
-            )}
-            {entry.photos.length === 0 && entry.ocorrencia === false && !entry.observacao && (
-              <p className="mt-0.5 flex items-center gap-1 text-[11px] text-brava-text-secondary">
-                <ImageIcon className="h-3 w-3" />
-                Registro vazio
-              </p>
-            )}
+            <div className="space-y-2.5">
+              {group.entries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className={cn(
+                    "rounded-brava-sm border-l-[3px] bg-brava-bg px-3 py-2.5",
+                    entry.pendingSync ? "border-brava-warning" : entry.ocorrencia ? "border-brava-danger" : "border-brava-blue/40"
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[12.5px] font-bold text-brava-text">{entry.activityName}</p>
+                    <p className="shrink-0 font-mono text-[11px] text-brava-text-secondary">{formatDateTime(entry.createdAt)}</p>
+                  </div>
+                  {entry.pendingSync ? (
+                    <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-brava-warning">
+                      <Clock className="h-3 w-3" />
+                      {entry.userName}
+                    </p>
+                  ) : (
+                    <p className="mt-0.5 text-[11px] text-brava-text-secondary">{entry.userName}</p>
+                  )}
+                  {entry.observacao && <p className="mt-1 text-[13px] text-brava-text">{entry.observacao}</p>}
+                  {entry.ocorrencia && (
+                    <p className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-brava-danger">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      Ocorrência de segurança/qualidade
+                    </p>
+                  )}
+                  {entry.photos.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {entry.photos.map((url) => (
+                        <a key={url} href={url} target="_blank" rel="noreferrer" className="block h-14 w-14 overflow-hidden rounded-brava-sm border border-brava-border">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt="" className="h-full w-full object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {entry.photos.length === 0 && entry.ocorrencia === false && !entry.observacao && (
+                    <p className="mt-0.5 flex items-center gap-1 text-[11px] text-brava-text-secondary">
+                      <ImageIcon className="h-3 w-3" />
+                      Registro vazio
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>

@@ -14,15 +14,8 @@ import {
 } from "@/lib/brava/field/offlineQueue";
 import { flushOfflineQueue } from "@/lib/brava/field/offlineSync";
 
-function nowHHMM(): string {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
-
-/** Pinned at the top of Campo's registration flow — PT número/horário and efetivo for today, one record per tank+day (last write wins). */
+/** Pinned at the top of Campo's registration flow — PET horário and efetivo for today, one record per tank+day (last write wins). PT lives on each registro now, since several can be released at once for different frentes. */
 export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) {
-  const [ptNumero, setPtNumero] = useState("");
-  const [ptHorario, setPtHorario] = useState(nowHHMM());
   const [petHorario1, setPetHorario1] = useState("");
   const [petHorario2, setPetHorario2] = useState("");
   const [efetivo, setEfetivo] = useState("");
@@ -41,8 +34,6 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
         const body = await res.json();
         const log = body.log as FieldDailyLog | null;
         if (log && !cancelled) {
-          setPtNumero(log.ptNumero);
-          if (log.ptHorario) setPtHorario(log.ptHorario);
           if (log.petHorario1) setPetHorario1(log.petHorario1);
           if (log.petHorario2) setPetHorario2(log.petHorario2);
           setEfetivo(log.efetivo);
@@ -55,8 +46,6 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
         const queuedDailyLog = pending.find((a) => a.kind === "daily-log") as PendingAction | undefined;
         if (queuedDailyLog && !cancelled) {
           const p = queuedDailyLog.payload as PendingDailyLogPayload;
-          setPtNumero(p.ptNumero);
-          setPtHorario(p.ptHorario);
           setPetHorario1(p.petHorario1 ?? "");
           setPetHorario2(p.petHorario2 ?? "");
           setEfetivo(p.efetivo);
@@ -76,8 +65,6 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
     await enqueuePendingAction("daily-log", tank.tag, {
       tankId: tank.id,
       date: todayISO(),
-      ptNumero,
-      ptHorario,
       petHorario1,
       petHorario2,
       efetivo,
@@ -102,7 +89,7 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
       const res = await fetchWithTimeout("/api/field-daily-log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tankId: tank.id, date: todayISO(), ptNumero, ptHorario, petHorario1, petHorario2, efetivo }),
+        body: JSON.stringify({ tankId: tank.id, date: todayISO(), petHorario1, petHorario2, efetivo }),
       });
       if (!res.ok) throw new Error("Falha ao salvar.");
       setDone(true);
@@ -123,35 +110,6 @@ export default function DailyLogHeaderCard({ tank }: { tank: TankWithDerived }) 
   return (
     <form onSubmit={handleSubmit} className="rounded-brava-lg border-2 border-brava-blue/30 bg-brava-white p-4 shadow-brava-sm">
       <div className="flex items-center gap-2.5">
-        <Clock className="h-4 w-4 shrink-0 text-brava-blue" />
-        <p className="text-[13px] font-bold text-brava-text">Liberação da PT</p>
-      </div>
-      <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-        <div>
-          <label className="block text-[10.5px] font-semibold uppercase tracking-wide text-brava-text-secondary">
-            Número da PT
-          </label>
-          <input
-            value={ptNumero}
-            onChange={(e) => setPtNumero(e.target.value)}
-            placeholder="ex: PT-00123"
-            className="mt-1 w-full rounded-brava-sm border border-brava-border px-3 py-2 text-[14px] focus:border-brava-blue focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-[10.5px] font-semibold uppercase tracking-wide text-brava-text-secondary">
-            Horário de liberação
-          </label>
-          <input
-            type="time"
-            value={ptHorario}
-            onChange={(e) => setPtHorario(e.target.value)}
-            className="mt-1 w-full rounded-brava-sm border border-brava-border px-3 py-2 text-[14px] focus:border-brava-blue focus:outline-none"
-          />
-        </div>
-      </div>
-
-      <div className="mt-3 flex items-center gap-2.5 border-t border-brava-border pt-3">
         <Clock className="h-4 w-4 shrink-0 text-brava-blue" />
         <p className="text-[13px] font-bold text-brava-text">Liberação de PET</p>
       </div>

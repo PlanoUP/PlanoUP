@@ -5,6 +5,8 @@ export type PendingKind = "field-entry" | "daily-log" | "action-plan";
 
 export interface PendingFieldEntryPayload {
   tankId: string;
+  ptNumero: string;
+  ptHorario: string;
   activityName: string;
   observacao: string;
   ocorrencia: boolean;
@@ -14,8 +16,6 @@ export interface PendingFieldEntryPayload {
 export interface PendingDailyLogPayload {
   tankId: string;
   date: string;
-  ptNumero: string;
-  ptHorario: string;
   petHorario1: string;
   petHorario2: string;
   efetivo: string;
@@ -101,6 +101,8 @@ export function pendingFieldEntryToDisplay(action: PendingAction): FieldEntry | 
     tankId: p.tankId,
     tankTag: action.tankTag,
     date: action.createdAt.slice(0, 10),
+    ptNumero: p.ptNumero,
+    ptHorario: p.ptHorario || null,
     activityName: p.activityName,
     userId: "local",
     userName: action.status === "failed" ? "Falhou ao enviar — vai tentar de novo" : "Aguardando envio",

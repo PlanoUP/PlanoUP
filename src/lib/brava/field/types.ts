@@ -1,10 +1,11 @@
 // Fiscal field-registration domain — individual Fiscal accounts, distinct
 // from the single shared "editor" password, plus a dated, attributed log of
 // what each one registers from a tank in the field: a running list of
-// activities as they happen during the day (not tied to the tank's formal
-// Gantt schedule), each with its own start/end time, observação and fotos,
-// plus one "day header" per tank+date (PT número/horário, efetivo) that the
-// day's PDF report is built from.
+// "frentes de serviço" as they happen during the day (not tied to the
+// tank's formal Gantt schedule) — several PTs can be released at the same
+// time for different crews, so PT número/horário lives on each entry, not
+// on a single day-wide header. PET horário and efetivo stay day-wide
+// (upserted once per tank+date) since they aren't per-PT.
 
 /** Quick-pick activity labels offered in Campo — a Fiscal can also type a custom one via "+ Adicionar atividade". */
 export const PRESET_FIELD_ACTIVITIES = [
@@ -37,6 +38,9 @@ export function toPublicFieldUser(user: FieldUser): FieldUserPublic {
 
 export interface FieldEntryInput {
   tankId: string;
+  /** This entry's own frente de serviço — its PT is independent from any other entry's, since several can be released at once. */
+  ptNumero: string;
+  ptHorario: string | null;
   /** One of PRESET_FIELD_ACTIVITIES, or a custom label the Fiscal typed. */
   activityName: string;
   observacao: string;
@@ -50,6 +54,8 @@ export interface FieldEntry {
   tankTag: string;
   /** YYYY-MM-DD, assigned server-side at creation — the day this entry's report groups it into. */
   date: string;
+  ptNumero: string;
+  ptHorario: string | null;
   activityName: string;
   userId: string;
   userName: string;
@@ -61,14 +67,12 @@ export interface FieldEntry {
   pendingSync?: boolean;
 }
 
-/** One per tank+date — the PT/PET release info and efetivo for that day, pinned at the top of Campo and of the day's PDF report. Upserted (last write wins), not an append-only log. */
+/** One per tank+date — the PET release info and efetivo for that day (not per-PT), pinned at the top of Campo and of the day's PDF report. Upserted (last write wins), not an append-only log. */
 export interface FieldDailyLog {
   id: string; // `${tankId}__${date}`
   tankId: string;
   tankTag: string;
   date: string;
-  ptNumero: string;
-  ptHorario: string | null;
   petHorario1: string | null;
   petHorario2: string | null;
   efetivo: string;

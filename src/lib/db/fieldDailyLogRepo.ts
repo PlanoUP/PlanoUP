@@ -18,14 +18,12 @@ export interface FieldDailyLogUpsertInput {
   tankTag: string;
   date: string;
   /** Any of these left undefined keeps the existing saved value — a true partial update, not a full overwrite. */
-  ptNumero?: string;
-  ptHorario?: string | null;
   petHorario1?: string | null;
   petHorario2?: string | null;
   efetivo?: string;
 }
 
-/** Upsert — PT/PET número/horário and efetivo are edited in place throughout the day, not appended. */
+/** Upsert — PET horário and efetivo are edited in place throughout the day, not appended. */
 export async function upsertFieldDailyLog(
   input: FieldDailyLogUpsertInput,
   updatedByName: string
@@ -37,8 +35,6 @@ export async function upsertFieldDailyLog(
     tankId: input.tankId,
     tankTag: input.tankTag,
     date: input.date,
-    ptNumero: input.ptNumero ?? existing?.ptNumero ?? "",
-    ptHorario: input.ptHorario ?? existing?.ptHorario ?? null,
     petHorario1: input.petHorario1 ?? existing?.petHorario1 ?? null,
     petHorario2: input.petHorario2 ?? existing?.petHorario2 ?? null,
     efetivo: input.efetivo ?? existing?.efetivo ?? "",

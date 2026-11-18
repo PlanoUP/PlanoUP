@@ -37,6 +37,8 @@ async function replayFieldEntry(payload: PendingFieldEntryPayload): Promise<void
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       tankId: payload.tankId,
+      ptNumero: payload.ptNumero,
+      ptHorario: payload.ptHorario,
       activityName: payload.activityName,
       observacao: payload.observacao,
       ocorrencia: payload.ocorrencia,

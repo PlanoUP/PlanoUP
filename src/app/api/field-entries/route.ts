@@ -51,6 +51,8 @@ export async function POST(request: Request) {
       tankId: tank.id,
       tankTag: tank.tag,
       date: todayISO(),
+      ptNumero: body.ptNumero?.trim() ?? "",
+      ptHorario: typeof body.ptHorario === "string" && body.ptHorario.length > 0 ? body.ptHorario : null,
       activityName: body.activityName.trim(),
       userId: author.id,
       userName: author.name,

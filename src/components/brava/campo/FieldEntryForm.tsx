@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, X, AlertTriangle, Send } from "lucide-react";
+import { Camera, X, AlertTriangle, Clock, Send } from "lucide-react";
 import { TankWithDerived } from "@/lib/brava/types";
 import { FieldEntry } from "@/lib/brava/field/types";
 import { cn } from "@/lib/brava/cn";
@@ -18,6 +18,11 @@ async function parseErrorMessage(res: Response): Promise<string> {
   }
 }
 
+function nowHHMM(): string {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
 export default function FieldEntryForm({
   tank,
   activityName,
@@ -29,6 +34,8 @@ export default function FieldEntryForm({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [ptNumero, setPtNumero] = useState("");
+  const [ptHorario, setPtHorario] = useState(nowHHMM());
   const [observacao, setObservacao] = useState("");
   const [ocorrencia, setOcorrencia] = useState(false);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
@@ -76,6 +83,8 @@ export default function FieldEntryForm({
   }
 
   function resetFields() {
+    setPtNumero("");
+    setPtHorario(nowHHMM());
     setObservacao("");
     setOcorrencia(false);
     setPhotoFiles([]);
@@ -84,6 +93,8 @@ export default function FieldEntryForm({
   async function queueOffline() {
     await enqueuePendingAction("field-entry", tank.tag, {
       tankId: tank.id,
+      ptNumero,
+      ptHorario,
       activityName,
       observacao,
       ocorrencia,
@@ -105,6 +116,10 @@ export default function FieldEntryForm({
       setError("Escolha ou adicione uma etapa antes de registrar.");
       return;
     }
+    if (!ptNumero.trim()) {
+      setError("Informe o número da PT desta frente de serviço.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     setPhotoWarning(null);
@@ -123,6 +138,8 @@ export default function FieldEntryForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tankId: tank.id,
+          ptNumero,
+          ptHorario,
           activityName,
           observacao,
           ocorrencia,
@@ -148,8 +165,33 @@ export default function FieldEntryForm({
 
   return (
     <form onSubmit={handleSubmit} className="rounded-brava-lg border border-brava-blue/25 bg-brava-white p-5 shadow-brava-sm">
-      <p className="text-[11px] font-bold uppercase tracking-wide text-brava-blue">Registrar</p>
+      <p className="text-[11px] font-bold uppercase tracking-wide text-brava-blue">Registrar frente de serviço</p>
       <p className="mt-1 text-[16px] font-bold text-brava-text">{activityName || "Escolha uma etapa acima"}</p>
+
+      <div className="mt-4 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-brava-text-secondary">
+        <Clock className="h-3.5 w-3.5 text-brava-blue" />
+        PT desta frente
+      </div>
+      <div className="mt-1.5 grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[10.5px] font-semibold text-brava-text-secondary">Número da PT</label>
+          <input
+            value={ptNumero}
+            onChange={(e) => setPtNumero(e.target.value)}
+            placeholder="ex: PT-00123"
+            className="mt-1 w-full rounded-brava-sm border border-brava-border px-3 py-2.5 text-[14px] focus:border-brava-blue focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[10.5px] font-semibold text-brava-text-secondary">Horário de liberação</label>
+          <input
+            type="time"
+            value={ptHorario}
+            onChange={(e) => setPtHorario(e.target.value)}
+            className="mt-1 w-full rounded-brava-sm border border-brava-border px-3 py-2.5 text-[14px] focus:border-brava-blue focus:outline-none"
+          />
+        </div>
+      </div>
 
       <label className="mt-4 block text-[11px] font-bold uppercase tracking-wide text-brava-text-secondary">
         Observação
