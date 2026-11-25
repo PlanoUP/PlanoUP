@@ -214,6 +214,7 @@ function TenantCard({
   const [ownerName, setOwnerName] = useState('')
   const [ownerEmail, setOwnerEmail] = useState('')
   const suspended = tenant.status === 'suspended'
+  const pending = tenant.status === 'pending'
 
   async function run(label: string, task: () => Promise<string | void>) {
     setBusy(label)
@@ -244,10 +245,10 @@ function TenantCard({
             <span
               className={cn(
                 'inline-flex h-6 items-center rounded-full px-2.5 text-[12px] font-semibold',
-                suspended ? 'bg-red-50 text-red-800' : 'bg-tour/10 text-tour',
+                suspended ? 'bg-red-50 text-red-800' : pending ? 'bg-gold-400/30 text-navy-950' : 'bg-tour/10 text-tour',
               )}
             >
-              {suspended ? 'Suspensa' : 'Ativa'}
+              {suspended ? 'Suspensa' : pending ? 'Aguardando aprovação' : 'Ativa'}
             </span>
           </p>
           <p className="mt-1 text-[13.5px] text-slate">
@@ -344,7 +345,16 @@ function TenantCard({
               Criar responsável
             </Button>
           )}
-          {suspended ? (
+          {pending ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={busy !== null}
+              onClick={() => void run('status', () => updateTenant(tenant.id, { status: 'active' }).then(() => 'Conta aprovada: o site já pode ir ao ar.'))}
+            >
+              Aprovar conta
+            </Button>
+          ) : suspended ? (
             <Button
               type="button"
               variant="outline"

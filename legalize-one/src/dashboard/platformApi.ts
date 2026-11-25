@@ -3,7 +3,8 @@ import { PanelError } from './propertiesApi'
 
 /** Painel da plataforma: imobiliárias clientes (RPCs `platform_*`, só admin da plataforma). */
 
-export type TenantStatus = 'active' | 'suspended'
+/** `pending`: cadastro aberto do corretor aguardando aprovação (migration 0013). */
+export type TenantStatus = 'active' | 'suspended' | 'pending'
 
 export interface PlatformTenant {
   id: string

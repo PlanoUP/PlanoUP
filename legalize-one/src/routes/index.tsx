@@ -29,6 +29,7 @@ import {
   Sell,
   Team,
   TenantSettingsPage,
+  MySite,
 } from './lazyPages'
 
 function withSuspense(node: ReactNode) {
@@ -86,6 +87,7 @@ export const router = createBrowserRouter([
           { path: 'equipe', element: withSuspense(<Team />) },
           { path: 'conta', element: withSuspense(<Account />) },
           { path: 'imobiliaria', element: withSuspense(<TenantSettingsPage />) },
+          { path: 'meu-site', element: withSuspense(<MySite />) },
           { path: 'mais', element: withSuspense(<More />) },
           { path: 'plataforma', element: withSuspense(<Platform />) },
           { path: '*', element: withSuspense(<DashboardHome />) },

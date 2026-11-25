@@ -1,20 +1,62 @@
 import { requireSupabase } from '@/lib/supabase'
 import { PanelError, friendlyDbError } from './propertiesApi'
+import { hasCorretorSchema } from './schema'
 
 /** Contatos (leads) da imobiliária. Quem vê/altera o quê: políticas do banco (RLS). */
 
-export type LeadStatus = 'new' | 'contacted' | 'visit_scheduled' | 'negotiation' | 'converted' | 'lost'
+export type LeadStatus =
+  | 'new'
+  | 'contacted'
+  | 'qualified'
+  | 'visit_scheduled'
+  | 'negotiation'
+  | 'proposal'
+  | 'converted'
+  | 'lost'
 export type LeadChannel = 'whatsapp' | 'info_request' | 'visit_request' | 'call' | 'form'
 
-export const LEAD_STATUS_ORDER: LeadStatus[] = ['new', 'contacted', 'visit_scheduled', 'negotiation', 'converted', 'lost']
+/** Funil completo (8 etapas, migration 0013). */
+export const LEAD_STATUS_ORDER: LeadStatus[] = [
+  'new',
+  'contacted',
+  'qualified',
+  'visit_scheduled',
+  'negotiation',
+  'proposal',
+  'converted',
+  'lost',
+]
+/** Funil anterior (6 etapas): usado enquanto o banco não tiver a migration 0013. */
+export const LEAD_STATUS_LEGACY: LeadStatus[] = ['new', 'contacted', 'visit_scheduled', 'negotiation', 'converted', 'lost']
 
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
-  new: 'Novo',
+  new: 'Novo contato',
   contacted: 'Em atendimento',
+  qualified: 'Qualificado',
   visit_scheduled: 'Visita agendada',
-  negotiation: 'Em negociação',
-  converted: 'Fechado',
+  negotiation: 'Negociação',
+  proposal: 'Proposta',
+  converted: 'Ganho',
   lost: 'Perdido',
+}
+
+/** O que cada etapa significa (dica no funil). */
+export const LEAD_STATUS_HINTS: Record<LeadStatus, string> = {
+  new: 'Chegou e ainda não foi atendido.',
+  contacted: 'Primeira conversa feita.',
+  qualified: 'Perfil, orçamento e prazo entendidos.',
+  visit_scheduled: 'Visita marcada no imóvel.',
+  negotiation: 'Conversando sobre valores e condições.',
+  proposal: 'Proposta formal registrada.',
+  converted: 'Negócio fechado.',
+  lost: 'Desistiu ou não respondeu.',
+}
+
+export const isOpenLead = (s: LeadStatus) => s !== 'converted' && s !== 'lost'
+
+/** Etapas que o banco aceita (o funil de 8 etapas depende da migration 0013). */
+export async function availableLeadStages(): Promise<LeadStatus[]> {
+  return (await hasCorretorSchema()) ? LEAD_STATUS_ORDER : LEAD_STATUS_LEGACY
 }
 
 export const LEAD_CHANNEL_LABELS: Record<LeadChannel, string> = {

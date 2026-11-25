@@ -2,7 +2,7 @@ import { ArrowRight, Inbox, Plus } from 'lucide-react'
 import { Link } from 'react-router'
 import { useAuth } from '@/auth/context'
 import { ButtonLink } from '@/components/ui/Button'
-import { listLeads } from '@/dashboard/leadsApi'
+import { isOpenLead, listLeads } from '@/dashboard/leadsApi'
 import { PlatformOverview } from '@/dashboard/PlatformOverview'
 import { listProperties, STATUS_LABELS, type PropertyStatus } from '@/dashboard/propertiesApi'
 import { useWorkspace } from '@/dashboard/workspace'
@@ -23,7 +23,7 @@ export default function DashboardHome() {
   const { data: properties } = useAsyncData(() => listProperties(ws.tenantId), ws.tenantId)
   const { data: leads } = useAsyncData(() => listLeads(ws.tenantId), `leads:${ws.tenantId}`)
   const newLeads = (leads ?? []).filter((l) => l.status === 'new').length
-  const openLeads = (leads ?? []).filter((l) => l.status !== 'converted' && l.status !== 'lost').length
+  const openLeads = (leads ?? []).filter((l) => isOpenLead(l.status)).length
   const { data: entitlements } = useAsyncData(async () => {
     const supabase = await requireSupabase()
     const { data, error } = await supabase.rpc('tenant_entitlements', { p_tenant_id: ws.tenantId })

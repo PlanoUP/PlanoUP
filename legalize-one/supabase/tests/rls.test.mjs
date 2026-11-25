@@ -14,6 +14,7 @@ const U = {
   brokerA: '33333333-3333-4333-8333-333333333333',
   platform: '44444444-4444-4444-8444-444444444444',
   outsider: '55555555-5555-4555-8555-555555555555',
+  newbie: '77777777-7777-4777-8777-777777777777',
 }
 
 let db
@@ -496,6 +497,7 @@ describe('salvaguardas do schema', () => {
         and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))
       order by p.proname`)
     assert.deepEqual(rows, [
+      { proname: 'create_solo_account', anon: false },
       { proname: 'create_tenant_with_owner', anon: false },
       { proname: 'get_broker_media', anon: true },
       { proname: 'get_broker_profile', anon: true },
@@ -765,5 +767,146 @@ describe('clientes em processo (cadastro, documentos e histórico)', () => {
     await as('ownerA', () => q(`delete from public.clients where id = $1`, [mine]))
     assert.equal((await as('server', () => q(`select id from public.client_documents where client_id = $1`, [mine]))).length, 0)
     assert.equal((await as('server', () => q(`select id from public.client_events where client_id = $1`, [mine]))).length, 0)
+  })
+})
+
+// =====================================================================================
+// Legalize Corretor · Fase 01 (migrations 0013 e 0014)
+// =====================================================================================
+describe('CRM: etapas, agenda, propostas e histórico', () => {
+  let broker
+  let lead
+  let othersLead
+
+  before(async () => {
+    await as('server', async () => {
+      broker = (await q(`select id from public.brokers where tenant_id = $1 and user_id = $2`, [tenantA, U.brokerA]))[0].id
+      lead = (await q(`insert into public.leads (tenant_id, broker_id, name, phone, channel) values ($1, $2, 'Ana Compradora', '84999991234', 'form') returning id`, [tenantA, broker]))[0].id
+      othersLead = (await q(`insert into public.leads (tenant_id, name, phone, channel) values ($1, 'Sem responsável', '84999995678', 'form') returning id`, [tenantA]))[0].id
+    })
+  })
+
+  test('funil com as 8 etapas; contato aceita "qualificado" e "proposta"', async () => {
+    const values = await q(`select unnest(enum_range(null::public.lead_status))::text as v`)
+    assert.deepEqual(values.map((r) => r.v), ['new', 'contacted', 'qualified', 'visit_scheduled', 'negotiation', 'proposal', 'converted', 'lost'])
+    const moved = await as('brokerA', () => q(`update public.leads set status = 'qualified' where id = $1 returning status`, [lead]))
+    assert.equal(moved[0].status, 'qualified')
+  })
+
+  test('tarefa: corretor cria em nome próprio no contato que atende; não no dos outros', async () => {
+    const own = await as('brokerA', () =>
+      q(`insert into public.crm_tasks (tenant_id, lead_id, broker_id, kind, title, due_at) values ($1, $2, $3, 'call', 'Ligar para Ana', now() + interval '1 day') returning id`, [tenantA, lead, broker]),
+    )
+    assert.equal(own.length, 1)
+    await as('brokerA', () =>
+      rejects(q(`insert into public.crm_tasks (tenant_id, lead_id, broker_id, title, due_at) values ($1, $2, $3, 'Invadir', now())`, [tenantA, othersLead, broker]), /row-level security/),
+    )
+    await as('brokerA', () =>
+      rejects(q(`insert into public.crm_tasks (tenant_id, title, due_at) values ($1, 'Sem responsável', now())`, [tenantA]), /row-level security/),
+    )
+    await as('ownerB', () =>
+      rejects(q(`insert into public.crm_tasks (tenant_id, lead_id, title, due_at) values ($1, $2, 'Outra conta', now())`, [tenantA, lead]), /row-level security/),
+    )
+    assert.equal((await as('ownerB', () => q(`select id from public.crm_tasks`))).length, 0)
+    assert.equal((await as('ownerA', () => q(`select id from public.crm_tasks where lead_id = $1`, [lead]))).length, 1)
+  })
+
+  test('visita agendada leva o contato para "Visita agendada" e conclusão entra no histórico', async () => {
+    const [{ id: visit }] = await as('brokerA', () =>
+      q(`insert into public.crm_tasks (tenant_id, lead_id, broker_id, kind, title, due_at) values ($1, $2, $3, 'visit', 'Visita ao apartamento', now() + interval '2 days') returning id`, [tenantA, lead, broker]),
+    )
+    const [{ status }] = await as('brokerA', () => q(`select status from public.leads where id = $1`, [lead]))
+    assert.equal(status, 'visit_scheduled')
+    await as('brokerA', () => q(`update public.crm_tasks set done_at = now() where id = $1`, [visit]))
+    const kinds = await as('brokerA', () => q(`select kind from public.lead_events where lead_id = $1 order by id`, [lead]))
+    assert.deepEqual(kinds.map((e) => e.kind), ['created', 'status', 'task_created', 'task_created', 'status', 'task_done'])
+  })
+
+  test('proposta: avança para "Proposta"; aceita vira "Ganho"; só quem atende o contato registra', async () => {
+    const [{ id: proposal }] = await as('brokerA', () =>
+      q(`insert into public.proposals (tenant_id, lead_id, amount, terms) values ($1, $2, 480000, 'Financiamento') returning id`, [tenantA, lead]),
+    )
+    assert.equal((await as('brokerA', () => q(`select status from public.leads where id = $1`, [lead])))[0].status, 'proposal')
+    await as('brokerA', () => q(`update public.proposals set status = 'accepted' where id = $1`, [proposal]))
+    assert.equal((await as('brokerA', () => q(`select status from public.leads where id = $1`, [lead])))[0].status, 'converted')
+    await as('brokerA', () =>
+      rejects(q(`insert into public.proposals (tenant_id, lead_id, amount) values ($1, $2, 100000)`, [tenantA, othersLead]), /row-level security/),
+    )
+    await as('ownerB', () => rejects(q(`insert into public.proposals (tenant_id, lead_id, amount) values ($1, $2, 1)`, [tenantA, lead]), /row-level security/))
+    assert.equal((await as('ownerB', () => q(`select id from public.proposals`))).length, 0)
+    await rejects(as('brokerA', () => q(`insert into public.proposals (tenant_id, lead_id, amount) values ($1, $2, 0)`, [tenantA, lead])), /check constraint/)
+  })
+
+  test('histórico: só gatilhos escrevem; outra conta e corretor sem acesso não leem', async () => {
+    await as('brokerA', () =>
+      rejects(q(`insert into public.lead_events (tenant_id, lead_id, kind) values ($1, $2, 'note')`, [tenantA, lead]), /permission denied/),
+    )
+    assert.equal((await as('ownerB', () => q(`select id from public.lead_events where lead_id = $1`, [lead]))).length, 0)
+    assert.equal((await as('brokerA', () => q(`select id from public.lead_events where lead_id = $1`, [othersLead]))).length, 0)
+    const kinds = await as('ownerA', () => q(`select kind from public.lead_events where lead_id = $1 order by id`, [lead]))
+    assert.ok(kinds.some((e) => e.kind === 'proposal') && kinds.some((e) => e.kind === 'proposal_status'))
+  })
+})
+
+describe('cadastro aberto do corretor (aguardando aprovação)', () => {
+  let account
+
+  test('anônimo não cria conta', async () => {
+    await as('anon', () => rejects(q(`select public.create_solo_account('Fulano', 'fulano-corretor')`), /permission denied/))
+  })
+
+  test('valida endereço e dados antes de criar', async () => {
+    await as('newbie', () => rejects(q(`select public.create_solo_account('Bia', 'dashboard')`), /invalid slug/))
+    await as('newbie', () => rejects(q(`select public.create_solo_account('Bia', 'Bia Lima!')`), /invalid slug/))
+    await as('newbie', () => rejects(q(`select public.create_solo_account('Bia', 'joao-silva')`), /slug already taken/))
+    await as('newbie', () => rejects(q(`select public.create_solo_account('Bia', 'bia-lima', null, '123')`), /invalid whatsapp/))
+  })
+
+  test('cria conta de corretor aguardando aprovação, com página ainda fora do ar', async () => {
+    account = (await as('newbie', () => q(`select public.create_solo_account('Bia Lima', 'Bia-Lima', 'CRECI-RN 9999', '(84) 99999-0000') as id`)))[0].id
+    const [t] = await as('newbie', () => q(`select kind, status, plan_code from public.tenants where id = $1`, [account]))
+    assert.deepEqual(t, { kind: 'solo', status: 'pending', plan_code: 'presenca_pro' })
+    const [m] = await as('newbie', () => q(`select role from public.tenant_members where tenant_id = $1`, [account]))
+    assert.equal(m.role, 'owner')
+    const [b] = await as('newbie', () => q(`select profile_slug, public_profile, whatsapp, creci from public.brokers where tenant_id = $1`, [account]))
+    assert.deepEqual(b, { profile_slug: 'bia-lima', public_profile: false, whatsapp: '84999990000', creci: 'CRECI-RN 9999' })
+    // Mesmo publicando o perfil, a página só aparece depois da aprovação.
+    await as('newbie', () => q(`update public.brokers set public_profile = true where tenant_id = $1`, [account]))
+    const [{ p }] = await as('anon', () => q(`select public.get_broker_profile('bia-lima') as p`))
+    assert.equal(p, null)
+  })
+
+  test('uma conta por pessoa; o corretor não se aprova sozinho', async () => {
+    await as('newbie', () => rejects(q(`select public.create_solo_account('Bia 2', 'bia-lima-2')`), /already has an account/))
+    await as('newbie', () => rejects(q(`select public.platform_update_tenant($1, null, 'active')`, [account]), /not_allowed/))
+    const [{ status }] = await as('server', () => q(`select status from public.tenants where id = $1`, [account]))
+    assert.equal(status, 'pending')
+  })
+
+  test('admin da plataforma aprova e a página vai ao ar', async () => {
+    await as('platform', () => q(`select public.platform_update_tenant($1, null, 'active')`, [account]))
+    const [{ p }] = await as('anon', () => q(`select public.get_broker_profile('bia-lima') as p`))
+    assert.equal(p.name, 'Bia Lima')
+    assert.deepEqual(p.socialLinks, {})
+  })
+})
+
+describe('planos comerciais (preços de teste)', () => {
+  test('anônimo lê nome comercial e preços dos planos à venda', async () => {
+    const rows = await as('anon', () => q(`select code, public_name, setup_fee::float, monthly_fee::float from public.plans where audience = 'solo' order by position`))
+    assert.deepEqual(rows, [
+      { code: 'presenca_pro', public_name: 'PRESENÇA PRO', setup_fee: 990, monthly_fee: 99 },
+      { code: 'legalize_premium', public_name: 'LEGALIZE PREMIUM', setup_fee: 2490, monthly_fee: 249 },
+    ])
+  })
+
+  test('só o admin da plataforma ajusta preços; limites e recursos não mudam pela API', async () => {
+    const byOwner = await as('ownerA', () => q(`update public.plans set monthly_fee = 1 where code = 'presenca_pro' returning code`))
+    assert.equal(byOwner.length, 0)
+    await as('anon', () => rejects(q(`update public.plans set monthly_fee = 1 where code = 'presenca_pro'`), /permission denied/))
+    await as('platform', () => q(`update public.plans set monthly_fee = 119 where code = 'presenca_pro'`))
+    assert.equal((await q(`select monthly_fee::float as v from public.plans where code = 'presenca_pro'`))[0].v, 119)
+    await as('platform', () => rejects(q(`update public.plans set limits = '{}' where code = 'presenca_pro'`), /permission denied/))
+    await as('platform', () => q(`update public.plans set monthly_fee = 99 where code = 'presenca_pro'`))
   })
 })

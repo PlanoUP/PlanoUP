@@ -218,6 +218,27 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
   para o Supabase não pausar por inatividade; exportação em planilha como cópia de segurança dos dados.
   - Sem backend, `/entrar` informa que o painel ainda não está ativo.
 
+## Legalize Corretor — Fase 01 (em andamento, branch `claude/legalize-corretor-fase-01`)
+
+Produto para o corretor autônomo sobre a mesma base (conta `kind = 'solo'`). Plano completo, gap por módulo e
+decisões: documento "Legalize Corretor — Auditoria e plano da Fase 01". Marca da plataforma: **Impulsigo** (mantida).
+
+| Entrega | Situação |
+| ------- | -------- |
+| `0013_crm_stages.sql`: funil em 8 etapas (`qualified`, `proposal`) e conta `pending` (cadastro aguardando aprovação) | Testada no PGlite. **Não aplicada no Supabase** |
+| `0014_corretor_fase01.sql`: `crm_tasks` (tarefas/visitas), `proposals`, `lead_events` (histórico por gatilho), preços nos planos + Presença Pro e Legalize Premium, `brokers.social_links`/`seo_description`, RPC `create_solo_account` | Testada no PGlite (12 testes novos). **Não aplicada no Supabase** |
+| Painel → **Meu site** (`/dashboard/meu-site`): perfil público do corretor sem código (foto, capa, apresentação, atuação, contato, redes, cor, publicar) | Pronto |
+| Painel → **Contatos → Funil**: Kanban por etapa (arrastar no computador, seletor de etapa no celular) + lista | Pronto |
+| Admin da plataforma: contas "Aguardando aprovação" + botão **Aprovar conta** | Pronto |
+| Interface reconhece os planos `corretor`, `presenca_pro` e `legalize_premium` | Pronto |
+
+**Compatível antes e depois da migração:** `src/dashboard/schema.ts` verifica se a tabela `crm_tasks` existe. Sem as
+migrations, o painel usa o funil de 6 etapas e o "Meu site" sem as redes extras — o mesmo build roda nos dois bancos.
+(O navegador registra um 404 dessa verificação enquanto o banco não for migrado; é esperado.)
+
+**Aplicar no Supabase (somente com aprovação):** `0013` e `0014` nessa ordem, cada uma na sua transação
+(`supabase db push` ou SQL Editor). São só acréscimos; rodar `npm run test:db` antes.
+
 ## Rotas
 
 | Rota            | Página                                   |
@@ -228,6 +249,7 @@ Arquitetura, modelo de dados, riscos e roadmap: [`SAAS_AUDIT.md`](./SAAS_AUDIT.m
 | `/vender`       | Captação de imóveis (formulário)         |
 | `/entrar`       | Entrada do painel da imobiliária         |
 | `/dashboard`    | Painel (protegido)                       |
+| `/dashboard/meu-site` | Página pública do corretor (edição) |
 
 Filtros da listagem via query string: `finalidade` (`venda`/`aluguel`), `regiao`, `tipo`, `preco`, `quartos`, `ordem`.
 

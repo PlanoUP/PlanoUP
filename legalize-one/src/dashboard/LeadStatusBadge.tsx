@@ -4,8 +4,10 @@ import { LEAD_STATUS_LABELS, type LeadStatus } from './leadsApi'
 const TONES: Record<LeadStatus, string> = {
   new: 'bg-gold-500 text-navy-950',
   contacted: 'bg-navy-800/10 text-navy-800',
+  qualified: 'bg-sky-100 text-sky-900',
   visit_scheduled: 'bg-tour/12 text-tour',
   negotiation: 'bg-navy-800 text-white',
+  proposal: 'bg-gold-400/30 text-navy-950',
   converted: 'bg-tour text-white',
   lost: 'bg-sand-300 text-slate',
 }
@@ -17,3 +19,4 @@ export function LeadStatusBadge({ status, className }: { status: LeadStatus; cla
     </span>
   )
 }
+

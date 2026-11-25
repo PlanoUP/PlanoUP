@@ -4,7 +4,7 @@
  * pelo banco (trigger `enforce_property_plan`). Valores PROVISÓRIOS, sem cobrança.
  * Use `hasFeature` / `limitOf` / `canAdd` — nunca compare o código do plano no meio da UI.
  */
-export type PlanCode = 'start' | 'pro' | 'premium'
+export type PlanCode = 'start' | 'pro' | 'premium' | 'corretor' | 'presenca_pro' | 'legalize_premium'
 
 export type Feature =
   | 'model3d'
@@ -13,6 +13,7 @@ export type Feature =
   | 'reports'
   | 'premium_listings'
   | 'custom_domain'
+  | 'qr_codes'
 
 export type LimitKey = 'max_properties' | 'max_users' | 'max_brokers'
 
@@ -35,6 +36,7 @@ export const PLANS: Record<PlanCode, Entitlements & { name: string }> = {
       reports: false,
       premium_listings: false,
       custom_domain: false,
+      qr_codes: false,
       support: 'email',
     },
   },
@@ -49,6 +51,7 @@ export const PLANS: Record<PlanCode, Entitlements & { name: string }> = {
       reports: true,
       premium_listings: false,
       custom_domain: true,
+      qr_codes: false,
       support: 'whatsapp',
     },
   },
@@ -63,6 +66,53 @@ export const PLANS: Record<PlanCode, Entitlements & { name: string }> = {
       reports: true,
       premium_listings: true,
       custom_domain: true,
+      qr_codes: false,
+      support: 'priority',
+    },
+  },
+  // Corretor autônomo (migrations 0009 e 0014). Valores de teste, ajustáveis; sem cobrança.
+  corretor: {
+    plan: 'corretor',
+    name: 'Corretor',
+    limits: { max_properties: 30, max_users: 1, max_brokers: 1 },
+    features: {
+      model3d: false,
+      virtual_tour: true,
+      analytics_advanced: false,
+      reports: false,
+      premium_listings: false,
+      custom_domain: false,
+      qr_codes: false,
+      support: 'whatsapp',
+    },
+  },
+  presenca_pro: {
+    plan: 'presenca_pro',
+    name: 'Presença Pro',
+    limits: { max_properties: 50, max_users: 1, max_brokers: 1 },
+    features: {
+      model3d: false,
+      virtual_tour: false,
+      analytics_advanced: false,
+      reports: false,
+      premium_listings: false,
+      custom_domain: false,
+      qr_codes: false,
+      support: 'whatsapp',
+    },
+  },
+  legalize_premium: {
+    plan: 'legalize_premium',
+    name: 'Legalize Premium',
+    limits: { max_properties: 150, max_users: 2, max_brokers: 1 },
+    features: {
+      model3d: true,
+      virtual_tour: true,
+      analytics_advanced: true,
+      reports: true,
+      premium_listings: true,
+      custom_domain: false,
+      qr_codes: true,
       support: 'priority',
     },
   },

@@ -53,7 +53,7 @@ function Shell() {
   const auth = useAuth()
   const { current } = useWorkspaceState()
   const location = useLocation()
-  const nav = visibleNav(current?.role, auth.isPlatformAdmin)
+  const nav = visibleNav(current?.role, auth.isPlatformAdmin, Boolean(current?.brokerId))
   // Administrador da plataforma: ambiente próprio (azul, marca Impulsigo, menu separado em plataforma × imobiliária).
   const platformView = auth.isPlatformAdmin
   const groups = platformView

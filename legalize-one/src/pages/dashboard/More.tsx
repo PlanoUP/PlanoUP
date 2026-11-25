@@ -12,7 +12,7 @@ export default function More() {
   const ws = useWorkspace()
   const auth = useAuth()
   const items = [
-    ...visibleNav(ws.role, auth.isPlatformAdmin).filter((i) => i.secondary),
+    ...visibleNav(ws.role, auth.isPlatformAdmin, Boolean(ws.brokerId)).filter((i) => i.secondary),
     { to: '/dashboard/conta', label: 'Minha conta', icon: CircleUser },
   ]
   return (

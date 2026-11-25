@@ -15,7 +15,9 @@ import {
   getLead,
   LEAD_CHANNEL_LABELS,
   LEAD_STATUS_LABELS,
+  LEAD_STATUS_LEGACY,
   LEAD_STATUS_ORDER,
+  availableLeadStages,
   listNotes,
   sourceLabel,
   teamNames,
@@ -193,6 +195,7 @@ function LeadView({ initial }: { initial: Lead }) {
   const [editing, setEditing] = useState(false)
   const [contact, setContact] = useState({ name: lead.name ?? '', phone: lead.phone ?? '', email: lead.email ?? '' })
   const [noteVersion, setNoteVersion] = useState(0)
+  const { data: stages } = useAsyncData(() => availableLeadStages(), 'lead-stages')
   const [note, setNote] = useState('')
   const { data: notes } = useAsyncData(async () => {
     const list = await listNotes(lead.id)
@@ -351,7 +354,7 @@ function LeadView({ initial }: { initial: Lead }) {
                   onChange={(e) => void patch({ status: e.target.value as LeadStatus }, 'Situação atualizada.')}
                   className={inputClass}
                 >
-                  {LEAD_STATUS_ORDER.map((s) => (
+                  {LEAD_STATUS_ORDER.filter((s) => s === lead.status || (stages ?? LEAD_STATUS_LEGACY).includes(s)).map((s) => (
                     <option key={s} value={s}>
                       {LEAD_STATUS_LABELS[s]}
                     </option>
